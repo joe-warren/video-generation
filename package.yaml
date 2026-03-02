@@ -25,6 +25,7 @@ dependencies:
 - text
 - svg-tree
 - lens
+- JuicyPixels
 
 ghc-options:
 - -Wall

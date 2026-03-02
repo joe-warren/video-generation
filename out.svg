@@ -2,51 +2,51 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1024.0" height="800.0">
   <g>
     <g transform="translate(0.0, 20.0)">
-      <text transform="translate(0.0, 0.0)">module</text>
-      <text transform="translate(90.0, 0.0)"> </text>
-      <text transform="translate(105.0, 0.0)">Lib</text>
+      <text fill="#000000" transform="translate(0.0, 0.0)">module</text>
+      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
+      <text fill="#FF0000" transform="translate(105.0, 0.0)">Lib</text>
     </g>
     <g transform="translate(0.0, 40.0)">
-      <text transform="translate(0.0, 0.0)">    ( someFunc</text>
+      <text fill="#00FFFF" transform="translate(0.0, 0.0)">    ( someFunc</text>
     </g>
     <g transform="translate(0.0, 60.0)">
-      <text transform="translate(0.0, 0.0)">    ) </text>
-      <text transform="translate(90.0, 0.0)">where</text>
+      <text fill="#00FFFF" transform="translate(0.0, 0.0)">    ) </text>
+      <text fill="#000000" transform="translate(90.0, 0.0)">where</text>
     </g>
     <g transform="translate(0.0, 80.0)" />
     <g transform="translate(0.0, 100.0)">
-      <text transform="translate(0.0, 0.0)">import</text>
-      <text transform="translate(90.0, 0.0)"> </text>
-      <text transform="translate(105.0, 0.0)">qualified</text>
-      <text transform="translate(240.0, 0.0)"> </text>
-      <text transform="translate(255.0, 0.0)">Data.Text.IO</text>
-      <text transform="translate(435.0, 0.0)"> </text>
-      <text transform="translate(450.0, 0.0)">as</text>
-      <text transform="translate(480.0, 0.0)"> </text>
-      <text transform="translate(495.0, 0.0)">T</text>
+      <text fill="#000000" transform="translate(0.0, 0.0)">import</text>
+      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
+      <text fill="#000000" transform="translate(105.0, 0.0)">qualified</text>
+      <text fill="#00FFFF" transform="translate(240.0, 0.0)"> </text>
+      <text fill="#FF0000" transform="translate(255.0, 0.0)">Data.Text.IO</text>
+      <text fill="#00FFFF" transform="translate(435.0, 0.0)"> </text>
+      <text fill="#000000" transform="translate(450.0, 0.0)">as</text>
+      <text fill="#00FFFF" transform="translate(480.0, 0.0)"> </text>
+      <text fill="#FF0000" transform="translate(495.0, 0.0)">T</text>
     </g>
     <g transform="translate(0.0, 120.0)">
-      <text transform="translate(0.0, 0.0)">import</text>
-      <text transform="translate(90.0, 0.0)"> </text>
-      <text transform="translate(105.0, 0.0)">CodeScene</text>
-      <text transform="translate(240.0, 0.0)"> (highlightAndSave)</text>
+      <text fill="#000000" transform="translate(0.0, 0.0)">import</text>
+      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
+      <text fill="#FF0000" transform="translate(105.0, 0.0)">CodeScene</text>
+      <text fill="#00FFFF" transform="translate(240.0, 0.0)"> (highlightAndSave)</text>
     </g>
     <g transform="translate(0.0, 140.0)" />
     <g transform="translate(0.0, 160.0)">
-      <text transform="translate(0.0, 0.0)">someFunc ::</text>
-      <text transform="translate(165.0, 0.0)"> </text>
-      <text transform="translate(180.0, 0.0)">IO</text>
-      <text transform="translate(210.0, 0.0)"> ()</text>
+      <text fill="#000000" transform="translate(0.0, 0.0)">someFunc ::</text>
+      <text fill="#00FFFF" transform="translate(165.0, 0.0)"> </text>
+      <text fill="#FF0000" transform="translate(180.0, 0.0)">IO</text>
+      <text fill="#00FFFF" transform="translate(210.0, 0.0)"> ()</text>
     </g>
     <g transform="translate(0.0, 180.0)">
-      <text transform="translate(0.0, 0.0)">someFunc </text>
-      <text transform="translate(135.0, 0.0)">=</text>
-      <text transform="translate(150.0, 0.0)"> highlightAndSave </text>
-      <text transform="translate(420.0, 0.0)">&quot;out.svg&quot;</text>
-      <text transform="translate(555.0, 0.0)"> </text>
-      <text transform="translate(570.0, 0.0)">=&lt;&lt;</text>
-      <text transform="translate(615.0, 0.0)"> T.readFile </text>
-      <text transform="translate(795.0, 0.0)">&quot;src/Lib.hs&quot;</text>
+      <text fill="#00FFFF" transform="translate(0.0, 0.0)">someFunc </text>
+      <text fill="#000000" transform="translate(135.0, 0.0)">=</text>
+      <text fill="#00FFFF" transform="translate(150.0, 0.0)"> highlightAndSave </text>
+      <text fill="#000000" transform="translate(420.0, 0.0)">&quot;out.svg&quot;</text>
+      <text fill="#00FFFF" transform="translate(555.0, 0.0)"> </text>
+      <text fill="#0000FF" transform="translate(570.0, 0.0)">=&lt;&lt;</text>
+      <text fill="#00FFFF" transform="translate(615.0, 0.0)"> T.readFile </text>
+      <text fill="#000000" transform="translate(795.0, 0.0)">&quot;src/Lib.hs&quot;</text>
     </g>
   </g>
 </svg>
