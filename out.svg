@@ -1,52 +1,165 @@
 <?xml version='1.0' ?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1024.0" height="800.0">
   <g>
-    <g transform="translate(0.0, 20.0)">
-      <text fill="#000000" transform="translate(0.0, 0.0)">module</text>
-      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
-      <text fill="#FF0000" transform="translate(105.0, 0.0)">Lib</text>
-    </g>
-    <g transform="translate(0.0, 40.0)">
-      <text fill="#00FFFF" transform="translate(0.0, 0.0)">    ( someFunc</text>
-    </g>
-    <g transform="translate(0.0, 60.0)">
-      <text fill="#00FFFF" transform="translate(0.0, 0.0)">    ) </text>
-      <text fill="#000000" transform="translate(90.0, 0.0)">where</text>
-    </g>
-    <g transform="translate(0.0, 80.0)" />
-    <g transform="translate(0.0, 100.0)">
-      <text fill="#000000" transform="translate(0.0, 0.0)">import</text>
-      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
-      <text fill="#000000" transform="translate(105.0, 0.0)">qualified</text>
-      <text fill="#00FFFF" transform="translate(240.0, 0.0)"> </text>
-      <text fill="#FF0000" transform="translate(255.0, 0.0)">Data.Text.IO</text>
-      <text fill="#00FFFF" transform="translate(435.0, 0.0)"> </text>
-      <text fill="#000000" transform="translate(450.0, 0.0)">as</text>
-      <text fill="#00FFFF" transform="translate(480.0, 0.0)"> </text>
-      <text fill="#FF0000" transform="translate(495.0, 0.0)">T</text>
-    </g>
-    <g transform="translate(0.0, 120.0)">
-      <text fill="#000000" transform="translate(0.0, 0.0)">import</text>
-      <text fill="#00FFFF" transform="translate(90.0, 0.0)"> </text>
-      <text fill="#FF0000" transform="translate(105.0, 0.0)">CodeScene</text>
-      <text fill="#00FFFF" transform="translate(240.0, 0.0)"> (highlightAndSave)</text>
-    </g>
-    <g transform="translate(0.0, 140.0)" />
-    <g transform="translate(0.0, 160.0)">
-      <text fill="#000000" transform="translate(0.0, 0.0)">someFunc ::</text>
-      <text fill="#00FFFF" transform="translate(165.0, 0.0)"> </text>
-      <text fill="#FF0000" transform="translate(180.0, 0.0)">IO</text>
-      <text fill="#00FFFF" transform="translate(210.0, 0.0)"> ()</text>
-    </g>
-    <g transform="translate(0.0, 180.0)">
-      <text fill="#00FFFF" transform="translate(0.0, 0.0)">someFunc </text>
-      <text fill="#000000" transform="translate(135.0, 0.0)">=</text>
-      <text fill="#00FFFF" transform="translate(150.0, 0.0)"> highlightAndSave </text>
-      <text fill="#000000" transform="translate(420.0, 0.0)">&quot;out.svg&quot;</text>
-      <text fill="#00FFFF" transform="translate(555.0, 0.0)"> </text>
-      <text fill="#0000FF" transform="translate(570.0, 0.0)">=&lt;&lt;</text>
-      <text fill="#00FFFF" transform="translate(615.0, 0.0)"> T.readFile </text>
-      <text fill="#000000" transform="translate(795.0, 0.0)">&quot;src/Lib.hs&quot;</text>
-    </g>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(0.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(10.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(20.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(30.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">l</text>
+    <text fill="#000000" transform="translate(0.0, 25.0) translate(50.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#FF0000" transform="translate(0.0, 25.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">L</text>
+    <text fill="#FF0000" transform="translate(0.0, 25.0) translate(80.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#FF0000" transform="translate(0.0, 25.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">b</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">(</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(60.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(80.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(100.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">F</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(110.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(120.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#00FFFF" transform="translate(0.0, 50.0) translate(130.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">c</text>
+    <text fill="#00FFFF" transform="translate(0.0, 75.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">)</text>
+    <text fill="#000000" transform="translate(0.0, 75.0) translate(60.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">w</text>
+    <text fill="#000000" transform="translate(0.0, 75.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#000000" transform="translate(0.0, 75.0) translate(80.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 75.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">r</text>
+    <text fill="#000000" transform="translate(0.0, 75.0) translate(100.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(0.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(10.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(20.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">p</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(30.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">r</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(50.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">q</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(80.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(100.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">l</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(110.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(120.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">f</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(130.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(140.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(150.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(170.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">D</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(180.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(190.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(200.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(210.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">.</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(220.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">T</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(230.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(240.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">x</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(250.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(260.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">.</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(270.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">I</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(280.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">O</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(300.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#000000" transform="translate(0.0, 125.0) translate(310.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#FF0000" transform="translate(0.0, 125.0) translate(330.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">T</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(0.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(10.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(20.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">p</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(30.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">r</text>
+    <text fill="#000000" transform="translate(0.0, 150.0) translate(50.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">C</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(80.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(100.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(110.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">S</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(120.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">c</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(130.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(140.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#FF0000" transform="translate(0.0, 150.0) translate(150.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(170.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">(</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(180.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(190.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(200.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">g</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(210.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(220.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">l</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(230.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(240.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">g</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(250.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(260.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(270.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">A</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(280.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(290.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(300.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">S</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(310.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(320.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">v</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(330.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#00FFFF" transform="translate(0.0, 150.0) translate(340.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">)</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(0.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(10.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(20.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(30.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">F</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(50.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(60.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">c</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">:</text>
+    <text fill="#000000" transform="translate(0.0, 200.0) translate(100.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">:</text>
+    <text fill="#FF0000" transform="translate(0.0, 200.0) translate(120.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">I</text>
+    <text fill="#FF0000" transform="translate(0.0, 200.0) translate(130.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">O</text>
+    <text fill="#00FFFF" transform="translate(0.0, 200.0) translate(150.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">(</text>
+    <text fill="#00FFFF" transform="translate(0.0, 200.0) translate(160.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">)</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(0.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(10.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(20.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">m</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(30.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(40.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">F</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(50.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(60.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(70.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">c</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(90.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">=</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(110.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(120.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(130.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">g</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(140.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(150.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">l</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(160.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(170.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">g</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(180.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(190.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(200.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">A</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(210.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">n</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(220.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(230.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">S</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(240.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(250.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">v</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(260.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(280.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&quot;</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(290.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">o</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(300.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">u</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(310.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">t</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(320.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">.</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(330.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(340.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">v</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(350.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">g</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(360.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&quot;</text>
+    <text fill="#0000FF" transform="translate(0.0, 225.0) translate(380.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">=</text>
+    <text fill="#0000FF" transform="translate(0.0, 225.0) translate(390.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&lt;</text>
+    <text fill="#0000FF" transform="translate(0.0, 225.0) translate(400.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&lt;</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(420.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">T</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(430.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">.</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(440.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">r</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(450.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(460.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">a</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(470.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">d</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(480.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">F</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(490.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(500.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">l</text>
+    <text fill="#00FFFF" transform="translate(0.0, 225.0) translate(510.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">e</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(530.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&quot;</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(540.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(550.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">r</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(560.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">c</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(570.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">/</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(580.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">L</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(590.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">i</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(600.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">b</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(610.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">.</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(620.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">h</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(630.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">s</text>
+    <text fill="#000000" transform="translate(0.0, 225.0) translate(640.0, 0.0)" font-size="20.0px" font-family="Share Tech Mono">&quot;</text>
   </g>
 </svg>

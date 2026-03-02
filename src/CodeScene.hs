@@ -6,6 +6,7 @@ import qualified Skylighting as Sky
 import qualified Graphics.Svg as Svg
 import qualified Codec.Picture.Types as JP
 import Control.Lens
+import Control.Monad (join)
 import Data.Maybe (maybe)
 import Data.Monoid (Last (..))
 
@@ -30,25 +31,29 @@ tokenColour tokType =
         b = fromIntegral ((i `div` 4) `rem` 2) * 255
     in JP.PixelRGBA8 r g b 255
 
-lineToSvg :: Sky.SourceLine -> Svg.Tree
+lineToSvg :: Sky.SourceLine -> [Svg.Tree]
 lineToSvg = 
-    let textTree t = Svg.TextTree Nothing (Svg.defaultSvg & Svg.textRoot . Svg.spanContent .~ [Svg.SpanText t])
-        f _ [] = []
-        f offset ((tokenType, t):xs) = 
-            let trans = translate (15 * offset) 0
+    let f _ [] = []
+        f offset ((_, ' '):xs) = f (offset+1) xs
+        f offset ((tokenType, t):xs) =
+            let trans = translate (10 * offset) 0
                 colour a = a & Svg.drawAttr . Svg.fillColor .~ (Last . Just $ Svg.ColorRef (tokenColour tokenType))
-                newOffset  = offset + fromIntegral (T.length t)
-            in (colour . trans $ (textTree t)) : f newOffset xs  
-        group children = Svg.GroupTree $ Svg.Group mempty children Nothing Svg.defaultSvg
-     in group . f 0
+                font a = a 
+                    & Svg.drawAttr . Svg.fontFamily .~ (pure ["Share Tech Mono"])
+                    & Svg.drawAttr . Svg.fontSize .~ (pure $ Svg.Px 20)
+                newOffset  = offset + 1
+                textTree = Svg.TextTree Nothing (Svg.defaultSvg & Svg.textRoot . Svg.spanContent .~ [Svg.SpanText . T.singleton $ t])
+            in (font . colour . trans $ textTree) : f newOffset xs
+        splitChars = ((traverse T.unpack) =<<)
+     in f 0 . splitChars
 
 linesToSvg :: [Sky.SourceLine] -> Svg.Document
 linesToSvg lines = 
     let w = Just . Svg.Num $ 1024
         h = Just . Svg.Num $ 800
         group children =  Svg.GroupTree $ Svg.Group mempty children Nothing Svg.defaultSvg
-        transform (i, elem) =  translate 0 (20 * i) elem
-        e = group . fmap transform . zip [1..] . fmap lineToSvg $ lines
+        transform (i, elems) =  translate 0 (25 * i) <$> elems
+        e = group . join . fmap transform . zip [1..] . fmap lineToSvg $ lines
     in Svg.Document Nothing w h [e] mempty mempty mempty mempty
 
 highlightCode :: Text -> Svg.Document
