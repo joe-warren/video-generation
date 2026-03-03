@@ -33,7 +33,7 @@ charHeight :: Integer
 charHeight = charWidth * 2
 
 lineHeight :: Integer 
-lineHeight = charWidth * 3
+lineHeight = (charWidth * 5) `div` 2
 
 style :: Sky.Style
 style = Sky.haddock
@@ -97,7 +97,8 @@ linesToSvg lines =
     let w = Svg.Num . fromIntegral $ width
         h = Svg.Num .fromIntegral $ height
 
-        xOff = fromIntegral $ charWidth * borderColumns
+        xDelta = fromIntegral $ (width - (charWidth * (columns + 2 * borderColumns))) `div` 2
+        xOff = xDelta + (fromIntegral $ charWidth * borderColumns)
         yOff = fromIntegral ((height - fromIntegral (length lines) * lineHeight) `div` 2)
 
         transform (i, elems) =  second (translate xOff (yOff + fromIntegral lineHeight * i)) <$> elems
@@ -117,10 +118,10 @@ linesToSvg lines =
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ 
-                    ( Svg.Px $ (fromIntegral borderColumns - 0.5) * fromIntegral charWidth
+                    ( Svg.Px $ xDelta + (fromIntegral borderColumns - 0.5) * fromIntegral charWidth
                     , Svg.Px . fromInteger $ ((height - fromIntegral (length lines) * lineHeight) `div` 2)
                     )
-                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral (columns * charWidth)))
+                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((columns + 1) * charWidth)))
                 & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral lineHeight)
                 & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
                 & strokeColour (JP.PixelRGBA8 0 0 0 255)
