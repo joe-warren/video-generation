@@ -26,6 +26,7 @@ dependencies:
 - svg-tree
 - lens
 - JuicyPixels
+- containers
 
 default-extensions: 
 - OverloadedStrings

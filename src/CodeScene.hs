@@ -11,6 +11,32 @@ import Control.Monad (join, forM)
 import Data.Monoid (Last (..))
 import Control.Arrow (second)
 import Numeric (showFFloat)
+import qualified Data.Map as M
+import Data.Maybe (fromMaybe)
+
+width :: Integer
+width = 1024
+
+height :: Integer 
+height = 800
+
+columns :: Integer 
+columns = 80
+
+borderColumns :: Integer
+borderColumns = 2
+
+charWidth :: Integer
+charWidth = width `div` (columns + 2 * borderColumns)
+
+charHeight :: Integer
+charHeight = charWidth * 2
+
+lineHeight :: Integer 
+lineHeight = charWidth * 3
+
+style :: Sky.Style
+style = Sky.haddock
 
 highlightHaskell :: Text -> [Sky.SourceLine]
 highlightHaskell text = 
@@ -28,13 +54,21 @@ translate x y elem =
 colour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
 colour c a = a & Svg.drawAttr . Svg.fillColor .~ (Last . Just $ Svg.ColorRef c)
 
+strokeColour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
+strokeColour c a = a & Svg.drawAttr . Svg.strokeColor .~ (Last . Just $ Svg.ColorRef c)
+
+strokeWidth :: Svg.WithDrawAttributes a => Double -> a -> a    
+strokeWidth w a = a & Svg.drawAttr . Svg.strokeWidth .~ (Last . Just . Svg.Px $ w)
+
+convertColor :: Sky.Color -> JP.PixelRGBA8
+convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
+
 tokenColour :: Sky.TokenType -> JP.PixelRGBA8
 tokenColour tokType =
-    let i = fromEnum tokType
-        r = fromIntegral (i `rem` 2) * 255
-        g = fromIntegral ((i `div` 2) `rem` 2) * 255
-        b = fromIntegral ((i `div` 4) `rem` 2) * 255
-    in JP.PixelRGBA8 r g b 255
+    let tokStyle = tokType `M.lookup` Sky.tokenStyles style
+        tokCol = fromMaybe (Sky.RGB 0 0 0) (Sky.tokenColor =<< tokStyle)
+        
+    in convertColor tokCol
 
 data LetterType = StartOrMidWord | EndOfWord | EndOfLine | EndOfFile
 
@@ -43,10 +77,10 @@ lineToSvg =
     let f _ [] = []
         f offset ((_, ' '):xs) = f (offset+1) xs
         f offset ((tokenType, t):xs) =
-            let trans = translate (10 * offset) 0
+            let trans = translate (fromIntegral charWidth * offset) 0
                 font a = a 
                     & Svg.drawAttr . Svg.fontFamily .~ (pure ["Share Tech Mono"])
-                    & Svg.drawAttr . Svg.fontSize .~ (pure $ Svg.Px 20)
+                    & Svg.drawAttr . Svg.fontSize .~ (pure . Svg.Px . fromIntegral $ charHeight)
                 col = colour (tokenColour tokenType)
                 newOffset  = offset + 1
                 letterType = case xs of
@@ -60,9 +94,13 @@ lineToSvg =
 
 linesToSvg :: [Sky.SourceLine] -> [(LetterType, Svg.Document)]
 linesToSvg lines = 
-    let w = Svg.Num $ 1024
-        h = Svg.Num $ 800
-        transform (i, elems) =  second (translate 0 (25 * i)) <$> elems
+    let w = Svg.Num . fromIntegral $ width
+        h = Svg.Num .fromIntegral $ height
+
+        xOff = fromIntegral $ charWidth * borderColumns
+        yOff = fromIntegral ((height - fromIntegral (length lines) * lineHeight) `div` 2)
+
+        transform (i, elems) =  second (translate xOff (yOff + fromIntegral lineHeight * i)) <$> elems
         elems = lines
             & fmap lineToSvg
             & zip [1..]
@@ -76,9 +114,21 @@ linesToSvg lines =
                 & Svg.rectHeight .~ h
                 & colour (JP.PixelRGBA8 255 255 255 255)
 
+        frame = Svg.RectangleTree $ 
+            Svg.defaultSvg 
+                & Svg.rectUpperLeftCorner .~ 
+                    ( Svg.Px $ (fromIntegral borderColumns - 0.5) * fromIntegral charWidth
+                    , Svg.Px . fromInteger $ ((height - fromIntegral (length lines) * lineHeight) `div` 2)
+                    )
+                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral (columns * charWidth)))
+                & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral lineHeight)
+                & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
+                & strokeColour (JP.PixelRGBA8 0 0 0 255)
+                & strokeWidth 2
+
         makePages _ [] = []
         makePages prev ((letterType, letter):xs) = 
-            let group = Svg.GroupTree $ Svg.Group mempty (background : letter : prev) Nothing Svg.defaultSvg
+            let group = Svg.GroupTree $ Svg.Group mempty (background : frame : letter : prev) Nothing Svg.defaultSvg
                 document = Svg.Document Nothing (Just w) (Just h) [group] mempty mempty mempty mempty
             in (letterType, document) : makePages (letter:prev) xs
         in makePages [] elems
