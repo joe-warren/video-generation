@@ -27,6 +27,9 @@ dependencies:
 - lens
 - JuicyPixels
 
+default-extensions: 
+- OverloadedStrings
+
 ghc-options:
 - -Wall
 - -Wcompat
