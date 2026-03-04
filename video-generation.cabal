@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       CodeScene
+      ConcatFileVideo
       Lib
   other-modules:
       Paths_video_generation
@@ -41,6 +42,7 @@ library
     , base >=4.7 && <5
     , containers
     , lens
+    , process
     , skylighting
     , svg-tree
     , text
@@ -62,6 +64,7 @@ executable video-generation-exe
     , base >=4.7 && <5
     , containers
     , lens
+    , process
     , skylighting
     , svg-tree
     , text
@@ -85,6 +88,7 @@ test-suite video-generation-test
     , base >=4.7 && <5
     , containers
     , lens
+    , process
     , skylighting
     , svg-tree
     , text

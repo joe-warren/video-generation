@@ -27,6 +27,7 @@ dependencies:
 - lens
 - JuicyPixels
 - containers
+- process
 
 default-extensions: 
 - OverloadedStrings

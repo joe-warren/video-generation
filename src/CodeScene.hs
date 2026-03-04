@@ -2,7 +2,6 @@ module CodeScene where
 
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.IO as T
 import qualified Skylighting as Sky
 import qualified Graphics.Svg as Svg
 import qualified Codec.Picture.Types as JP
@@ -10,15 +9,14 @@ import Control.Lens
 import Control.Monad (join, forM)
 import Data.Monoid (Last (..))
 import Control.Arrow (second)
-import Numeric (showFFloat)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 
 width :: Integer
-width = 1024
+width = 1920
 
 height :: Integer 
-height = 800
+height = 1080
 
 columns :: Integer 
 columns = 80
@@ -140,19 +138,11 @@ durations EndOfWord = 3
 durations EndOfLine = 15
 durations EndOfFile = 100
 
-writeConcatFile :: FilePath -> [(Int, FilePath)] -> IO ()
-writeConcatFile filepath= 
-    let showFloat f = T.pack $ showFFloat Nothing f [] 
-        go (nFrames, path) = replicate nFrames
-            ("file '" <> T.pack path <> "'\n" <>
-            "duration " <> showFloat 0.04 <> "\n")
-    in T.writeFile filepath . T.concat . (go =<<)
 
-highlightAndSave :: FilePath -> Text -> IO ()
+highlightAndSave :: FilePath -> Text -> IO [(Int, FilePath)]
 highlightAndSave dir text = do
     let frames = linesToSvg . highlightHaskell $ text
-    framesAndDurations <- forM (zip [0..] frames) $ \(i, (letterType, frame)) -> do
+    forM (zip [0..] frames) $ \(i, (letterType, frame)) -> do
             let path = (dir <> "/" <> show i <> ".svg")
             Svg.saveXmlFile path frame
             return (durations letterType, path)
-    writeConcatFile "output.txt" framesAndDurations

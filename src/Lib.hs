@@ -4,6 +4,9 @@ module Lib
 
 import qualified Data.Text.IO as T
 import CodeScene (highlightAndSave)
+import ConcatFileVideo (generateVideo)
 
 someFunc :: IO ()
-someFunc = highlightAndSave "output" =<< T.readFile "src/Lib.hs"
+someFunc = generateVideo "output" "output.mp4" 
+            =<< highlightAndSave "output"
+            =<< T.readFile "src/Lib.hs"
