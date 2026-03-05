@@ -28,9 +28,13 @@ dependencies:
 - JuicyPixels
 - containers
 - process
+- linear
+- waterfall-cad
+- waterfall-cad-svg
 
 default-extensions: 
 - OverloadedStrings
+- RecordWildCards
 
 ghc-options:
 - -Wall

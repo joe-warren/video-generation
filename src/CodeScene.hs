@@ -1,5 +1,8 @@
 module CodeScene where
 
+import VideoData
+import SvgUtils
+
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Skylighting as Sky
@@ -12,26 +15,20 @@ import Control.Arrow (second)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 
-width :: Integer
-width = 1920
-
-height :: Integer 
-height = 1080
-
 columns :: Integer 
 columns = 80
 
 borderColumns :: Integer
 borderColumns = 2
 
-charWidth :: Integer
-charWidth = width `div` (columns + 2 * borderColumns)
+charWidth :: VideoData -> Integer
+charWidth (VideoData {..}) = videoWidth `div` (columns + 2 * borderColumns)
 
-charHeight :: Integer
-charHeight = charWidth * 2
+charHeight :: VideoData -> Integer
+charHeight vd = charWidth vd * 2
 
-lineHeight :: Integer 
-lineHeight = (charWidth * 5) `div` 2
+lineHeight :: VideoData -> Integer 
+lineHeight vd = (charWidth vd * 5) `div` 2
 
 style :: Sky.Style
 style = Sky.haddock
@@ -42,15 +39,6 @@ highlightHaskell text =
         [syntax] = Sky.syntaxesByExtension Sky.defaultSyntaxMap "hs" 
         Right lines = Sky.tokenize tokenizerConfig syntax text
     in lines
-
-translate :: Svg.WithDrawAttributes a => Double -> Double -> a -> a
-translate x y elem = 
-    let t = Svg.Translate x y
-        addT = Just . maybe [t] (t:)
-    in elem & Svg.drawAttr . Svg.transform %~ addT
-
-colour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
-colour c a = a & Svg.drawAttr . Svg.fillColor .~ (Last . Just $ Svg.ColorRef c)
 
 strokeColour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
 strokeColour c a = a & Svg.drawAttr . Svg.strokeColor .~ (Last . Just $ Svg.ColorRef c)
@@ -70,38 +58,41 @@ tokenColour tokType =
 
 data LetterType = StartOrMidWord | EndOfWord | EndOfLine | EndOfFile
 
-lineToSvg :: Sky.SourceLine -> [(LetterType, Svg.Tree)]
-lineToSvg = 
+lineToSvg :: VideoData -> Sky.SourceLine -> [(LetterType, Svg.Tree)]
+lineToSvg vd = 
     let f _ [] = []
         f offset ((_, ' '):xs) = f (offset+1) xs
         f offset ((tokenType, t):xs) =
-            let trans = translate (fromIntegral charWidth * offset) 0
+            let trans = translate (fromIntegral (charWidth vd) * offset) 0
                 font a = a 
                     & Svg.drawAttr . Svg.fontFamily .~ (pure ["Share Tech Mono"])
-                    & Svg.drawAttr . Svg.fontSize .~ (pure . Svg.Px . fromIntegral $ charHeight)
+                    & Svg.drawAttr . Svg.fontSize .~ (pure . Svg.Px . fromIntegral . charHeight $ vd)
                 col = colour (tokenColour tokenType)
                 newOffset  = offset + 1
                 letterType = case xs of
                     (_,' '):_ -> EndOfWord
                     (_,_):_ -> StartOrMidWord
                     [] -> EndOfLine
-                textTree = Svg.TextTree Nothing (Svg.defaultSvg & Svg.textRoot . Svg.spanContent .~ [Svg.SpanText . T.singleton $ t])
+                textTree = Svg.TextTree Nothing 
+                    (Svg.defaultSvg 
+                        & Svg.textRoot . Svg.spanContent .~ [Svg.SpanText . T.singleton $ t]
+                    )
             in (letterType, font . col . trans $ textTree) : f newOffset xs
         splitChars = ((traverse T.unpack) =<<)
      in f 0 . splitChars
 
-linesToSvg :: [Sky.SourceLine] -> [(LetterType, Svg.Document)]
-linesToSvg lines = 
-    let w = Svg.Num . fromIntegral $ width
-        h = Svg.Num .fromIntegral $ height
+linesToSvg :: VideoData -> [Sky.SourceLine] -> [(LetterType, Svg.Document)]
+linesToSvg vd@(VideoData {..}) lines = 
+    let w = Svg.Num . fromIntegral $ videoWidth
+        h = Svg.Num .fromIntegral $ videoHeight
 
-        xDelta = fromIntegral $ (width - (charWidth * (columns + 2 * borderColumns))) `div` 2
-        xOff = xDelta + (fromIntegral $ charWidth * borderColumns)
-        yOff = fromIntegral ((height - fromIntegral (length lines) * lineHeight) `div` 2)
+        xDelta = fromIntegral $ (videoWidth - (charWidth vd * (columns + 2 * borderColumns))) `div` 2
+        xOff = xDelta + (fromIntegral $ charWidth vd * borderColumns)
+        yOff = fromIntegral ((videoHeight - fromIntegral (length lines) * lineHeight vd) `div` 2)
 
-        transform (i, elems) =  second (translate xOff (yOff + fromIntegral lineHeight * i)) <$> elems
+        transform (i, elems) =  second (translate xOff (yOff + fromIntegral (lineHeight vd) * i)) <$> elems
         elems = lines
-            & fmap lineToSvg
+            & fmap (lineToSvg vd)
             & zip [1..]
             & fmap transform
             & join
@@ -116,11 +107,11 @@ linesToSvg lines =
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ 
-                    ( Svg.Px $ xDelta + (fromIntegral borderColumns - 0.5) * fromIntegral charWidth
-                    , Svg.Px . fromInteger $ ((height - fromIntegral (length lines) * lineHeight) `div` 2)
+                    ( Svg.Px $ xDelta + (fromIntegral borderColumns - 0.5) * fromIntegral (charWidth vd)
+                    , Svg.Px . fromInteger $ ((videoHeight - fromIntegral (length lines) * lineHeight vd) `div` 2)
                     )
-                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((columns + 1) * charWidth)))
-                & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral lineHeight)
+                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((columns + 1) * charWidth vd)))
+                & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd))
                 & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
                 & strokeColour (JP.PixelRGBA8 0 0 0 255)
                 & strokeWidth 2
@@ -138,11 +129,10 @@ durations EndOfWord = 3
 durations EndOfLine = 15
 durations EndOfFile = 100
 
-
-highlightAndSave :: FilePath -> Text -> IO [(Int, FilePath)]
-highlightAndSave dir text = do
-    let frames = linesToSvg . highlightHaskell $ text
+highlightAndSave :: VideoData -> Text -> IO [(Int, FilePath)]
+highlightAndSave vd text = do
+    let frames = linesToSvg vd . highlightHaskell $ text
     forM (zip [0..] frames) $ \(i, (letterType, frame)) -> do
-            let path = (dir <> "/" <> show i <> ".svg")
+            let path = (scratchDir vd <> "/" <> show i <> ".svg")
             Svg.saveXmlFile path frame
             return (durations letterType, path)

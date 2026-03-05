@@ -27,7 +27,11 @@ library
   exposed-modules:
       CodeScene
       ConcatFileVideo
+      ExampleObject
       Lib
+      SvgUtils
+      VideoData
+      WaterfallScene
   other-modules:
       Paths_video_generation
   autogen-modules:
@@ -36,16 +40,20 @@ library
       src
   default-extensions:
       OverloadedStrings
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
     , lens
+    , linear
     , process
     , skylighting
     , svg-tree
     , text
+    , waterfall-cad
+    , waterfall-cad-svg
   default-language: Haskell2010
 
 executable video-generation-exe
@@ -58,17 +66,21 @@ executable video-generation-exe
       app
   default-extensions:
       OverloadedStrings
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
     , lens
+    , linear
     , process
     , skylighting
     , svg-tree
     , text
     , video-generation
+    , waterfall-cad
+    , waterfall-cad-svg
   default-language: Haskell2010
 
 test-suite video-generation-test
@@ -82,15 +94,19 @@ test-suite video-generation-test
       test
   default-extensions:
       OverloadedStrings
+      RecordWildCards
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
     , lens
+    , linear
     , process
     , skylighting
     , svg-tree
     , text
     , video-generation
+    , waterfall-cad
+    , waterfall-cad-svg
   default-language: Haskell2010
