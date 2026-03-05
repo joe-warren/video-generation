@@ -1,21 +1,17 @@
-module ExampleObject 
-( csgExample
-) where
+module ExampleObject where
 
-import qualified Waterfall.Solids as Solids
-import qualified Waterfall.Transforms as Transforms
-import Waterfall.Booleans ( union, intersection, difference )
+import qualified Waterfall as W
 import Linear (V3 (..), (^*), unit, _x, _y )
 import Data.Function ((&))
 
-csgExample :: Solids.Solid
+csgExample :: W.Solid
 csgExample = let 
-    sphere = Solids.unitSphere
-    sphere' = Transforms.translate (unit _x) . Transforms.uScale 0.1 $ sphere
-    cube = Transforms.uScale 1.5 Solids.centeredCube
-    cylinder = Solids.centeredCylinder
-         & Transforms.scale (V3 0.55 0.55 4) 
-    cylinderA = Transforms.rotate (unit _x) (pi/2) cylinder
-    cylinderB = Transforms.rotate (unit _y) (pi/2) cylinder
-    object = (cube `intersection` sphere) `difference` (cylinder `union` cylinderA `union` cylinderB)
+    sphere = W.unitSphere
+    sphere' = W.translate (unit _x) . W.uScale 0.1 $ sphere
+    cube = W.uScale 1.5 W.centeredCube
+    cylinder = W.centeredCylinder
+         & W.scale (V3 0.55 0.55 4) 
+    cylinderA = W.rotate (unit _x) (pi/2) cylinder
+    cylinderB = W.rotate (unit _y) (pi/2) cylinder
+    object = (cube `W.intersection` sphere) `W.difference` (cylinder `W.union` cylinderA `W.union` cylinderB)
   in object <> sphere'

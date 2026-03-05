@@ -18,6 +18,6 @@ videoData = VideoData
 
 someFunc :: IO ()
 someFunc = generateVideo "output" "output.mp4" 
-            =<< WaterfallScene.solidClip videoData csgExample
-            -- =<< CodeScene.highlightAndSave videoData
-            -- =<< T.readFile "src/Lib.hs"
+            -- =<< WaterfallScene.solidClip videoData csgExample
+            =<< CodeScene.highlightAndSave videoData
+            =<< T.readFile "src/ExampleObject.hs"
