@@ -28,5 +28,3 @@ generateVideo scratchDir outputFile frames = do
         , "-pix_fmt", "yuv420p"
         , outputFile
         ]
-
-    return ()
