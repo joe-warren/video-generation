@@ -27,6 +27,7 @@ library
   exposed-modules:
       CodeScene
       ConcatFileVideo
+      Eval
       ExampleObject
       Lib
       SvgUtils
@@ -46,6 +47,8 @@ library
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , ghc
+    , ghc-paths
     , lens
     , linear
     , process
@@ -72,6 +75,8 @@ executable video-generation-exe
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , ghc
+    , ghc-paths
     , lens
     , linear
     , process
@@ -100,6 +105,8 @@ test-suite video-generation-test
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , ghc
+    , ghc-paths
     , lens
     , linear
     , process

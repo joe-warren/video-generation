@@ -9,6 +9,8 @@ import VideoData
 import ExampleObject (csgExample)
 import qualified WaterfallScene
 
+import qualified Eval (eval)
+
 videoData :: VideoData
 videoData = VideoData 
     { videoWidth = 1920
@@ -17,7 +19,11 @@ videoData = VideoData
     } 
 
 someFunc :: IO ()
-someFunc = generateVideo "output" "output.mp4" 
+someFunc = Eval.eval "test.hs" "Main.value"
+    {--
+        generateVideo "output" "output.mp4" 
             -- =<< WaterfallScene.solidClip videoData csgExample
             =<< CodeScene.highlightAndSave videoData
             =<< T.readFile "src/ExampleObject.hs"
+
+    --}
