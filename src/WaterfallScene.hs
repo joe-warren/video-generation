@@ -5,7 +5,7 @@ where
 
 import VideoData
 import SvgUtils
-import ConcatFileVideo (BuildVideo, WriteFrames, addSvgFrame)
+import GenerateVideo (BuildVideo, WriteFrames, addSvgFrame)
 
 import qualified Waterfall as W
 import qualified Waterfall.SVG as W

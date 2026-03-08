@@ -1,4 +1,4 @@
- module ConcatFileVideo
+ module GenerateVideo
 ( generateVideo 
 , FramePath 
 , WriteFrames (..)

@@ -2,7 +2,7 @@ module CodeScene where
 
 import VideoData
 import SvgUtils
-import ConcatFileVideo (BuildVideo, WriteFrames, addSvgDuration)
+import GenerateVideo (BuildVideo, WriteFrames, addSvgDuration)
 
 import Data.Text (Text)
 import qualified Data.Text as T

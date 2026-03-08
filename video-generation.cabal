@@ -26,9 +26,9 @@ source-repository head
 library
   exposed-modules:
       CodeScene
-      ConcatFileVideo
       Eval
       ExampleObject
+      GenerateVideo
       Lib
       SvgUtils
       VideoData
@@ -64,7 +64,6 @@ library
     , skylighting
     , svg-tree
     , text
-    , text-builder-linear
     , waterfall-cad
     , waterfall-cad-svg
   default-language: Haskell2010
@@ -102,7 +101,6 @@ executable video-generation-exe
     , skylighting
     , svg-tree
     , text
-    , text-builder-linear
     , video-generation
     , waterfall-cad
     , waterfall-cad-svg
@@ -142,7 +140,6 @@ test-suite video-generation-test
     , skylighting
     , svg-tree
     , text
-    , text-builder-linear
     , video-generation
     , waterfall-cad
     , waterfall-cad-svg

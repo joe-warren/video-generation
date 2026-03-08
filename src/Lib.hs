@@ -4,7 +4,7 @@ module Lib
 
 import qualified Data.Text.IO as T
 import qualified CodeScene 
-import ConcatFileVideo (runBuildVideo, runWriteFrames)
+import GenerateVideo (runBuildVideo, runWriteFrames)
 import VideoData 
 import ExampleObject (csgExample)
 import qualified WaterfallScene
