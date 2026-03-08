@@ -5,5 +5,7 @@ module VideoData
 data VideoData = VideoData 
     { videoWidth :: Integer
     , videoHeight :: Integer
+    , videoFPS :: Integer
     , scratchDir :: FilePath
+    , videoOutputFile :: FilePath
     } 

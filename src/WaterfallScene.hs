@@ -5,6 +5,7 @@ where
 
 import VideoData
 import SvgUtils
+import ConcatFileVideo (BuildVideo, WriteFrames, addSvgFrame)
 
 import qualified Waterfall as W
 import qualified Waterfall.SVG as W
@@ -12,6 +13,9 @@ import qualified Graphics.Svg as Svg
 import qualified Codec.Picture.Types as JP
 import Linear
 import Control.Lens
+import Data.Foldable (traverse_)
+import Effectful
+import Effectful.Reader.Static
 
 nFrames :: Integer 
 nFrames = 400
@@ -72,14 +76,10 @@ frameSvg (vd@VideoData {..}) solid frame =
             & Svg.elements %~ addOffset
             & Svg.elements %~ (background:)
 
-renderFrameSvg :: VideoData -> W.Solid -> Integer -> IO (Int, FilePath)
-renderFrameSvg vd s i =
-    let frame = frameSvg vd s i
-        path = (scratchDir vd <> "/" <> show i <> ".svg")
-    in do 
-        Svg.saveXmlFile path frame
-        return (1, path)
+renderFrameSvg :: (BuildVideo :> es, WriteFrames :> es, Reader VideoData :> es) => W.Solid -> Integer -> Eff es ()
+renderFrameSvg s i = do
+    vd <- ask
+    addSvgFrame (frameSvg vd s i)
     
-
-solidClip :: VideoData -> W.Solid -> IO [(Int, FilePath)]
-solidClip vd solid = traverse (renderFrameSvg vd solid) [0..nFrames]
+solidClip :: (BuildVideo :> es, WriteFrames :> es, Reader VideoData :> es) => W.Solid -> Eff es ()
+solidClip solid = traverse_ (renderFrameSvg solid) [0..nFrames]

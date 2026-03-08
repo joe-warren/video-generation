@@ -33,10 +33,19 @@ dependencies:
 - waterfall-cad-svg
 - ghc
 - ghc-paths
+- effectful
 
 default-extensions: 
 - OverloadedStrings
 - RecordWildCards
+- GADTs
+- DataKinds
+- KindSignatures
+- TypeFamilies
+- LambdaCase
+- TypeOperators
+- FlexibleContexts
+- AllowAmbiguousTypes 
 
 ghc-options:
 - -Wall

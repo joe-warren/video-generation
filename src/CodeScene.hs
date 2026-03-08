@@ -2,6 +2,7 @@ module CodeScene where
 
 import VideoData
 import SvgUtils
+import ConcatFileVideo (BuildVideo, WriteFrames, addSvgDuration)
 
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -9,11 +10,13 @@ import qualified Skylighting as Sky
 import qualified Graphics.Svg as Svg
 import qualified Codec.Picture.Types as JP
 import Control.Lens
-import Control.Monad (join, forM)
+import Control.Monad (join, forM_)
 import Data.Monoid (Last (..))
 import Control.Arrow (second)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
+import Effectful
+import Effectful.Reader.Static
 
 columns :: Integer 
 columns = 80
@@ -123,16 +126,15 @@ linesToSvg vd@(VideoData {..}) lines =
             in (letterType, document) : makePages (letter:prev) xs
         in makePages [] elems
 
-durations :: LetterType -> Int
-durations StartOrMidWord = 1
-durations EndOfWord = 3
-durations EndOfLine = 15
-durations EndOfFile = 100
+durations :: LetterType -> Double
+durations StartOrMidWord = 0.04
+durations EndOfWord = 0.1
+durations EndOfLine = 0.5
+durations EndOfFile = 2.0
 
-highlightAndSave :: VideoData -> Text -> IO [(Int, FilePath)]
-highlightAndSave vd text = do
+highlightAndSave :: (WriteFrames :> es, BuildVideo :> es, Reader VideoData :> es) => Text -> Eff es ()
+highlightAndSave text = do
+    vd <- ask
     let frames = linesToSvg vd . highlightHaskell $ text
-    forM (zip [0..] frames) $ \(i, (letterType, frame)) -> do
-            let path = (scratchDir vd <> "/" <> show i <> ".svg")
-            Svg.saveXmlFile path frame
-            return (durations letterType, path)
+    forM_ frames $ \(letterType, frame) -> 
+            addSvgDuration (durations letterType) frame 
