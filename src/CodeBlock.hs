@@ -7,6 +7,8 @@ import Effectful.Exception
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import Data.Char (isSpace)
+import Data.List (dropWhileEnd)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Control.Arrow (first)
@@ -36,7 +38,9 @@ parseCodeBlocks =
                     let (thisBlock, rest) = go xs
                     in ([] , M.singleton (T.strip l') thisBlock <> rest)
                 Nothing -> first (l:) $ go xs
-    in snd <$> go
+        isBlank = T.all (isSpace)
+        trimBlankLines = dropWhile isBlank . dropWhileEnd isBlank
+    in fmap trimBlankLines . snd <$> go
 
 
 runLoadCodeBlocks ::

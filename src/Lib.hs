@@ -7,7 +7,7 @@ import qualified CodeScene
 import qualified CodeBlock
 import GenerateVideo (runBuildVideo, runWriteFrames)
 import VideoData 
-import ExampleObject (csgExample)
+import qualified ExampleObject
 import qualified WaterfallScene
 
 import Effectful.Reader.Static
@@ -34,6 +34,9 @@ run =
 
 someFunc :: IO ()
 someFunc = run $ do
-            WaterfallScene.solidClip csgExample
-            CodeScene.highlightAndSave "hs" =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "csgExample"
+    CodeScene.highlightAndSave "hs" 
+        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Intro"
+    CodeScene.highlightAndSave "hs" 
+        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Profile"
+    WaterfallScene.solidClip ExampleObject.spatula
 
