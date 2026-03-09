@@ -9,8 +9,7 @@
 , runWriteFrames
 ) where
 
-import qualified VideoData as VideoData
-import VideoData (VideoData)
+import VideoProps
 
 import Numeric (showFFloat)
 import qualified Data.Text as T
@@ -25,6 +24,7 @@ import Data.IORef (newIORef, readIORef, modifyIORef, writeIORef)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
+import Control.Lens
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
 data WriteFrames :: Effect where
@@ -44,7 +44,7 @@ addSvgFrame = send . AddFrame <=< send . WriteSvgFrame
 addSvgDuration :: (WriteFrames :> es, BuildVideo :> es) => Double -> Svg.Document -> Eff es ()
 addSvgDuration dur = send . AddDuration dur <=< send . WriteSvgFrame 
 
-runWriteFrames :: (IOE :> es, Reader VideoData :> es) => Eff (WriteFrames : es) a -> Eff (es) a
+runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames eff = do
     ref <- liftIO $ newIORef (0:: Integer)
     interpretWith eff $ \_ -> \case
@@ -52,34 +52,34 @@ runWriteFrames eff = do
             index <- liftIO $ readIORef ref
             vd <- ask
             let name = printf "%04d" index <> ".svg"
-            let path = VideoData.scratchDir vd <> "/" <> name
+            let path = vd ^. videoScratchDir <> "/" <> name
             liftIO $ Svg.saveXmlFile path document
             liftIO $ modifyIORef ref (+1) 
             return $ FramePath name
 
-concatLine :: VideoData -> FramePath -> Text
+concatLine :: VideoProps -> FramePath -> Text
 concatLine vd (FramePath path)= 
     let showFloat f = T.pack $ showFFloat Nothing f [] 
     in "file '" <> T.pack path <> "'\n" <>
-        "duration " <> showFloat (1 / (fromInteger . VideoData.videoFPS $ vd)) <> "\n"
+        "duration " <> showFloat (1 / (fromInteger $ vd ^. videoFPS)) <> "\n"
 
-runBuildVideo :: (IOE :> es, Reader VideoData :> es) => Eff (BuildVideo : es) a -> Eff (es) a
+runBuildVideo :: (IOE :> es, Reader VideoProps :> es) => Eff (BuildVideo : es) a -> Eff (es) a
 runBuildVideo eff = do
     posRef <- liftIO $ newIORef (0 :: Double)
     vd <- ask
-    let concatFileName = VideoData.scratchDir vd <> "/concat.txt"
+    let concatFileName = vd ^. videoScratchDir <> "/concat.txt"
     handle <- liftIO $ openFile concatFileName WriteMode
     let writeOneFrame fp = T.hPutStr handle (concatLine vd fp)
     res <- interpretWith eff $ \_ -> \case 
         AddFrame f -> liftIO $ writeOneFrame f
         AddDuration dur f -> liftIO $ do
             currentPos <- readIORef $ posRef
-            let newPos = currentPos + (dur * fromIntegral (VideoData.videoFPS vd))
+            let newPos = currentPos + (dur * fromIntegral (vd ^. videoFPS))
                 (nFrames, posRemainder) =  properFraction newPos
             replicateM_ nFrames (writeOneFrame f)
             writeIORef posRef posRemainder
     liftIO $ hClose handle
-    liftIO $ generateVideo concatFileName (VideoData.videoOutputFile vd)
+    liftIO $ generateVideo concatFileName (vd ^. videoOutputFile)
     return res
 
 generateVideo :: FilePath -> FilePath -> IO ()

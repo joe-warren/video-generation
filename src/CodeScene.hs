@@ -1,6 +1,6 @@
 module CodeScene where
 
-import VideoData
+import VideoProps
 import SvgUtils
 import GenerateVideo (BuildVideo, WriteFrames, addSvgDuration)
 
@@ -18,24 +18,40 @@ import Data.Maybe (fromMaybe)
 import Effectful
 import Effectful.Reader.Static
 import Effectful.Error.Static
+import Data.Default
 
-columns :: Integer 
-columns = 80
+data CodeSceneProps = CodeSceneProps
+    { _codeSceneFileExtension :: Text
+    , _codeSceneColumns :: Integer
+    , _codeSceneBorderColumns :: Integer
+    , _codeSceneFrameWidth :: Double
+    , _codeSceneStyle :: Sky.Style
+    , _codeSceneTransitionDuration :: Double 
+    , _codeSceneStillDuration :: Double
+    } deriving (Show)
 
-borderColumns :: Integer
-borderColumns = 2
+instance Default CodeSceneProps where
+    def = CodeSceneProps 
+        { _codeSceneFileExtension = "hs"
+        , _codeSceneColumns = 80
+        , _codeSceneBorderColumns = 2 
+        , _codeSceneFrameWidth = 2.0
+        , _codeSceneStyle = Sky.haddock
+        , _codeSceneTransitionDuration = 2.0
+        , _codeSceneStillDuration = 3.0
+        }
 
-charWidth :: VideoData -> Integer
-charWidth (VideoData {..}) = videoWidth `div` (columns + 2 * borderColumns)
 
-charHeight :: VideoData -> Integer
-charHeight vd = charWidth vd * 2
+makeLenses ''CodeSceneProps
 
-lineHeight :: VideoData -> Integer 
-lineHeight vd = (charWidth vd * 5) `div` 2
+charWidth :: VideoProps -> CodeSceneProps -> Integer
+charWidth vd cs = vd ^. videoWidth `div` (cs ^. codeSceneColumns + 2 * cs ^. codeSceneBorderColumns)
 
-style :: Sky.Style
-style = Sky.haddock
+charHeight :: VideoProps -> CodeSceneProps -> Integer
+charHeight vd cs = charWidth vd cs * 2
+
+lineHeight :: VideoProps -> CodeSceneProps -> Integer 
+lineHeight vd cs = (charWidth vd cs * 5) `div` 2
 
 data HighlightError = 
     HighlightErrorMissingSyntax Text
@@ -71,25 +87,24 @@ strokeWidth w a = a & Svg.drawAttr . Svg.strokeWidth .~ (Last . Just . Svg.Px $ 
 convertColor :: Sky.Color -> JP.PixelRGBA8
 convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
 
-tokenColour :: Sky.TokenType -> JP.PixelRGBA8
-tokenColour tokType =
-    let tokStyle = tokType `M.lookup` Sky.tokenStyles style
+tokenColour :: CodeSceneProps -> Sky.TokenType -> JP.PixelRGBA8
+tokenColour cs tokType =
+    let tokStyle = tokType `M.lookup` Sky.tokenStyles (cs ^. codeSceneStyle)
         tokCol = fromMaybe (Sky.RGB 0 0 0) (Sky.tokenColor =<< tokStyle)
-        
     in convertColor tokCol
 
-data LetterType = StartOrMidWord | EndOfWord | EndOfLine | EndOfFile
+data LetterType = StartOrMidWord | EndOfWord | EndOfLine
 
-lineToSvg :: VideoData -> Sky.SourceLine -> [(LetterType, Svg.Tree)]
-lineToSvg vd = 
+lineToSvg :: VideoProps -> CodeSceneProps -> Sky.SourceLine -> [(LetterType, Svg.Tree)]
+lineToSvg vd cs = 
     let f _ [] = []
         f offset ((_, ' '):xs) = f (offset+1) xs
         f offset ((tokenType, t):xs) =
-            let trans = translate (fromIntegral (charWidth vd) * offset) 0
+            let trans = translate (fromIntegral (charWidth vd cs) * offset) 0
                 font a = a 
                     & Svg.drawAttr . Svg.fontFamily .~ (pure ["Share Tech Mono"])
-                    & Svg.drawAttr . Svg.fontSize .~ (pure . Svg.Px . fromIntegral . charHeight $ vd)
-                col = colour (tokenColour tokenType)
+                    & Svg.drawAttr . Svg.fontSize .~ (pure . Svg.Px . fromIntegral $ charHeight vd cs)
+                col = colour (tokenColour cs tokenType)
                 newOffset  = offset + 1
                 letterType = case xs of
                     (_,' '):_ -> EndOfWord
@@ -103,22 +118,21 @@ lineToSvg vd =
         splitChars = ((traverse T.unpack) =<<)
      in f 0 . splitChars
 
-linesToSvg :: VideoData -> [Sky.SourceLine] -> [(LetterType, Svg.Document)]
-linesToSvg vd@(VideoData {..}) lines = 
-    let w = Svg.Num . fromIntegral $ videoWidth
-        h = Svg.Num .fromIntegral $ videoHeight
+linesToSvg :: VideoProps -> CodeSceneProps -> [Sky.SourceLine] -> [(LetterType, Svg.Document)]
+linesToSvg vd cs lines = 
+    let w = Svg.Num . fromIntegral $ vd ^. videoWidth
+        h = Svg.Num .fromIntegral $ vd ^. videoHeight
 
-        xDelta = fromIntegral $ (videoWidth - (charWidth vd * (columns + 2 * borderColumns))) `div` 2
-        xOff = xDelta + (fromIntegral $ charWidth vd * borderColumns)
-        yOff = fromIntegral ((videoHeight - fromIntegral (length lines) * lineHeight vd) `div` 2)
+        xDelta = fromIntegral $ (vd ^. videoWidth - (charWidth vd cs * ((cs ^. codeSceneColumns) + 2 * cs ^. codeSceneBorderColumns))) `div` 2
+        xOff = xDelta + (fromIntegral $ charWidth vd cs * cs ^. codeSceneBorderColumns)
+        yOff = fromIntegral ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
 
-        transform (i, elems) =  second (translate xOff (yOff + fromIntegral (lineHeight vd) * i)) <$> elems
+        transform (i, elems) =  second (translate xOff (yOff + fromIntegral (lineHeight vd cs) * i)) <$> elems
         elems = lines
-            & fmap (lineToSvg vd)
+            & fmap (lineToSvg vd cs)
             & zip [1..]
             & fmap transform
             & join
-            & set  (_last . _1) EndOfFile
         background = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
@@ -129,11 +143,11 @@ linesToSvg vd@(VideoData {..}) lines =
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ 
-                    ( Svg.Px $ xDelta + (fromIntegral borderColumns - 0.5) * fromIntegral (charWidth vd)
-                    , Svg.Px . fromInteger $ ((videoHeight - fromIntegral (length lines) * lineHeight vd) `div` 2)
+                    ( Svg.Px $ xDelta + (fromIntegral (cs ^. codeSceneBorderColumns) - 0.5) * fromIntegral (charWidth vd cs)
+                    , Svg.Px . fromInteger $ ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
                     )
-                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((columns + 1) * charWidth vd)))
-                & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd))
+                & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((cs ^. codeSceneColumns + 1) * charWidth vd cs)))
+                & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd cs))
                 & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
                 & strokeColour (JP.PixelRGBA8 0 0 0 255)
                 & strokeWidth 2
@@ -149,16 +163,15 @@ durations :: LetterType -> Double
 durations StartOrMidWord = 0.04
 durations EndOfWord = 0.1
 durations EndOfLine = 0.5
-durations EndOfFile = 2.0
 
-highlightAndSave :: 
+codeScene :: 
     ( WriteFrames :> es
     , BuildVideo :> es
-    , Reader VideoData :> es
+    , Reader VideoProps :> es
     , Error HighlightError :> es
-    ) => Text -> Text -> Eff es ()
-highlightAndSave extension text = do
+    ) => CodeSceneProps -> Text -> Eff es ()
+codeScene cs text = do
     vd <- ask
-    frames <- linesToSvg vd <$> highlight extension text
+    frames <- linesToSvg vd cs <$> highlight (cs ^. codeSceneFileExtension) text
     forM_ frames $ \(letterType, frame) -> 
             addSvgDuration (durations letterType) frame 

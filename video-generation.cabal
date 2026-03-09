@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.38.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -32,7 +32,7 @@ library
       GenerateVideo
       Lib
       SvgUtils
-      VideoData
+      VideoProps
       WaterfallScene
   other-modules:
       Paths_video_generation
@@ -51,11 +51,13 @@ library
       TypeOperators
       FlexibleContexts
       AllowAmbiguousTypes
+      TemplateHaskell
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , data-default
     , effectful
     , ghc
     , ghc-paths
@@ -88,11 +90,13 @@ executable video-generation-exe
       TypeOperators
       FlexibleContexts
       AllowAmbiguousTypes
+      TemplateHaskell
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , data-default
     , effectful
     , ghc
     , ghc-paths
@@ -127,11 +131,13 @@ test-suite video-generation-test
       TypeOperators
       FlexibleContexts
       AllowAmbiguousTypes
+      TemplateHaskell
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
     , containers
+    , data-default
     , effectful
     , ghc
     , ghc-paths

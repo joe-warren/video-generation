@@ -3,7 +3,7 @@ module WaterfallScene
 )
 where
 
-import VideoData
+import VideoProps
 import SvgUtils
 import GenerateVideo (BuildVideo, WriteFrames, addSvgFrame)
 
@@ -23,16 +23,16 @@ nFrames = 400
 border :: Integer 
 border = 20
 
-resizeDiagram :: VideoData -> W.Diagram -> (V2 Double, W.Diagram)
-resizeDiagram (VideoData {..}) d = 
+resizeDiagram :: VideoProps -> W.Diagram -> (V2 Double, W.Diagram)
+resizeDiagram vd d = 
     case W.diagramBoundingBox d of 
         Nothing -> (zero, d)
         Just (lo, hi) -> 
             let diagramWidth = (hi-lo) ^. _x
                 diagramHeight = (hi-lo) ^. _y
                 diagramAspect = diagramWidth / diagramHeight
-                targetWidth = fromInteger (videoWidth - 2 * border) 
-                targetHeight = fromInteger (videoHeight - 2 * border)
+                targetWidth = fromInteger (vd ^. videoWidth - 2 * border) 
+                targetHeight = fromInteger (vd ^. videoHeight - 2 * border)
                 videoAspect = targetWidth / targetHeight
                 (scale, offset) = 
                     if diagramAspect < videoAspect 
@@ -49,15 +49,15 @@ resizeDiagram (VideoData {..}) d =
             in (offset, W.uScale2D scale d)
 
 
-frameSvg :: VideoData -> W.Solid -> Integer-> Svg.Document
-frameSvg (vd@VideoData {..}) solid frame = 
+frameSvg :: VideoProps -> W.Solid -> Integer-> Svg.Document
+frameSvg (vd@VideoProps {..}) solid frame = 
     let angle = 2 * pi * fromInteger frame / fromInteger nFrames
         viewAngle = V3 2 2 1 
         solid' = W.rotate (unit _z) angle solid
         (V2 offsetX offsetY, diagram) = resizeDiagram vd $ W.solidDiagram viewAngle solid'
         waterfallSvg = W.diagramToSvg diagram
-        w = Svg.Num . fromIntegral $ videoWidth
-        h = Svg.Num .fromIntegral $ videoHeight
+        w = Svg.Num . fromIntegral $ vd ^. videoWidth
+        h = Svg.Num .fromIntegral $ vd ^. videoHeight
         background = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
@@ -76,10 +76,10 @@ frameSvg (vd@VideoData {..}) solid frame =
             & Svg.elements %~ addOffset
             & Svg.elements %~ (background:)
 
-renderFrameSvg :: (BuildVideo :> es, WriteFrames :> es, Reader VideoData :> es) => W.Solid -> Integer -> Eff es ()
+renderFrameSvg :: (BuildVideo :> es, WriteFrames :> es, Reader VideoProps :> es) => W.Solid -> Integer -> Eff es ()
 renderFrameSvg s i = do
     vd <- ask
     addSvgFrame (frameSvg vd s i)
     
-solidClip :: (BuildVideo :> es, WriteFrames :> es, Reader VideoData :> es) => W.Solid -> Eff es ()
+solidClip :: (BuildVideo :> es, WriteFrames :> es, Reader VideoProps :> es) => W.Solid -> Eff es ()
 solidClip solid = traverse_ (renderFrameSvg solid) [0..nFrames]
