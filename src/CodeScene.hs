@@ -43,7 +43,7 @@ data HighlightError =
     | HighlightErrorInTokenizer Text
     deriving Show
 
-runHighlight:: (IOE :> es) => Eff (Error HighlightError : es) () -> Eff es () 
+runHighlight :: (IOE :> es) => Eff (Error HighlightError : es) () -> Eff es () 
 runHighlight = 
     let handler callstack e = liftIO $ do
             putStrLn "Highlighting Error"

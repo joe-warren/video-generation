@@ -4,6 +4,7 @@ module Lib
 
 import qualified Data.Text.IO as T
 import qualified CodeScene 
+import qualified CodeBlock
 import GenerateVideo (runBuildVideo, runWriteFrames)
 import VideoData 
 import ExampleObject (csgExample)
@@ -23,10 +24,16 @@ videoData = VideoData
     , videoOutputFile = "output.mp4"
     } 
 
-someFunc :: IO ()
-someFunc = runEff . CodeScene.runHighlight . runReader videoData . runBuildVideo . runWriteFrames $ do
-            WaterfallScene.solidClip csgExample
-            CodeScene.highlightAndSave "hs" =<< liftIO (T.readFile "src/ExampleObject.hs")
+run =
+    runEff 
+    . CodeBlock.runLoadCodeBlocks'
+    . CodeScene.runHighlight
+    . runReader videoData
+    . runBuildVideo
+    . runWriteFrames
 
-    -- Eval.eval "test.hs" "Main.value"
+someFunc :: IO ()
+someFunc = run $ do
+            WaterfallScene.solidClip csgExample
+            CodeScene.highlightAndSave "hs" =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "csgExample"
 

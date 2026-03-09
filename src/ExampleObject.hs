@@ -4,6 +4,7 @@ import qualified Waterfall as W
 import Linear (V3 (..), (^*), unit, _x, _y)
 import Data.Function ((&))
 
+-- BLOCK:csgExample
 csgExample :: W.Solid
 csgExample = let 
     sphere = W.unitSphere
@@ -15,3 +16,7 @@ csgExample = let
     object = (cube `W.intersection` sphere)
          `W.difference` (cylinder <> cylinderA <> cylinderB)
   in object <> sphere'
+-- BLOCK:someOtherJunk
+
+foo :: String
+foo = "some other junk"
