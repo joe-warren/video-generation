@@ -17,6 +17,7 @@ import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Effectful
 import Effectful.Reader.Static
+import Effectful.Error.Static
 
 columns :: Integer 
 columns = 80
@@ -36,12 +37,30 @@ lineHeight vd = (charWidth vd * 5) `div` 2
 style :: Sky.Style
 style = Sky.haddock
 
-highlightHaskell :: Text -> [Sky.SourceLine]
-highlightHaskell text = 
+data HighlightError = 
+    HighlightErrorMissingSyntax Text
+    | HighlightErrorAmbiguousSyntax Text
+    | HighlightErrorInTokenizer Text
+    deriving Show
+
+runHighlight:: (IOE :> es) => Eff (Error HighlightError : es) () -> Eff es () 
+runHighlight = 
+    let handler callstack e = liftIO $ do
+            putStrLn "Highlighting Error"
+            print e
+            print callstack
+    in runErrorWith handler
+
+highlight :: (Error HighlightError :> es) => Text -> Text -> Eff es [Sky.SourceLine]
+highlight extension text = do
     let tokenizerConfig = Sky.TokenizerConfig Sky.defaultSyntaxMap False
-        [syntax] = Sky.syntaxesByExtension Sky.defaultSyntaxMap "hs" 
-        Right lines = Sky.tokenize tokenizerConfig syntax text
-    in lines
+    syntax <- 
+        case Sky.syntaxesByExtension Sky.defaultSyntaxMap (T.unpack extension) of    
+            [s] -> pure s
+            [] -> throwError (HighlightErrorMissingSyntax extension)
+            _ -> throwError (HighlightErrorAmbiguousSyntax extension)
+    let wrapTokenizerError = either (throwError . HighlightErrorInTokenizer . T.pack) pure
+    wrapTokenizerError $ Sky.tokenize tokenizerConfig syntax text
 
 strokeColour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
 strokeColour c a = a & Svg.drawAttr . Svg.strokeColor .~ (Last . Just $ Svg.ColorRef c)
@@ -132,9 +151,14 @@ durations EndOfWord = 0.1
 durations EndOfLine = 0.5
 durations EndOfFile = 2.0
 
-highlightAndSave :: (WriteFrames :> es, BuildVideo :> es, Reader VideoData :> es) => Text -> Eff es ()
-highlightAndSave text = do
+highlightAndSave :: 
+    ( WriteFrames :> es
+    , BuildVideo :> es
+    , Reader VideoData :> es
+    , Error HighlightError :> es
+    ) => Text -> Text -> Eff es ()
+highlightAndSave extension text = do
     vd <- ask
-    let frames = linesToSvg vd . highlightHaskell $ text
+    frames <- linesToSvg vd <$> highlight extension text
     forM_ frames $ \(letterType, frame) -> 
             addSvgDuration (durations letterType) frame 

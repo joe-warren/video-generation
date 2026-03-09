@@ -24,9 +24,9 @@ videoData = VideoData
     } 
 
 someFunc :: IO ()
-someFunc = runEff . runReader videoData . runBuildVideo . runWriteFrames $ do
+someFunc = runEff . CodeScene.runHighlight . runReader videoData . runBuildVideo . runWriteFrames $ do
             WaterfallScene.solidClip csgExample
-            CodeScene.highlightAndSave =<< liftIO (T.readFile "src/ExampleObject.hs")
+            CodeScene.highlightAndSave "hs" =<< liftIO (T.readFile "src/ExampleObject.hs")
 
     -- Eval.eval "test.hs" "Main.value"
 
