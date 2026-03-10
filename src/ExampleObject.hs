@@ -104,4 +104,4 @@ negativeMask =
 
 -- BLOCK: Spatula
 spatula :: W.Solid
-spatula = (blade <> handleWithGrip) `W.difference` negativeMask
+spatula = (blade <> handleWithHole) `W.difference` negativeMask
