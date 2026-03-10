@@ -43,6 +43,31 @@ roundFn (s, e)  | (nearZero (s ^. _xy - e ^. _xy))
 blade :: W.Solid
 blade = W.roundConditionalFillet roundFn sharpBlade
 
+-- BLOCK: Slot Profile
+
+slotProfile :: W.Path2D
+slotProfile = W.closeLoop $ W.pathFrom (V2 (-3) 0)
+    [ W.arcViaRelative (V2 3 (-3)) (V2 6 0)
+    , W.lineRelative (30 *^ unit _y)
+    , W.arcViaRelative (V2 (-3) 3) (V2 (-6) 0)
+    ]
+
+-- BLOCK: Slots
+
+slots :: W.Solid
+slots = mconcat
+    [ W.translate (V3 (x * 12.5) 25 0)
+        . W.rotate (unit _z) (x * (-pi/20))
+        . W.prism bladeThickness 
+        $ W.makeShape slotProfile
+    | x <- [-1, 0, 1]
+    ]
+
+-- BLOCK: Slotted Blade 
+
+slottedBlade :: W.Solid
+slottedBlade = blade `W.difference` slots
+
 -- BLOCK:Handle Params
 
 handleLongLeg :: V3 Double
@@ -112,4 +137,4 @@ negativeMask =
 
 -- BLOCK: Spatula
 spatula :: W.Solid
-spatula = (blade <> handleWithHole) `W.difference` negativeMask
+spatula = (slottedBlade <> handleWithHole) `W.difference` negativeMask

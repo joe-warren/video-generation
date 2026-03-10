@@ -96,6 +96,17 @@ someFunc = run $ do
 
     codeBlockWithObject "Blade" ExampleObject.blade
 
+    codeBlockWithDiagram "Slot Profile"
+        (ExampleObject.slotProfile 
+            & W.pathDiagram W.OutLine W.Visible
+            & W.uScale2D (1/80)
+            & WaterfallScene.centerDiagram
+        )
+
+    codeBlockWithObject "Slots" ExampleObject.slots 
+
+    codeBlockWithObject "Slotted Blade" ExampleObject.slottedBlade
+
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"
     codeBlockWithObject "Handle" ExampleObject.handle
@@ -110,6 +121,11 @@ someFunc = run $ do
     codeBlockOno "Spatula"
 
     WaterfallScene.animatedClip 8 $ showRotating (1/150) (2*pi)
+            ( ExampleObject.spatula 
+                & center
+            ) . easeInOutSoft
+            
+    WaterfallScene.animatedClip 8 $ showRotating' (unit _y) (1/150) (2*pi)
             ( ExampleObject.spatula 
                 & center
             ) . easeInOutSoft
