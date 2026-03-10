@@ -7,6 +7,8 @@ import qualified CodeScene
 import qualified CodeBlock
 import GenerateVideo (runBuildVideo, runWriteFrames)
 import VideoProps 
+import qualified Transitions
+
 import qualified ExampleObject
 import qualified WaterfallScene
 import qualified Waterfall as W
@@ -28,28 +30,9 @@ run =
     . runBuildVideo
     . runWriteFrames
 
-easeInOutElastic :: Double -> Double 
-easeInOutElastic x
-    | nearZero x = 0
-    | nearZero (x-1) = 1
-    | x < 0.5   = (2 ** (  20  * x - 10)) * sin ( (20 * x - 11.125) * c5) / 2 
-    | otherwise = (2 ** ((-20) * x + 10)) * sin ( (20 * x - 11.125) * c5) / 2 + 1 
-    where c5 = (2 * pi) / 4.5
-
-easeInOutBack :: Double -> Double 
-easeInOutBack x 
-    | x < 0.5 =    ((2 * x)     ** 2 ) * ((c2 + 1) * (2 * x    ) - c2) / 2
-    | otherwise = (((2 * x - 2 ) ** 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2
-    where 
-        c1 = 1.70158
-        c2 = c1 * 1.525
-
-easeInOutSin :: Double -> Double
-easeInOutSin x = (1 - cos (pi * x)) / 2 
-
 easeInOutSoft :: Double -> Double
 easeInOutSoft x 
-    | x < fac = easeInOutBack (x / fac)-- (easeInOutSin x + x) / 2 
+    | x < fac = Transitions.easeInOutBack (x / fac)-- (easeInOutSin x + x) / 2 
     | otherwise = 1
     where fac = 0.9
 
