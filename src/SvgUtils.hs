@@ -1,6 +1,8 @@
 module SvgUtils 
 ( translate
 , colour
+, strokeColour
+, strokeWidth
 ) where
 
 import Data.Text (Text)
@@ -23,3 +25,10 @@ translate x y elem =
 
 colour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
 colour c a = a & Svg.drawAttr . Svg.fillColor .~ (Last . Just $ Svg.ColorRef c)
+
+
+strokeColour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
+strokeColour c a = a & Svg.drawAttr . Svg.strokeColor .~ (Last . Just $ Svg.ColorRef c)
+
+strokeWidth :: Svg.WithDrawAttributes a => Double -> a -> a    
+strokeWidth w a = a & Svg.drawAttr . Svg.strokeWidth .~ (Last . Just . Svg.Px $ w)

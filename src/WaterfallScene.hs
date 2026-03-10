@@ -1,11 +1,14 @@
 module WaterfallScene 
 ( solidClip
+, stillClip
+, animatedClip
+, centerDiagram
 )
 where
 
 import VideoProps
 import SvgUtils
-import GenerateVideo (BuildVideo, WriteFrames, addSvgFrame)
+import GenerateVideo (BuildVideo, WriteFrames, addSvgFrame, addSvgDuration)
 
 import qualified Waterfall as W
 import qualified Waterfall.SVG as W
@@ -48,7 +51,6 @@ resizeDiagram vd d =
                              )
             in (offset, W.uScale2D scale d)
 
-
 frameSvg :: VideoProps -> W.Solid -> Integer-> Svg.Document
 frameSvg (vd@VideoProps {..}) solid frame = 
     let angle = 2 * pi * fromInteger frame / fromInteger nFrames
@@ -75,6 +77,78 @@ frameSvg (vd@VideoProps {..}) solid frame =
             & Svg.height .~ (Just h)
             & Svg.elements %~ addOffset
             & Svg.elements %~ (background:)
+
+-- | scale the diagram so that the video shows the range [-1, 1] on the smallest axis
+diagramSvg :: VideoProps -> W.Diagram -> Svg.Document
+diagramSvg vd diagram = 
+    let minorAxis = fromIntegral $ min (vd ^. videoWidth) (vd ^. videoHeight)
+
+        w = Svg.Num . fromIntegral $ vd ^. videoWidth
+        h = Svg.Num .fromIntegral $ vd ^. videoHeight
+
+        paths lt visibility =
+            W.path2DToPathCommands =<<
+                W.diagramLines lt visibility (W.uScale2D minorAxis diagram)
+
+        background = Svg.RectangleTree $ 
+            Svg.defaultSvg 
+                & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
+                & Svg.rectWidth .~ w
+                & Svg.rectHeight .~ h
+                & colour (JP.PixelRGBA8 255 255 255 255)
+
+        dx = (fromInteger (vd ^. videoWidth) ) / 2
+        dy = (fromInteger (vd ^. videoHeight) ) / 2
+        addOffset = translate dx dy
+
+        document e = Svg.Document Nothing (Just w) (Just h) [e] mempty mempty mempty mempty
+        pathColour W.Visible = JP.PixelRGBA8 0 0 0 255
+        pathColour W.Hidden = JP.PixelRGBA8 200 200 255 255
+        pathOf lt visibility = 
+            Svg.defaultSvg 
+                & Svg.pathDefinition .~ (paths lt visibility)
+                & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
+                & strokeColour (pathColour visibility)
+                & strokeWidth 2.0
+                & Svg.PathTree 
+                & addOffset
+            
+        group children = Svg.GroupTree $ Svg.Group mempty children Nothing Svg.defaultSvg
+            in document . group $
+                    background :
+                    [ pathOf lineType visibility
+                        | visibility <- [W.Hidden, W.Visible]
+                        , lineType <- [W.SharpLine, W.OutLine]
+                    ]
+
+centerDiagram :: W.Diagram -> W.Diagram
+centerDiagram d = 
+    case W.diagramBoundingBox d of 
+        Nothing -> d
+        Just (lo, hi) -> W.translate2D (negate (lo + hi) ^* 0.5) d
+
+stillClip :: 
+    ( BuildVideo :> es
+    , WriteFrames :> es
+    , Reader VideoProps :> es
+    ) => Double -> W.Diagram  -> Eff es ()
+stillClip duration d = do
+    vd <- ask
+    addSvgDuration duration (diagramSvg vd d)
+
+-- | parameterized by a value that ranges between [0, 1]
+animatedClip :: 
+    ( BuildVideo :> es
+    , WriteFrames :> es
+    , Reader VideoProps :> es
+    ) => Double -> (Double -> W.Diagram)  -> Eff es ()
+animatedClip duration f = do
+    vd <- ask
+    let nFrames = floor (duration * fromInteger (vd ^. videoFPS))
+
+    let v = (/ fromInteger nFrames) . fromInteger
+    traverse_ (addSvgFrame . diagramSvg vd . f . v) [0..nFrames]
+
 
 renderFrameSvg :: (BuildVideo :> es, WriteFrames :> es, Reader VideoProps :> es) => W.Solid -> Integer -> Eff es ()
 renderFrameSvg s i = do

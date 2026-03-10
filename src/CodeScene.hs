@@ -38,9 +38,8 @@ instance Default CodeSceneProps where
         , _codeSceneFrameWidth = 2.0
         , _codeSceneStyle = Sky.haddock
         , _codeSceneTransitionDuration = 2.0
-        , _codeSceneStillDuration = 3.0
+        , _codeSceneStillDuration = 1.0
         }
-
 
 makeLenses ''CodeSceneProps
 
@@ -78,11 +77,6 @@ highlight extension text = do
     let wrapTokenizerError = either (throwError . HighlightErrorInTokenizer . T.pack) pure
     wrapTokenizerError $ Sky.tokenize tokenizerConfig syntax text
 
-strokeColour :: Svg.WithDrawAttributes a => JP.PixelRGBA8 -> a -> a    
-strokeColour c a = a & Svg.drawAttr . Svg.strokeColor .~ (Last . Just $ Svg.ColorRef c)
-
-strokeWidth :: Svg.WithDrawAttributes a => Double -> a -> a    
-strokeWidth w a = a & Svg.drawAttr . Svg.strokeWidth .~ (Last . Just . Svg.Px $ w)
 
 convertColor :: Sky.Color -> JP.PixelRGBA8
 convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
@@ -159,10 +153,10 @@ linesToSvg vd cs lines =
             in (letterType, document) : makePages (letter:prev) xs
         in makePages [] elems
 
-durations :: LetterType -> Double
-durations StartOrMidWord = 0.04
-durations EndOfWord = 0.1
-durations EndOfLine = 0.5
+durationWeight :: LetterType -> Double
+durationWeight StartOrMidWord = 0.8
+durationWeight EndOfWord = 0.2
+durationWeight EndOfLine = 1.0
 
 codeScene :: 
     ( WriteFrames :> es
@@ -173,5 +167,15 @@ codeScene ::
 codeScene cs text = do
     vd <- ask
     frames <- linesToSvg vd cs <$> highlight (cs ^. codeSceneFileExtension) text
-    forM_ frames $ \(letterType, frame) -> 
-            addSvgDuration (durations letterType) frame 
+
+    case unsnoc frames of 
+        Nothing -> pure ()
+        Just (transitionFrames, lastFrame) -> do
+            let normalizedLength = sum (durationWeight . fst <$> transitionFrames)
+            forM_ transitionFrames $ \(letterType, frame) -> 
+                let dur =
+                        cs ^. codeSceneTransitionDuration 
+                            * durationWeight letterType
+                            / normalizedLength
+                in addSvgDuration dur frame 
+            addSvgDuration (cs ^. codeSceneStillDuration) (snd lastFrame)

@@ -8,10 +8,13 @@ module ExampleObject where
 
 
 -- BLOCK:Imports
+-- Imports
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
+
 -- BLOCK:Profile
+
 bladeProfile :: W.Path2D
 bladeProfile =
     W.closeLoop $
@@ -21,20 +24,27 @@ bladeProfile =
         , W.arcViaTo (V2 0 70) (V2 (-30) 60)
         ]
 
--- BLOCK:Blade
+-- BLOCK:Sharp Blade
+
 bladeThickness :: Double
 bladeThickness = 3
 
+sharpBlade :: W.Solid
+sharpBlade =  W.prism bladeThickness (W.makeShape bladeProfile) 
+
+-- BLOCK:Blade
+
+roundFn :: (V3 Double, V3 Double) -> Maybe Double 
+roundFn (s, e)  | (nearZero (s ^. _xy - e ^. _xy)) 
+                    && nearZero (s ^. _y) 
+                        = Just 10
+                | otherwise = Nothing 
+
 blade :: W.Solid
-blade = 
-    let roundFn (s, e) 
-            | (nearZero (s ^. _xy - e ^. _xy)) 
-                && nearZero (s ^. _y) 
-                    = Just 10
-            | otherwise = Nothing 
-    in W.prism bladeThickness (W.makeShape bladeProfile) 
-            & W.roundConditionalFillet roundFn
--- BLOCK:Handle
+blade = W.roundConditionalFillet roundFn sharpBlade
+
+-- BLOCK:Handle Path
+
 handleLongLeg :: V3 Double
 handleLongLeg = V3 0 (-60) 15
 
@@ -51,6 +61,8 @@ handlePath =
             , W.lineRelative handleLongLeg
             ]
 
+-- BLOCK:Handle
+
 handle :: W.Solid
 handle = 
     W.sweep handlePath (W.scale2D (V2 10 7.5) W.centeredSquare)
@@ -64,7 +76,14 @@ grip =
         gripPath = W.line (e - gripD) (e + gripD)
     in W.sweep gripPath (W.scale2D (V2 16 12) W.centeredSquare)
         & W.roundFillet 4
---BLOCK:Hole
+
+-- BLOCK: Handle And Grip
+
+handleWithGrip :: W.Solid
+handleWithGrip = grip <> handle
+
+-- BLOCK:Hole
+
 hole :: W.Solid
 hole = 
     let Just (_, e) = W.pathEndpoints handlePath
@@ -73,7 +92,9 @@ hole =
     in W.sweep holePath (W.scale2D (V2 6 30) W.centeredSquare)
         & W.roundFillet 2.75
 
---BLOCK: Negative Mask
+handleWithHole = handleWithGrip `W.difference` hole
+
+-- BLOCK: Negative Mask
 
 negativeMask :: W.Solid
 negativeMask = 
@@ -83,4 +104,4 @@ negativeMask =
 
 -- BLOCK: Spatula
 spatula :: W.Solid
-spatula = (blade <> handle <> grip) `W.difference` (hole <> negativeMask)
+spatula = (blade <> handleWithGrip) `W.difference` negativeMask
