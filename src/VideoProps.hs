@@ -9,6 +9,7 @@ data VideoProps = VideoProps
     , _videoFPS :: Integer
     , _videoScratchDir :: FilePath
     , _videoOutputFile :: FilePath
+    , _videoConvertViaPng :: Bool
     } deriving (Show, Eq)
 
 makeLenses ''VideoProps
@@ -21,4 +22,5 @@ instance Default VideoProps where
         , _videoFPS = 25
         , _videoScratchDir = "output"
         , _videoOutputFile = "output.mp4"
+        , _videoConvertViaPng = False
         } 

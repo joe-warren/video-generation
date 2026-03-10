@@ -55,7 +55,13 @@ runWriteFrames eff = do
             let path = vd ^. videoScratchDir <> "/" <> name
             liftIO $ Svg.saveXmlFile path document
             liftIO $ modifyIORef ref (+1) 
-            return $ FramePath name
+            if (vd ^. videoConvertViaPng) 
+                then do
+                    let pngName = printf "%04d" index <> ".png"
+                    let pngPath = vd ^. videoScratchDir <> "/" <> pngName
+                    liftIO $ convertFile path pngPath
+                    return $ FramePath pngName
+                else return $ FramePath name
 
 concatLine :: VideoProps -> FramePath -> Text
 concatLine vd (FramePath path)= 
@@ -81,6 +87,13 @@ runBuildVideo eff = do
     liftIO $ hClose handle
     liftIO $ generateVideo concatFileName (vd ^. videoOutputFile)
     return res
+
+convertFile :: FilePath -> FilePath -> IO ()
+convertFile inputFile outputFile = do
+    Process.callProcess "rsvg-convert"
+        [ "--output=" <> outputFile
+        , inputFile
+        ]
 
 generateVideo :: FilePath -> FilePath -> IO ()
 generateVideo concatFile outputFile = do

@@ -18,13 +18,7 @@ import Control.Lens
 import Linear
 
 videoProps :: VideoProps
-videoProps = VideoProps 
-    { _videoWidth = 1920
-    , _videoHeight = 1080
-    , _videoFPS = 25
-    , _videoScratchDir = "output"
-    , _videoOutputFile = "output.mp4"
-    } 
+videoProps = def
 
 run =
     runEff 
