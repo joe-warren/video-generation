@@ -26,8 +26,6 @@ data CodeSceneProps = CodeSceneProps
     , _codeSceneBorderColumns :: Integer
     , _codeSceneFrameWidth :: Double
     , _codeSceneStyle :: Sky.Style
-    , _codeSceneTransitionDuration :: Double 
-    , _codeSceneStillDuration :: Double
     } deriving (Show)
 
 instance Default CodeSceneProps where
@@ -37,8 +35,6 @@ instance Default CodeSceneProps where
         , _codeSceneBorderColumns = 2 
         , _codeSceneFrameWidth = 2.0
         , _codeSceneStyle = Sky.haddock
-        , _codeSceneTransitionDuration = 2.0
-        , _codeSceneStillDuration = 1.0
         }
 
 makeLenses ''CodeSceneProps
@@ -56,6 +52,7 @@ data HighlightError =
     HighlightErrorMissingSyntax Text
     | HighlightErrorAmbiguousSyntax Text
     | HighlightErrorInTokenizer Text
+    | HighlightErrorEmptyHighlight
     deriving Show
 
 runHighlight :: (IOE :> es) => Eff (Error HighlightError : es) () -> Eff es () 
@@ -163,19 +160,19 @@ codeScene ::
     , BuildVideo :> es
     , Reader VideoProps :> es
     , Error HighlightError :> es
-    ) => CodeSceneProps -> Text -> Eff es ()
-codeScene cs text = do
+    ) => CodeSceneProps -> Double -> Text -> Eff es Svg.Document
+codeScene cs duration text = do
     vd <- ask
     frames <- linesToSvg vd cs <$> highlight (cs ^. codeSceneFileExtension) text
 
     case unsnoc frames of 
-        Nothing -> pure ()
+        Nothing -> throwError HighlightErrorEmptyHighlight
         Just (transitionFrames, lastFrame) -> do
             let normalizedLength = sum (durationWeight . fst <$> transitionFrames)
             forM_ transitionFrames $ \(letterType, frame) -> 
                 let dur =
-                        cs ^. codeSceneTransitionDuration 
+                        duration 
                             * durationWeight letterType
                             / normalizedLength
                 in addSvgDuration dur frame 
-            addSvgDuration (cs ^. codeSceneStillDuration) (snd lastFrame)
+            return . snd $ lastFrame 

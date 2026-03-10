@@ -5,7 +5,7 @@ module Lib
 import qualified Data.Text.IO as T
 import qualified CodeScene 
 import qualified CodeBlock
-import GenerateVideo (runBuildVideo, runWriteFrames)
+import GenerateVideo (runBuildVideo, runWriteFrames, addSvgDuration)
 import VideoProps 
 import qualified Transitions
 
@@ -18,6 +18,10 @@ import Effectful
 import Data.Default (def)
 import Control.Lens
 import Linear
+import GHC.Plugins (RdrName(Exact))
+import Animate (animate)
+import qualified SvgUtils
+import Transitions (easeInOutSin)
 
 videoProps :: VideoProps
 videoProps = def
@@ -38,21 +42,10 @@ easeInOutSoft x
 
 someFunc :: IO ()
 someFunc = run $ do
-    CodeScene.codeScene def 
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Intro"
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Imports"
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Profile"
-    WaterfallScene.stillClip 2 
-        (ExampleObject.bladeProfile 
-            & W.pathDiagram W.OutLine W.Visible
-            & W.uScale2D (1/80)
-            & WaterfallScene.centerDiagram
-        )
-        
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Sharp Blade"
+    let codeBlockOno blockname = 
+            addSvgDuration 1.0
+            =<< CodeScene.codeScene def 2.0
+            =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" blockname
 
     let center solid = 
             case W.axisAlignedBoundingBox solid of
@@ -65,53 +58,56 @@ someFunc = run $ do
             & W.solidDiagram (V3 2 2 1)
         showRotating = showRotating' (unit _z)
 
-    WaterfallScene.animatedClip 4 $ showRotating (1/150) pi  
-        (ExampleObject.sharpBlade & center)  
-        . easeInOutSoft
+    let codeBlockWithFade blockname nextScene = do
+            fullCode <- CodeScene.codeScene def 2.0
+                =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" blockname
+            addSvgDuration 1.5 fullCode
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Blade"
-    
-    WaterfallScene.animatedClip 4 $ showRotating  (1/150) pi 
-        ( ExampleObject.blade & center
-        ) . easeInOutSoft
+            fadedCode <- animate 0.5 
+                ( SvgUtils.addBackground SvgUtils.white 
+                . SvgUtils.makeOpaque fullCode 
+                . (+ 1.0)
+                . (* (-0.925))
+                . easeInOutSin
+                )
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Handle Path"
-        
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Handle"
-        
-    WaterfallScene.animatedClip 4 $ showRotating  (1/150) pi 
-        ( ExampleObject.handle & center
-        ) . easeInOutSoft
+            nextScene fadedCode
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Grip"
-        
-    WaterfallScene.animatedClip 4 $ showRotating  (1/150) pi 
-        ( ExampleObject.grip & center
-        ) . easeInOutSoft
+    let codeBlockWithDiagram blockname diagram = 
+            codeBlockWithFade blockname $ \background -> 
+                WaterfallScene.stillClipWithBackground 2 background diagram
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Handle And Grip"
+    let codeBlockWithObject blockname object = do
+            codeBlockWithFade blockname $ \background -> 
+                WaterfallScene.animatedClipWithBackground 5 background $ 
+                    showRotating (1/150) (2*pi) (center object)  
+                    . easeInOutSoft
+            
+    codeBlockOno "Intro"
+    codeBlockOno "Imports"
+    codeBlockWithDiagram "Profile"
+        (ExampleObject.bladeProfile 
+            & W.pathDiagram W.OutLine W.Visible
+            & W.uScale2D (1/80)
+            & WaterfallScene.centerDiagram
+        )
         
-    WaterfallScene.animatedClip 4 $ showRotating (1/150) pi 
-        ( ExampleObject.handleWithGrip & center
-        ) . easeInOutSoft
+    codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Hole"
-        
-    WaterfallScene.animatedClip 4 $ showRotating (1/150) pi 
-        ( ExampleObject.handleWithHole & center
-        ) . easeInOutSoft
-        
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Negative Mask"
+    codeBlockWithObject "Blade" ExampleObject.blade
 
-    CodeScene.codeScene def  
-        =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" "Spatula"
+    codeBlockOno "Handle Params"
+    codeBlockOno "Handle Path"
+    codeBlockWithObject "Handle" ExampleObject.handle
+
+    codeBlockWithObject "Grip" ExampleObject.grip
+
+    codeBlockWithObject "Handle And Grip" ExampleObject.handleWithGrip
+
+    codeBlockWithObject "Hole" ExampleObject.handleWithHole
+        
+    codeBlockOno "Negative Mask" 
+    codeBlockOno "Spatula"
 
     WaterfallScene.animatedClip 8 $ showRotating (1/150) (2*pi)
             ( ExampleObject.spatula 

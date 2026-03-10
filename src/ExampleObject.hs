@@ -43,21 +43,29 @@ roundFn (s, e)  | (nearZero (s ^. _xy - e ^. _xy))
 blade :: W.Solid
 blade = W.roundConditionalFillet roundFn sharpBlade
 
--- BLOCK:Handle Path
+-- BLOCK:Handle Params
 
 handleLongLeg :: V3 Double
 handleLongLeg = V3 0 (-60) 15
 
+handleShortLeg :: V3 Double 
+handleShortLeg = V3 0 (-30) 30
+
+handleJoinL :: Double 
+handleJoinL = 5
+
+-- BLOCK:Handle Path
+
 handlePath :: W.Path
 handlePath =
-    let shortLeg = V3 0 (-30) 30
-        joinL = 5
+    let shortLegDir = handleJoinL *^ normalize handleShortLeg
+        longLegDir = handleJoinL *^ normalize handleLongLeg
     in W.pathFrom (5 *^ unit _y)
-            [ W.lineRelative shortLeg
+            [ W.lineRelative handleShortLeg
             , W.bezierRelative
-                (joinL *^ normalize shortLeg) 
-                (joinL *^ normalize shortLeg)
-                (joinL *^ (normalize shortLeg + normalize handleLongLeg))
+                shortLegDir
+                shortLegDir
+                (shortLegDir + longLegDir)
             , W.lineRelative handleLongLeg
             ]
 
