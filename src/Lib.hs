@@ -18,7 +18,6 @@ import Effectful
 import Data.Default (def)
 import Control.Lens
 import Linear
-import GHC.Plugins (RdrName(Exact))
 import Animate (animate)
 import qualified SvgUtils
 import Transitions (easeInOutSin)
