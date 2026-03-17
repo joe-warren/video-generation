@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.1.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -30,6 +30,7 @@ library
       CodeScene
       Eval
       ExampleObject
+      GenerateAudio
       GenerateVideo
       Lib
       SvgUtils
@@ -54,6 +55,7 @@ library
       FlexibleContexts
       AllowAmbiguousTypes
       TemplateHaskell
+      MultiParamTypeClasses
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       JuicyPixels
@@ -69,6 +71,7 @@ library
     , skylighting
     , svg-tree
     , text
+    , tidal
     , waterfall-cad
     , waterfall-cad-svg
   default-language: Haskell2010
@@ -93,6 +96,7 @@ executable video-generation-exe
       FlexibleContexts
       AllowAmbiguousTypes
       TemplateHaskell
+      MultiParamTypeClasses
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
@@ -108,6 +112,7 @@ executable video-generation-exe
     , skylighting
     , svg-tree
     , text
+    , tidal
     , video-generation
     , waterfall-cad
     , waterfall-cad-svg
@@ -134,6 +139,7 @@ test-suite video-generation-test
       FlexibleContexts
       AllowAmbiguousTypes
       TemplateHaskell
+      MultiParamTypeClasses
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       JuicyPixels
@@ -149,6 +155,7 @@ test-suite video-generation-test
     , skylighting
     , svg-tree
     , text
+    , tidal
     , video-generation
     , waterfall-cad
     , waterfall-cad-svg

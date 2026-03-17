@@ -7,6 +7,8 @@
 , addSvgDuration
 , runBuildVideo
 , runWriteFrames
+, runTrackOffset
+, getCurrentOffsetSeconds
 ) where
 
 import VideoProps
@@ -24,9 +26,11 @@ import Data.IORef (newIORef, readIORef, modifyIORef, writeIORef)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
+import Effectful.State.Static.Local
 import Control.Lens
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
+
 data WriteFrames :: Effect where
     WriteSvgFrame :: Svg.Document -> WriteFrames m FramePath
 
@@ -38,11 +42,19 @@ data BuildVideo :: Effect where
 
 type instance DispatchOf BuildVideo = Dynamic
 
+data TrackOffset :: Effect where
+    GetCurrentOffsetSeconds :: TrackOffset m Double
+
+type instance DispatchOf TrackOffset = Dynamic
+
 addSvgFrame :: (WriteFrames :> es, BuildVideo :> es) => Svg.Document -> Eff es ()
 addSvgFrame = send . AddFrame <=< send . WriteSvgFrame 
 
 addSvgDuration :: (WriteFrames :> es, BuildVideo :> es) => Double -> Svg.Document -> Eff es ()
 addSvgDuration dur = send . AddDuration dur <=< send . WriteSvgFrame 
+
+getCurrentOffsetSeconds :: (TrackOffset :> es) =>  Eff es Double
+getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames eff = do
@@ -63,6 +75,22 @@ runWriteFrames eff = do
                     return $ FramePath pngName
                 else return $ FramePath name
 
+                
+runTrackOffset:: (WriteFrames :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
+runTrackOffset = 
+    reinterpret (evalState (0::Integer) 
+        . interpose (\_ -> \case 
+            WriteSvgFrame doc -> do
+                modify (+1)
+                send (WriteSvgFrame doc)
+        )
+    ) $ \_ -> \case 
+            GetCurrentOffsetSeconds -> do 
+                frames <- get
+                vd <- ask
+                return (fromInteger frames / fromInteger (vd ^. videoFPS))
+        
+
 concatLine :: VideoProps -> FramePath -> Text
 concatLine vd (FramePath path)= 
     let showFloat f = T.pack $ showFFloat Nothing f [] 
@@ -72,6 +100,7 @@ concatLine vd (FramePath path)=
 runBuildVideo :: (IOE :> es, Reader VideoProps :> es) => Eff (BuildVideo : es) a -> Eff (es) a
 runBuildVideo eff = do
     posRef <- liftIO $ newIORef (0 :: Double)
+    offsetRef <- liftIO $ newIORef (0 :: Double)
     vd <- ask
     let concatFileName = vd ^. videoScratchDir <> "/concat.txt"
     handle <- liftIO $ openFile concatFileName WriteMode

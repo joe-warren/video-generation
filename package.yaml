@@ -35,6 +35,7 @@ dependencies:
 - ghc-paths
 - effectful
 - data-default
+- tidal
 
 default-extensions: 
 - OverloadedStrings
@@ -48,6 +49,7 @@ default-extensions:
 - FlexibleContexts
 - AllowAmbiguousTypes 
 - TemplateHaskell
+- MultiParamTypeClasses
 
 ghc-options:
 - -Wall
