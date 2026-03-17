@@ -50,6 +50,7 @@ default-extensions:
 - AllowAmbiguousTypes 
 - TemplateHaskell
 - MultiParamTypeClasses
+- ScopedTypeVariables
 
 ghc-options:
 - -Wall

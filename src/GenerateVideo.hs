@@ -22,7 +22,6 @@ import qualified Graphics.Svg as Svg
 import Effectful
 import Effectful.Dispatch.Dynamic
 import Control.Monad ((<=<), replicateM_)
-import Data.IORef (newIORef, readIORef, modifyIORef, writeIORef)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
@@ -57,16 +56,15 @@ getCurrentOffsetSeconds :: (TrackOffset :> es) =>  Eff es Double
 getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
-runWriteFrames eff = do
-    ref <- liftIO $ newIORef (0:: Integer)
-    interpretWith eff $ \_ -> \case
+runWriteFrames = do
+    reinterpret (evalState (0::Integer)) $ \_ -> \case
         WriteSvgFrame document -> do
-            index <- liftIO $ readIORef ref
+            (index::Integer) <- get
             vd <- ask
             let name = printf "%04d" index <> ".svg"
             let path = vd ^. videoScratchDir <> "/" <> name
             liftIO $ Svg.saveXmlFile path document
-            liftIO $ modifyIORef ref (+1) 
+            modify (+1) 
             if (vd ^. videoConvertViaPng) 
                 then do
                     let pngName = printf "%04d" index <> ".png"
@@ -99,20 +97,18 @@ concatLine vd (FramePath path)=
 
 runBuildVideo :: (IOE :> es, Reader VideoProps :> es) => Eff (BuildVideo : es) a -> Eff (es) a
 runBuildVideo eff = do
-    posRef <- liftIO $ newIORef (0 :: Double)
-    offsetRef <- liftIO $ newIORef (0 :: Double)
     vd <- ask
     let concatFileName = vd ^. videoScratchDir <> "/concat.txt"
     handle <- liftIO $ openFile concatFileName WriteMode
     let writeOneFrame fp = T.hPutStr handle (concatLine vd fp)
-    res <- interpretWith eff $ \_ -> \case 
+    res <- reinterpretWith (evalState (0::Double))eff $ \_ -> \case 
         AddFrame f -> liftIO $ writeOneFrame f
-        AddDuration dur f -> liftIO $ do
-            currentPos <- readIORef $ posRef
+        AddDuration dur f -> do
+            currentPos <- get
             let newPos = currentPos + (dur * fromIntegral (vd ^. videoFPS))
                 (nFrames, posRemainder) =  properFraction newPos
-            replicateM_ nFrames (writeOneFrame f)
-            writeIORef posRef posRemainder
+            liftIO $ replicateM_ nFrames (writeOneFrame f)
+            put posRemainder
     liftIO $ hClose handle
     liftIO $ generateVideo concatFileName (vd ^. videoOutputFile)
     return res
