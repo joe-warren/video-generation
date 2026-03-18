@@ -1,5 +1,9 @@
 module ExampleAudio where
 
+-- BLOCK: Audio Intro
+
+-- But first, music
+
 import Sound.Tidal.Boot
 
 introRhythm = cat 
@@ -14,10 +18,21 @@ introChords = cat
     , n "b'major7  e'minor"
     , n "fs'major7 b'minor"
     ]
+
+-- BLOCK: Play Intro
+
 intro = stack
     [ introRhythm |- n 24 # sound "supersaw" # amp 0.8 
-    , rolled (introChords -| n "36" # sound "supersquare" # amp 0.3 # decay 0.0 # voice 0.5 # resonance 0.0 # lfo 0)
+    , rolled (introChords -| n "36" 
+        # sound "supersquare" 
+        # amp 0.3 
+        # decay 0.0 
+        # voice 0.5 
+        # resonance 0.0 
+        # lfo 0)
     ]
+-- BLOCK: Verse 1
+
 
 verse1Rhythm = cat
     [ n "g  _  fs _  g  _  fs _  g  fs g  fs fs _  e  _" 

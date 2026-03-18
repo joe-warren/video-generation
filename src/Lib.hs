@@ -93,14 +93,14 @@ someFunc = run $ do
 
     let audioCodeBlockParams = 
             def
-            & CodeScene.codeSceneStyle .~ Sky.espresso
+            & CodeScene.codeSceneStyle .~ Sky.breezeDark
             
     let codeBlockAudioOno = codeBlockOno' "src/ExampleAudio.hs" audioCodeBlockParams
 
     let codeBlockTidalAudio blockname tidalEffect = do
             still <- CodeScene.codeScene audioCodeBlockParams 2.0
                 =<< CodeBlock.loadCodeBlock "src/ExampleAudio.hs" blockname
-            tidalEffect
+            _ <- tidalEffect
             addSvgDuration 1.0 still
             
     codeBlockOno "Intro"

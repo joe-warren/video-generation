@@ -12,6 +12,7 @@ import qualified Codec.Picture.Types as JP
 import Control.Lens
 import Control.Monad (join, forM_)
 import Data.Monoid (Last (..))
+import Control.Applicative((<|>))
 import Control.Arrow (second)
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
@@ -80,8 +81,9 @@ convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
 
 tokenColour :: CodeSceneProps -> Sky.TokenType -> JP.PixelRGBA8
 tokenColour cs tokType =
-    let tokStyle = tokType `M.lookup` Sky.tokenStyles (cs ^. codeSceneStyle)
-        tokCol = fromMaybe (Sky.RGB 0 0 0) (Sky.tokenColor =<< tokStyle)
+    let sceneStyle = cs ^. codeSceneStyle
+        tokStyle = tokType `M.lookup` Sky.tokenStyles sceneStyle
+        tokCol = fromMaybe (Sky.RGB 0 0 0) ((Sky.tokenColor =<< tokStyle) <|> Sky.defaultColor sceneStyle) 
     in convertColor tokCol
 
 data LetterType = StartOrMidWord | EndOfWord | EndOfLine
@@ -124,12 +126,15 @@ linesToSvg vd cs lines =
             & zip [1..]
             & fmap transform
             & join
+        backgroundColor = fromMaybe white $ convertColor <$> Sky.backgroundColor (cs ^. codeSceneStyle)
         background = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
                 & Svg.rectWidth .~ w
                 & Svg.rectHeight .~ h
-                & colour (JP.PixelRGBA8 255 255 255 255)
+                & colour backgroundColor
+                
+        frameColor = fromMaybe black $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
 
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
@@ -140,7 +145,7 @@ linesToSvg vd cs lines =
                 & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((cs ^. codeSceneColumns + 1) * charWidth vd cs)))
                 & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd cs))
                 & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
-                & strokeColour (JP.PixelRGBA8 0 0 0 255)
+                & strokeColour frameColor
                 & strokeWidth 2
 
         makePages _ [] = []
