@@ -1,5 +1,5 @@
-module Lib
-    ( someFunc
+module Main
+    ( main
     ) where
 
 import qualified Data.Text.IO as T
@@ -8,6 +8,7 @@ import qualified CodeBlock
 import GenerateVideo (runBuildVideo, runWriteFrames, addSvgDuration, runTrackOffset)
 import VideoProps 
 import qualified Transitions
+import qualified Run
 
 import qualified ExampleObject
 import qualified ExampleAudio
@@ -29,30 +30,20 @@ import GenerateAudio (runBuildAudio, setTidalPattern)
 videoProps :: VideoProps
 videoProps = def
 
-run =
-    runEff
-    . CodeBlock.runLoadCodeBlocks'
-    . CodeScene.runHighlight
-    . runReader videoProps
-    . runWriteFrames
-    . runBuildVideo
-    . runTrackOffset
-    . runBuildAudio
-
 easeInOutSoft :: Double -> Double
 easeInOutSoft x 
     | x < fac = Transitions.easeInOutBack (x / fac)-- (easeInOutSin x + x) / 2 
     | otherwise = 1
     where fac = 0.9
 
-someFunc :: IO ()
-someFunc = run $ do
+main :: IO ()
+main = Run.run videoProps $ do
     let codeBlockOno' srcfile props blockname = 
             addSvgDuration 1.0
             =<< CodeScene.codeScene props 2.0
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
-    let codeBlockOno = codeBlockOno' "src/ExampleObject.hs" def
+    let codeBlockOno = codeBlockOno' "spatula/ExampleObject.hs" def
 
     let center solid = 
             case W.axisAlignedBoundingBox solid of
@@ -67,7 +58,7 @@ someFunc = run $ do
 
     let codeBlockWithFade blockname nextScene = do
             fullCode <- CodeScene.codeScene def 2.0
-                =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" blockname
+                =<< CodeBlock.loadCodeBlock "spatula/ExampleObject.hs" blockname
             addSvgDuration 1.5 fullCode
 
             fadedCode <- animate 0.5 
@@ -95,11 +86,11 @@ someFunc = run $ do
             def
             & CodeScene.codeSceneStyle .~ Sky.breezeDark
             
-    let codeBlockAudioOno = codeBlockOno' "src/ExampleAudio.hs" audioCodeBlockParams
+    let codeBlockAudioOno = codeBlockOno' "spatula/ExampleAudio.hs" audioCodeBlockParams
 
     let codeBlockTidalAudio blockname tidalEffect = do
             still <- CodeScene.codeScene audioCodeBlockParams 2.0
-                =<< CodeBlock.loadCodeBlock "src/ExampleAudio.hs" blockname
+                =<< CodeBlock.loadCodeBlock "spatula/ExampleAudio.hs" blockname
             _ <- tidalEffect
             addSvgDuration 1.0 still
             

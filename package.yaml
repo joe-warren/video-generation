@@ -67,9 +67,9 @@ library:
   source-dirs: src
 
 executables:
-  video-generation-exe:
+  spatula-video:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         spatula
     ghc-options:
     - -threaded
     - -rtsopts
