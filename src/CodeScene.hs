@@ -2,7 +2,7 @@ module CodeScene where
 
 import VideoProps
 import SvgUtils
-import GenerateVideo (BuildVideo, WriteFrames, addSvgDuration)
+import GenerateVideo (BuildVideo, addSvgDuration)
 
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -156,8 +156,7 @@ durationWeight EndOfWord = 0.2
 durationWeight EndOfLine = 1.0
 
 codeScene :: 
-    ( WriteFrames :> es
-    , BuildVideo :> es
+    ( BuildVideo :> es
     , Reader VideoProps :> es
     , Error HighlightError :> es
     ) => CodeSceneProps -> Double -> Text -> Eff es Svg.Document

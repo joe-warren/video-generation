@@ -9,7 +9,7 @@ where
 
 import VideoProps
 import SvgUtils
-import GenerateVideo (BuildVideo, WriteFrames, addSvgDuration)
+import GenerateVideo (BuildVideo, addSvgDuration)
 
 import qualified Waterfall as W
 import qualified Waterfall.SVG as W
@@ -68,7 +68,6 @@ centerDiagram d =
 
 stillClip :: 
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> W.Diagram  -> Eff es ()
 stillClip duration d = do
@@ -79,7 +78,6 @@ stillClip duration d = do
 
 stillClipWithBackground :: 
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> Svg.Document -> W.Diagram -> Eff es ()
 stillClipWithBackground duration background d = do
@@ -89,7 +87,6 @@ stillClipWithBackground duration background d = do
 -- | parameterized by a value that ranges between [0, 1]
 animatedClip :: 
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> (Double -> W.Diagram)  -> Eff es ()
 animatedClip duration f = do
@@ -97,10 +94,8 @@ animatedClip duration f = do
     let background = SvgUtils.blankCanvas vd SvgUtils.white
     void $ animate duration (diagramSvg background vd . f )
 
-
 animatedClipWithBackground :: 
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> Svg.Document -> (Double -> W.Diagram)  -> Eff es ()
 animatedClipWithBackground duration background f = do

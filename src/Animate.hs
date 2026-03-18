@@ -13,7 +13,6 @@ import VideoProps
 import Control.Monad ((<=<))
 animateM ::
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> (Double -> Eff es Svg.Document) -> Eff es Svg.Document
 animateM duration f = do
@@ -26,7 +25,6 @@ animateM duration f = do
 
 animate ::
     ( BuildVideo :> es
-    , WriteFrames :> es
     , Reader VideoProps :> es
     ) => Double -> (Double -> Svg.Document) -> Eff es Svg.Document
 animate duration f = animateM duration (pure . f)

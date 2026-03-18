@@ -14,6 +14,8 @@ import qualified ExampleAudio
 import qualified WaterfallScene
 import qualified Waterfall as W
 
+import qualified Skylighting as Sky
+
 import Effectful.Reader.Static
 import Effectful
 import Data.Default (def)
@@ -32,8 +34,8 @@ run =
     . CodeBlock.runLoadCodeBlocks'
     . CodeScene.runHighlight
     . runReader videoProps
-    . runBuildVideo
     . runWriteFrames
+    . runBuildVideo
     . runTrackOffset
     . runBuildAudio
 
@@ -45,10 +47,12 @@ easeInOutSoft x
 
 someFunc :: IO ()
 someFunc = run $ do
-    let codeBlockOno blockname = 
+    let codeBlockOno' srcfile props blockname = 
             addSvgDuration 1.0
-            =<< CodeScene.codeScene def 2.0
-            =<< CodeBlock.loadCodeBlock "src/ExampleObject.hs" blockname
+            =<< CodeScene.codeScene props 2.0
+            =<< CodeBlock.loadCodeBlock srcfile blockname
+
+    let codeBlockOno = codeBlockOno' "src/ExampleObject.hs" def
 
     let center solid = 
             case W.axisAlignedBoundingBox solid of
@@ -76,6 +80,7 @@ someFunc = run $ do
 
             nextScene fadedCode
 
+
     let codeBlockWithDiagram blockname diagram = 
             codeBlockWithFade blockname $ \background -> 
                 WaterfallScene.stillClipWithBackground 2 background diagram
@@ -85,8 +90,25 @@ someFunc = run $ do
                 WaterfallScene.animatedClipWithBackground 5 background $ 
                     showRotating (1/150) (2*pi) (center object)  
                     . easeInOutSoft
+
+    let audioCodeBlockParams = 
+            def
+            & CodeScene.codeSceneStyle .~ Sky.espresso
+            
+    let codeBlockAudioOno = codeBlockOno' "src/ExampleAudio.hs" audioCodeBlockParams
+
+    let codeBlockTidalAudio blockname tidalEffect = do
+            still <- CodeScene.codeScene audioCodeBlockParams 2.0
+                =<< CodeBlock.loadCodeBlock "src/ExampleAudio.hs" blockname
+            tidalEffect
+            addSvgDuration 1.0 still
             
     codeBlockOno "Intro"
+
+    codeBlockAudioOno "Audio Intro"
+    codeBlockTidalAudio "Play Intro" $
+        setTidalPattern ExampleAudio.intro
+
     codeBlockOno "Imports"
     codeBlockWithDiagram "Profile"
         (ExampleObject.bladeProfile 
@@ -94,12 +116,11 @@ someFunc = run $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
-    setTidalPattern ExampleAudio.intro
         
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
     codeBlockWithObject "Blade" ExampleObject.blade
-
+    {-- 
     codeBlockWithDiagram "Slot Profile"
         (ExampleObject.slotProfile 
             & W.pathDiagram W.OutLine W.Visible
@@ -139,3 +160,4 @@ someFunc = run $ do
                 & center
             ) . easeInOutSoft
 
+--}
