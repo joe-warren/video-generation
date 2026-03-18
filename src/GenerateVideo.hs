@@ -76,19 +76,20 @@ runWriteFrames = do
                 else return $ FramePath name
 
                 
-runTrackOffset:: (WriteFrames :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
+runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
 runTrackOffset = 
-    reinterpret (evalState (0::Integer) 
+    reinterpret (evalState (0::Double) 
         . interpose (\_ -> \case 
-            WriteSvgFrame doc -> do
-                modify (+1)
-                send (WriteSvgFrame doc)
+            AddFrame f -> do
+                vd <- ask
+                modify (+ (1 / fromInteger (vd ^. videoFPS)))
+                send (AddFrame f)
+            AddDuration dur f -> do
+                modify (+ dur)
+                send (AddDuration dur f)
         )
     ) $ \_ -> \case 
-            GetCurrentOffsetSeconds -> do 
-                frames <- get
-                vd <- ask
-                return (fromInteger frames / fromInteger (vd ^. videoFPS))
+            GetCurrentOffsetSeconds -> get
         
 
 concatLine :: VideoProps -> FramePath -> Text

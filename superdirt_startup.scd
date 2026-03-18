@@ -1,16 +1,3 @@
-/*
-This is an example startup file.
-If you want to modify it, best copy it elsewhere to keep the git repository clean.
-
-You can then load it by calling
-"path/to/my/superdirt_startup.scd".load
-from the supercollider startup file
-
-The supercollider startup file is to be found in
-Platform.userAppSupportDir +/+ "startup.scd",
-or via the menu File > Open startup file
-*/
-
 
 (
 s.reboot { // server options are only updated on reboot
@@ -45,11 +32,9 @@ s.reboot { // server options are only updated on reboot
 		// you can keep this separate and make it easier to switch between setups
 		// by using "path/to/my/file.scd".load and if necessary commenting out different load statements
 		// ...
-
+		s.record(path: "./output/audio.wav".standardizePath, numChannels: 2);
 	};
 
 	s.latency = 0.3; // increase this if you get "late" messages
-
-
 };
 );

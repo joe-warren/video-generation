@@ -19,6 +19,9 @@ import Control.Monad (foldM_)
 import Control.Concurrent (threadDelay)
 import qualified System.Process as Process
 import System.IO (Handle)
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import Control.Lens
 
 {-# NOINLINE tidalInst #-}
 tidalInst = unsafePerformIO Tidal.mkTidal
@@ -79,13 +82,21 @@ runBuildAudio eff = do
 
     vd <- ask
     (stdinHandle, processHandle) <- liftIO $ runSuperdirt vd
+    --liftIO $ T.hPutStrLn stdinHandle ("s.prepareForRecord(" <> "'./" <> T.pack (vd ^. videoScratchDir) <> "/audio.mp3', 2);")
+    liftIO $ Tidal.setcps (180/60/4)
+    --liftIO $ T.hPutStrLn stdinHandle "s.record();"
+    let allPatterns = (initialAction <> patterns <> finalAction)
 
+
+    liftIO $ print $ fst <$> allPatterns
     let doPattern curOffset (offset, eff) = do 
             threadDelay (floor (1000000 * (offset - curOffset)))
-            liftIO $ eff
+            eff
             return offset
-    liftIO $ foldM_ doPattern 0 (initialAction <> patterns <> finalAction)
+    liftIO $ foldM_ doPattern 0 allPatterns
 
+    --liftIO $ T.hPutStrLn stdinHandle "s.stopRecording();"
+    --liftIO $ threadDelay (5 * 1000 * 100)
     liftIO $ Process.terminateProcess processHandle
 
     return res
