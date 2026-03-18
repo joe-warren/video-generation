@@ -5,11 +5,12 @@ module Lib
 import qualified Data.Text.IO as T
 import qualified CodeScene 
 import qualified CodeBlock
-import GenerateVideo (runBuildVideo, runWriteFrames, addSvgDuration)
+import GenerateVideo (runBuildVideo, runWriteFrames, addSvgDuration, runTrackOffset)
 import VideoProps 
 import qualified Transitions
 
 import qualified ExampleObject
+import qualified ExampleAudio
 import qualified WaterfallScene
 import qualified Waterfall as W
 
@@ -21,17 +22,20 @@ import Linear
 import Animate (animate)
 import qualified SvgUtils
 import Transitions (easeInOutSin)
+import GenerateAudio (runBuildAudio, setTidalPattern)
 
 videoProps :: VideoProps
 videoProps = def
 
 run =
-    runEff 
+    runEff
     . CodeBlock.runLoadCodeBlocks'
     . CodeScene.runHighlight
     . runReader videoProps
     . runBuildVideo
     . runWriteFrames
+    . runTrackOffset
+    . runBuildAudio
 
 easeInOutSoft :: Double -> Double
 easeInOutSoft x 
@@ -90,6 +94,7 @@ someFunc = run $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
+    setTidalPattern ExampleAudio.intro
         
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 

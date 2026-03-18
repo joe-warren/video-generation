@@ -1,36 +1,91 @@
 module GenerateAudio (
     setTidalPattern, 
+    setTidalCPS,
     runBuildAudio
 ) where
 
 import VideoProps
-
+import GenerateVideo (TrackOffset, getCurrentOffsetSeconds)
 
 import Effectful
 import Effectful.Dispatch.Dynamic
 import Effectful.Reader.Static
+import Effectful.Writer.Static.Local
+import Effectful.State.Static.Local
 import qualified Sound.Tidal.Boot as Tidal
 import qualified Sound.Tidal.Context as Tidal
 import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad (foldM_)
+import Control.Concurrent (threadDelay)
+import qualified System.Process as Process
+import System.IO (Handle)
 
 {-# NOINLINE tidalInst #-}
 tidalInst = unsafePerformIO Tidal.mkTidal
 
 instance Tidal.Tidally where tidal = tidalInst
 
-
 data BuildAudio :: Effect where
     SetTidalPattern :: Tidal.ControlPattern -> BuildAudio m ()
+    SetTidalCPS :: Tidal.Pattern Double -> BuildAudio m ()
 
 type instance DispatchOf BuildAudio = Dynamic
 
 setTidalPattern :: (BuildAudio :> es) => Tidal.ControlPattern -> Eff es ()
 setTidalPattern = send . SetTidalPattern
 
-runBuildAudio :: (IOE :> es, Reader VideoProps :> es) => Eff (BuildAudio : es) a -> Eff (es) a
+setTidalCPS :: (BuildAudio :> es) => Tidal.Pattern Double -> Eff es ()
+setTidalCPS = send . SetTidalCPS
+
+runSuperdirt :: VideoProps -> IO (Handle, Process.ProcessHandle)
+runSuperdirt props = do
+    (Just stdinHandle, _, _, processHandle) <- Process.createProcess $ 
+        Process.CreateProcess 
+            (Process.RawCommand 
+                "pw-jack" -- run superdirt within pipewire jack emulation
+                ["sclang", "superdirt_startup.scd"] -- command line args
+            )
+            Nothing -- no cwd
+            Nothing -- inherit environment
+            Process.CreatePipe -- create a handle, so we can write commands to superdirt
+            Process.Inherit -- use existing stdout
+            Process.Inherit -- use existing stderr
+            False  -- don't close fds
+            False -- don't create a group
+            False -- Superdirt isn't King Cnut
+            False -- don't detatch console
+            False -- don't create new console
+            False -- no new session
+            Nothing -- no child group 
+            Nothing -- no child user
+            False -- no use process jobs
+
+    return (stdinHandle, processHandle)
+
+runBuildAudio :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es) => Eff (BuildAudio : es) a -> Eff (es) a
 runBuildAudio eff = do
-    res <- interpretWith eff $ \_ -> \case 
-        SetTidalPattern controlPattern -> do
-            liftIO $ Tidal.d1 controlPattern
+    (res, patterns:: [(Double, IO ())]) <- 
+        reinterpretWith (runWriter) eff $ \_ -> \case 
+            SetTidalCPS cps -> do
+                offset <- getCurrentOffsetSeconds
+                tell [(offset, Tidal.setcps cps)]
+
+            SetTidalPattern controlPattern -> do
+                offset <- getCurrentOffsetSeconds
+                tell [(offset, Tidal.d1 controlPattern)]
+    finalOffset <- getCurrentOffsetSeconds
+    let finalAction = [(finalOffset, Tidal.hush <> putStrLn "done with tidal events")]
+    let initialAction = [(0, putStrLn "starting tidal events")]
+
+    vd <- ask
+    (stdinHandle, processHandle) <- liftIO $ runSuperdirt vd
+
+    let doPattern curOffset (offset, eff) = do 
+            threadDelay (floor (1000000 * (offset - curOffset)))
+            liftIO $ eff
+            return offset
+    liftIO $ foldM_ doPattern 0 (initialAction <> patterns <> finalAction)
+
+    liftIO $ Process.terminateProcess processHandle
 
     return res

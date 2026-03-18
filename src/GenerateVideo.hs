@@ -3,6 +3,8 @@
 , FramePath 
 , WriteFrames (..)
 , BuildVideo (..)
+, TrackOffset (..)
+, getCurrentOffsetSeconds
 , addSvgFrame
 , addSvgDuration
 , runBuildVideo

@@ -29,6 +29,7 @@ library
       CodeBlock
       CodeScene
       Eval
+      ExampleAudio
       ExampleObject
       GenerateAudio
       GenerateVideo
