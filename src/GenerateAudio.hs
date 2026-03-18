@@ -65,10 +65,15 @@ runSuperdirt props = do
 
     return (stdinHandle, processHandle)
 
-runBuildAudio :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es) => Eff (BuildAudio : es) a -> Eff (es) a
-runBuildAudio eff = do
-    (res, patterns:: [(Double, IO ())]) <- 
-        reinterpretWith (runWriter) eff $ \_ -> \case 
+runBuildAudioNoOp :: Eff (BuildAudio : es) a -> Eff es a
+runBuildAudioNoOp = interpret $ \_ -> \case
+    SetTidalCPS _ -> pure ()
+    SetTidalPattern _ -> pure ()
+
+runBuildAudioTidal :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es) => Eff (BuildAudio : es) a -> Eff es a
+runBuildAudioTidal eff = do
+    (res, patterns:: [(Double, IO ())]) <-
+        reinterpretWith (runWriter) eff $ \_ -> \case
             SetTidalCPS cps -> do
                 offset <- getCurrentOffsetSeconds
                 tell [(offset, Tidal.setcps cps)]
@@ -89,7 +94,7 @@ runBuildAudio eff = do
 
 
     liftIO $ print $ fst <$> allPatterns
-    let doPattern curOffset (offset, eff) = do 
+    let doPattern curOffset (offset, eff) = do
             threadDelay (floor (1000000 * (offset - curOffset)))
             eff
             return offset
@@ -100,3 +105,10 @@ runBuildAudio eff = do
     liftIO $ Process.terminateProcess processHandle
 
     return res
+
+runBuildAudio :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es) => Eff (BuildAudio : es) a -> Eff es a
+runBuildAudio eff = do
+    vd <- ask
+    if vd ^. videoGenerateAudio
+        then runBuildAudioTidal eff
+        else runBuildAudioNoOp eff
