@@ -33,7 +33,6 @@ intro = stack
     ]
 -- BLOCK: Verse 1
 
-
 verse1Rhythm = cat
     [ n "g  _  fs _  g  _  fs _  g  fs g  fs fs _  e  _" 
     , n "e  e  e  e  fs _  e  e  fs e  d  cs d  _  ~  ~"
@@ -48,13 +47,14 @@ verse1Chords = cat
     , n "fs'major7@3 b'minor"
     ]
 
+-- BLOCK: Play Verse 1
 verse1 =
     stack
     [ verse1Rhythm |- n 12 # sound "supersaw" # amp 0.8  
     , rolled (verse1Chords -| n "36" # sound "superpwm" # amp 0.3 # decay 0.0 # voice 0.5 # resonance 0.0 # lfo 0)
     ]
 
--- verse 2 
+-- BLOCK: Verse 2
 
 verse2Rhythm = cat 
     [ n "b  _  b  _  a  _  g  _  b  b  a  g  b  b  a  g"
@@ -69,6 +69,7 @@ verse2Chords = cat
     , n "e'minor b'major7"
     , n "fs'major7@2 fs'major7 b'minor"
     ]
+-- BLOCK: Play Verse 2
 verse2 = 
     stack
     [ verse2Rhythm |- n 12 # sound "supersaw" # amp 0.8  

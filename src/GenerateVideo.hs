@@ -114,7 +114,11 @@ runBuildVideo eff = do
                 liftIO $ replicateM_ nFrames (writeOneFrame fp)
             put posRemainder
     liftIO $ hClose handle
-    liftIO $ generateVideo concatFileName (vd ^. videoOutputFile)
+    let audioFile = 
+            if (vd ^. videoGenerateAudio)
+                then Just (vd ^. videoScratchDir <> "/audio.wav")
+                else Nothing
+    liftIO $ generateVideo concatFileName audioFile (vd ^. videoOutputFile)
     return res
 
 convertFile :: FilePath -> FilePath -> IO ()
@@ -124,13 +128,22 @@ convertFile inputFile outputFile = do
         , inputFile
         ]
 
-generateVideo :: FilePath -> FilePath -> IO ()
-generateVideo concatFile outputFile = do
-    Process.callProcess "ffmpeg"
-        [ "-y"
+generateVideo :: FilePath -> Maybe FilePath -> FilePath -> IO ()
+generateVideo concatFile audioFile outputFile = 
+    let audioCommands = case audioFile of 
+            Nothing -> []
+            Just f -> 
+                [ "-i", f
+                , "-shortest"
+                , "-map", "0:v:0"
+                , "-map", "1:a:0"
+                ]
+    in Process.callProcess "ffmpeg"
+        (["-y"
         , "-f", "concat"
         , "-i", concatFile
-        , "-vsync", "vfr"
+        ] <> audioCommands <>
+        [ "-vsync", "vfr"
         , "-pix_fmt", "yuv420p"
         , outputFile
-        ]
+        ])

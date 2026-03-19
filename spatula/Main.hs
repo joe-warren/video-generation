@@ -25,7 +25,7 @@ import Linear
 import Animate (animate)
 import qualified SvgUtils
 import Transitions (easeInOutSin)
-import GenerateAudio (runBuildAudio, setTidalPattern)
+import GenerateAudio (runBuildAudio, setTidalPattern, setTidalCPS)
 
 videoProps :: VideoProps
 videoProps = def
@@ -93,7 +93,9 @@ main = Run.run videoProps $ do
                 =<< CodeBlock.loadCodeBlock "spatula/ExampleAudio.hs" blockname
             _ <- tidalEffect
             addSvgDuration 1.0 still
-            
+
+    setTidalCPS (120/60/4)
+
     codeBlockOno "Intro"
 
     codeBlockAudioOno "Audio Intro"
@@ -107,11 +109,16 @@ main = Run.run videoProps $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
+
+ 
+    codeBlockAudioOno "Verse 1"
+    codeBlockTidalAudio "Play Verse 1" $
+        setTidalPattern ExampleAudio.verse1
         
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
     codeBlockWithObject "Blade" ExampleObject.blade
-    {-- 
+
     codeBlockWithDiagram "Slot Profile"
         (ExampleObject.slotProfile 
             & W.pathDiagram W.OutLine W.Visible
@@ -122,6 +129,10 @@ main = Run.run videoProps $ do
     codeBlockWithObject "Slots" ExampleObject.slots 
 
     codeBlockWithObject "Slotted Blade" ExampleObject.slottedBlade
+
+    codeBlockAudioOno "Verse 2"
+    codeBlockTidalAudio "Play Verse 2" $
+        setTidalPattern ExampleAudio.verse2
 
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"
