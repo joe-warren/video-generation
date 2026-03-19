@@ -30,10 +30,12 @@ import Sound.Tidal.Boot (silence)
 import GenerateAudio (runBuildAudio, setTidalPattern, setTidalOp)
 import qualified ExampleAudio
 import CodeScene (codeScene)
+import Control.Monad (join)
+import qualified Codec.Picture as JP
 
 videoProps :: VideoProps
 videoProps = def
-   -- & videoGenerateAudio .~ False
+   & videoGenerateAudio .~ False
    -- & videoGenerateVideo .~ False
 
 easeInOutStay :: Double -> Double
@@ -51,10 +53,11 @@ main = Run.run videoProps $ do
 
     let codeBlockOno = codeBlockOno' "spatula/ExampleObject.hs" def
 
-    let center solid = 
-            case W.axisAlignedBoundingBox solid of
+    let centerBasedOn target solid = 
+            case W.axisAlignedBoundingBox target of
                 Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
                 Nothing -> solid
+        center = join centerBasedOn
 
     let toDiagram =
             W.solidDiagram (V3 2 2 1)
@@ -81,11 +84,11 @@ main = Run.run videoProps $ do
 
     let codeBlockWithDiagram blockname diagram = 
             codeBlockWithFade blockname $ \background -> 
-                WaterfallScene.stillClipWithBackground 2 background diagram
+                WaterfallScene.stillClipWithBackground def 2 background diagram
 
     let codeBlockWithObject blockname object = do
             codeBlockWithFade blockname $ \background -> 
-                WaterfallScene.animatedClipWithBackground 5 background $ 
+                WaterfallScene.animatedClipWithBackground def 5 background $ 
                     showRotating (1/150) (2*pi) (center object)  
                     . easeInOutStay
 
@@ -123,13 +126,13 @@ main = Run.run videoProps $ do
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
     codeBlockWithFade "Blade" $ \background -> do
-        WaterfallScene.animatedClipWithBackground 2 background $ 
+        WaterfallScene.animatedClipWithBackground def 2 background $ 
                 toDiagram
                 . W.uScale (1/150)
                 . center
                 . ExampleObject.animatedBlade
                 . easeInOutStay
-        WaterfallScene.animatedClipWithBackground 5 background $ 
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/150) (2*pi) (center ExampleObject.blade)  
                 . easeInOutStay
 
@@ -147,10 +150,26 @@ main = Run.run videoProps $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
+    let redScene = def 
+            & WaterfallScene.waterfallVisibleColor .~ JP.PixelRGBA8 155 0 0 255 
+            & WaterfallScene.waterfallHiddenColor .~ JP.PixelRGBA8 255 200 200 255
 
-    codeBlockWithObject "Slots" ExampleObject.slots 
-
-    codeBlockWithObject "Slotted Blade" ExampleObject.slottedBlade
+    codeBlockWithFade "Slotted Blade" $ \background -> do
+        WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn ExampleObject.blade
+                . ExampleObject.growSlot
+                . easeInOutStay
+        WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn ExampleObject.blade
+                . ExampleObject.sweepSlots
+                . easeInOutStay
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/150) (2*pi) (center ExampleObject.slottedBlade)  
+                . easeInOutStay
 
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"
@@ -169,19 +188,19 @@ main = Run.run videoProps $ do
     codeBlockOno "Negative Mask" 
     codeBlockOno "Spatula"
 
-    WaterfallScene.animatedClip 8 $ showRotating (1/150) (2*pi)
+    WaterfallScene.animatedClip def 8 $ showRotating (1/150) (2*pi)
             ( ExampleObject.spatula 
                 & center
             ) . easeInOutStay
             
-    WaterfallScene.animatedClip 8 $ showRotating' (unit _y) (1/150) (2*pi)
+    WaterfallScene.animatedClip def 8 $ showRotating' (unit _y) (1/150) (2*pi)
             ( ExampleObject.spatula 
                 & center
             ) . easeInOutStay
 
     setTidalOp $ Tidal.jumpMod 1 8 silence
-    
-    WaterfallScene.animatedClip 8 $ showRotating' (unit _x) (1/150) (2*pi)
+
+    WaterfallScene.animatedClip def 8 $ showRotating' (unit _x) (1/150) (2*pi)
             ( ExampleObject.spatula 
                 & center
             ) . easeInOutStay

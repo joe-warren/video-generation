@@ -4,6 +4,9 @@ module WaterfallScene
 , animatedClip
 , animatedClipWithBackground
 , centerDiagram
+, WaterfallSceneProps (..)
+, waterfallHiddenColor
+, waterfallVisibleColor
 )
 where
 
@@ -19,12 +22,26 @@ import Linear
 import Control.Lens
 import Effectful
 import Effectful.Reader.Static
+import Data.Default
 import Animate (animate)
 import Control.Monad (void)
 
+data WaterfallSceneProps = WaterfallSceneProps
+    { _waterfallVisibleColor :: JP.PixelRGBA8 
+    , _waterfallHiddenColor :: JP.PixelRGBA8
+    }
+
+makeLenses ''WaterfallSceneProps
+
+instance Default WaterfallSceneProps where
+    def = WaterfallSceneProps 
+        { _waterfallVisibleColor = black
+        , _waterfallHiddenColor = JP.PixelRGBA8 200 200 255 255
+        }
+
 -- | scale the diagram so that the video shows the range [-1, 1] on the smallest axis
-diagramSvg :: Svg.Document -> VideoProps -> W.Diagram -> Svg.Document
-diagramSvg background vd diagram = 
+diagramSvg :: WaterfallSceneProps -> Svg.Document -> VideoProps -> W.Diagram -> Svg.Document
+diagramSvg props background vd diagram = 
     let minorAxis = fromIntegral $ min (vd ^. videoWidth) (vd ^. videoHeight)
 
         w = Svg.Num . fromIntegral $ vd ^. videoWidth
@@ -42,8 +59,9 @@ diagramSvg background vd diagram =
             background 
                 & Svg.elements %~ (<> e)
             
-        pathColour W.Visible = JP.PixelRGBA8 0 0 0 255
-        pathColour W.Hidden = JP.PixelRGBA8 200 200 255 255
+        pathColour W.Visible = props ^. waterfallVisibleColor
+        pathColour W.Hidden = props ^. waterfallHiddenColor
+        
         pathOf lt visibility = 
             Svg.defaultSvg 
                 & Svg.pathDefinition .~ (paths lt visibility)
@@ -69,35 +87,34 @@ centerDiagram d =
 stillClip :: 
     ( BuildVideo :> es
     , Reader VideoProps :> es
-    ) => Double -> W.Diagram  -> Eff es ()
-stillClip duration d = do
+    ) => WaterfallSceneProps -> Double -> W.Diagram  -> Eff es ()
+stillClip props duration d = do
     vd <- ask 
     let background =SvgUtils.blankCanvas vd SvgUtils.white
-    addSvgDuration duration (diagramSvg background vd d)
-
+    addSvgDuration duration (diagramSvg props background vd d)
 
 stillClipWithBackground :: 
     ( BuildVideo :> es
     , Reader VideoProps :> es
-    ) => Double -> Svg.Document -> W.Diagram -> Eff es ()
-stillClipWithBackground duration background d = do
+    ) => WaterfallSceneProps -> Double -> Svg.Document -> W.Diagram -> Eff es ()
+stillClipWithBackground props duration background d = do
     vd <- ask
-    addSvgDuration duration (diagramSvg background vd d)
+    addSvgDuration duration (diagramSvg props background vd d)
 
 -- | parameterized by a value that ranges between [0, 1]
 animatedClip :: 
     ( BuildVideo :> es
     , Reader VideoProps :> es
-    ) => Double -> (Double -> W.Diagram)  -> Eff es ()
-animatedClip duration f = do
+    ) => WaterfallSceneProps -> Double -> (Double -> W.Diagram) -> Eff es ()
+animatedClip props duration f = do
     vd <- ask
     let background = SvgUtils.blankCanvas vd SvgUtils.white
-    void $ animate duration (diagramSvg background vd . f )
+    void $ animate duration (diagramSvg props background vd . f )
 
 animatedClipWithBackground :: 
     ( BuildVideo :> es
     , Reader VideoProps :> es
-    ) => Double -> Svg.Document -> (Double -> W.Diagram)  -> Eff es ()
-animatedClipWithBackground duration background f = do
+    ) => WaterfallSceneProps -> Double -> Svg.Document -> (Double -> W.Diagram)  -> Eff es ()
+animatedClipWithBackground props duration background f = do
     vd <- ask
-    void $ animate duration (diagramSvg background vd . f )
+    void $ animate duration (diagramSvg props background vd . f )

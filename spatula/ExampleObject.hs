@@ -59,7 +59,26 @@ slotProfile = W.closeLoop $ W.pathFrom (V2 (-3) 0)
     , W.arcViaRelative (V2 (-3) 3) (V2 (-6) 0)
     ]
 
--- BLOCK: Slots
+-- BLOCK: Slot Animations (Not Shown)
+
+growSlot :: Double -> W.Solid
+growSlot f 
+    | f < 1e-3 = W.emptySolid
+    | otherwise = 
+        W.translate (V3 0 25 0)
+            . W.prism (bladeThickness * f)
+            $ W.makeShape slotProfile
+
+sweepSlots :: Double -> W.Solid
+sweepSlots f = mconcat
+    [ W.translate (V3 (x * 12.5) 25 0)
+        . W.rotate (unit _z) (x * (-pi/20))
+        . W.prism bladeThickness 
+        $ W.makeShape slotProfile
+    | x <- [-f, 0, f]
+    ]
+
+-- BLOCK: Slotted Blade
 
 slots :: W.Solid
 slots = mconcat
@@ -69,8 +88,6 @@ slots = mconcat
         $ W.makeShape slotProfile
     | x <- [-1, 0, 1]
     ]
-
--- BLOCK: Slotted Blade 
 
 slottedBlade :: W.Solid
 slottedBlade = blade `W.difference` slots
