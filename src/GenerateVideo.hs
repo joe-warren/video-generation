@@ -97,8 +97,8 @@ concatLine vd (FramePath path)=
     in "file '" <> T.pack path <> "'\n" <>
         "duration " <> showFloat (1 / (fromInteger $ vd ^. videoFPS)) <> "\n"
 
-runBuildVideo :: (IOE :> es, Reader VideoProps :> es, WriteFrames :> es) => Eff (BuildVideo : es) a -> Eff (es) a
-runBuildVideo eff = do
+runBuildVideoFfmpeg :: (IOE :> es, Reader VideoProps :> es, WriteFrames :> es) => Eff (BuildVideo : es) a -> Eff (es) a
+runBuildVideoFfmpeg eff = do
     vd <- ask
     let concatFileName = vd ^. videoScratchDir <> "/concat.txt"
     handle <- liftIO $ openFile concatFileName WriteMode
@@ -120,6 +120,20 @@ runBuildVideo eff = do
                 else Nothing
     liftIO $ generateVideo concatFileName audioFile (vd ^. videoOutputFile)
     return res
+
+runBuildVideoNoop :: Eff (BuildVideo : es) a -> Eff es a
+runBuildVideoNoop = interpret $ \_ -> \case
+    AddFrame _ -> pure ()
+    AddDuration _ _ -> pure ()
+    
+runBuildVideo :: (IOE :> es, Reader VideoProps :> es, WriteFrames :> es) => Eff (BuildVideo : es) a -> Eff (es) a
+runBuildVideo eff = do
+    vd <- ask
+    if vd ^. videoGenerateVideo 
+        then runBuildVideoFfmpeg eff
+        else runBuildVideoNoop eff
+
+
 
 convertFile :: FilePath -> FilePath -> IO ()
 convertFile inputFile outputFile = do
