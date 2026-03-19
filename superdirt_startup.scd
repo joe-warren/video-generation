@@ -32,7 +32,10 @@ s.reboot { // server options are only updated on reboot
 		// you can keep this separate and make it easier to switch between setups
 		// by using "path/to/my/file.scd".load and if necessary commenting out different load statements
 		// ...
-		s.record(path: "./output/audio.wav".standardizePath, numChannels: 2);
+		s.prepareForRecord(path: "./output/audio.wav".standardizePath, numChannels: 2);
+		s.sync;
+		s.record;
+		"SUPERDIRT TAPE ROLLING".postln;
 	};
 
 	s.latency = 0.3; // increase this if you get "late" messages

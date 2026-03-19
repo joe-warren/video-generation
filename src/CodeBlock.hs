@@ -66,11 +66,3 @@ logCodeBlockError =
             print e
             print callstack
     in runErrorWith handler
-
-runLoadCodeBlocks' ::
-    ( IOE :> es) =>
-    Eff (LoadCodeBlocks : Error CodeBlockError : es) () -> Eff es ()
-runLoadCodeBlocks' = logCodeBlockError . runLoadCodeBlocks
-
-
-
