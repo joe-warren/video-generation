@@ -24,7 +24,7 @@ introChords = cat
 
 -- BLOCK: Play Intro
 
-addSwing = swingBy (1/8) 8
+addSwing = swingBy (1/7) 8
 
 intro = addSwing $ stack
     [ introRhythm |- n 12 # sound "supersaw" # amp 0.8 
@@ -57,13 +57,13 @@ verse1Chords = cat
 rhythmInstrument x = stack 
     [ x # amp 0.4 # sound "supersaw"
     , (x |- n "12") # amp 0.8 # sound "supersaw"
-    ] # decay 0.25 # attack 0.05 # hold 0.2 # release 1.5
+    ] # decay 0.25 # attack 0.05 # hold 0.2 # release 0.7 # legato 1.20
 chordInstrument x = rolled x -| n "36"
         # sound "superpwm" 
-        # amp 1.0 # decay 0.5 
-        # voice 0.5 # resonance 0.0 # lfo 0
-        # pan (0.5 + sine * 0.2)  
-        # attack 0.1 # hold 2.0 # release 1.0
+        # decay 0.5 # voice 0.5 # resonance 0.0 # lfo 0
+        # dry 0.5 # room 0.5 # size 0.5
+        # amp 1.2 
+        -- # attack 0.1 # hold 2.0 # release 1.0
 verse1 =
     addSwing $ stack
     [ rhythmInstrument verse1Rhythm 
@@ -98,7 +98,7 @@ verse2 =
     addSwing $ stack
     [ rhythmInstrument verse2Rhythm
     , chordInstrument verse2Chords 
-    , s "<[sn:2 bd] [sn sd:3]>*16" # amp 0.2 # pan "<0.3 0.6>*8"
+    , s "<[sn:2 bd] [sd:3]>*16" # amp 0.2 # pan "<0.3 0.6>*8"
     ] # cps (80/60/4)
     
 verse2' = verse2 # varyTempo (80/60/4) (140/60/4) (80/60/4) 
