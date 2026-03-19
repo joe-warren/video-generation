@@ -24,8 +24,10 @@ introChords = cat
 
 -- BLOCK: Play Intro
 
-intro = stack
-    [ introRhythm |- n 24 # sound "supersaw" # amp 0.8 
+addSwing = swingBy (1/8) 8
+
+intro = addSwing $ stack
+    [ introRhythm |- n 12 # sound "supersaw" # amp 0.8 
     , rolled (introChords -| n "36" 
         # sound "supersquare" 
         # amp 0.3 
@@ -53,19 +55,20 @@ verse1Chords = cat
 
 -- BLOCK: Play Verse 1
 slightPan = pan (0.5 + sine * 0.2)  
-drumPan = pan "<0.4 0.6 0.3>*8"
+drumPan = pan "<0.3 0.6>*8"
+addOctave x = stack [x # amp 0.4, (x |- n "12") # amp 0.8]
 
 verse1 =
-    stack
-    [ verse1Rhythm |- n 12 # sound "supersaw" # amp 0.8  
+    addSwing $ stack
+    [ addOctave verse1Rhythm # sound "supersaw" # decay 0.3 # resonance 0.4
     , rolled (verse1Chords -| n "36"
          # sound "superpwm" 
          # amp 0.3 
-         # decay 0.0 
+         # decay 0.5 
          # voice 0.5 # resonance 0.0 # lfo 0
          # slightPan
          )
-    , s "<bd bd [sn sd:3]>*16" # delay 0.1 # drumPan
+    , s "<bd [sn sd:3]>*16" # drumPan # amp 0.2
     ] # cps (80/60/4)
 
 
@@ -94,19 +97,19 @@ varyTempo inn mid out =
 
 -- BLOCK: Play Verse 2
 verse2 = 
-    stack
-    [ verse2Rhythm |- n 12 # sound "supersaw" # amp 0.8  
+    addSwing $ stack
+    [ addOctave verse2Rhythm # sound "supersaw" # decay 0.3 # resonance 0.35
     , rolled (verse2Chords -| n "36" 
         # sound "superpwm" 
         # amp 0.3 
-        # decay 0.0 
+        # decay 0.5 
         # voice 0.5 
         # resonance 0.0 
         # lfo 0 # slightPan )
-    , s "<sn [sn:2 bd] [sn sd:3]>*16" # delay 0.1 # drumPan
+    , s "<[sn:2 bd] [sn sd:3]>*16" # drumPan # amp 0.2
     ] # cps (80/60/4)
     
-verse2' = verse2 # varyTempo (80/60/4) (160/60/4) (80/60/4) 
+verse2' = verse2 # varyTempo (80/60/4) (140/60/4) (80/60/4) 
 
 -- BLOCK: Outro
 

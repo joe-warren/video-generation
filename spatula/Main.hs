@@ -35,7 +35,7 @@ import qualified Codec.Picture as JP
 
 videoProps :: VideoProps
 videoProps = def
-   & videoGenerateAudio .~ False
+   -- & videoGenerateAudio .~ False
    -- & videoGenerateVideo .~ False
 
 easeInOutStay :: Double -> Double
@@ -120,8 +120,8 @@ main = Run.run videoProps $ do
             & WaterfallScene.centerDiagram
         )
     codeBlockAudioOno "Verse 1"
-    codeBlockTidalAudio "Play Verse 1" $
-        setTidalPattern ExampleAudio.verse1
+    setTidalPattern ExampleAudio.verse1
+    codeBlockAudioOno "Play Verse 1"
         
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
