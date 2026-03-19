@@ -145,3 +145,7 @@ negativeMask =
 -- BLOCK: Spatula
 spatula :: W.Solid
 spatula = (slottedBlade <> handleWithHole) `W.difference` negativeMask
+
+-- BLOCK: Outro
+
+-- With Apologies to Guy Steele

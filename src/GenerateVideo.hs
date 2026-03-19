@@ -148,7 +148,7 @@ generateVideo concatFile audioFile outputFile =
             Nothing -> []
             Just f -> 
                 [ "-i", f
-                , "-shortest"
+                -- , "-shortest"
                 , "-map", "0:v:0"
                 , "-map", "1:a:0"
                 ]
