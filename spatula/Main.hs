@@ -29,6 +29,7 @@ import GenerateAudio (runBuildAudio, setTidalPattern, setTidalCPS)
 
 videoProps :: VideoProps
 videoProps = def
+    -- & videoGenerateAudio .~ False
 
 easeInOutSoft :: Double -> Double
 easeInOutSoft x 
@@ -50,10 +51,12 @@ main = Run.run videoProps $ do
                 Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
                 Nothing -> solid
 
-    let showRotating' axis scale angle solid t = solid
+    let toDiagram =
+            W.solidDiagram (V3 2 2 1)
+        showRotating' axis scale angle solid t = solid
             & W.uScale scale 
             & W.rotate axis (angle * t)
-            & W.solidDiagram (V3 2 2 1)
+            & toDiagram
         showRotating = showRotating' (unit _z)
 
     let codeBlockWithFade blockname nextScene = do
@@ -117,7 +120,16 @@ main = Run.run videoProps $ do
         
     codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
 
-    codeBlockWithObject "Blade" ExampleObject.blade
+    codeBlockWithFade "Blade" $ \background -> do
+        WaterfallScene.animatedClipWithBackground 2 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . center
+                . ExampleObject.animatedBlade
+                . easeInOutSoft
+        WaterfallScene.animatedClipWithBackground 5 background $ 
+            showRotating (1/150) (2*pi) (center ExampleObject.blade)  
+                . easeInOutSoft
 
     codeBlockWithDiagram "Slot Profile"
         (ExampleObject.slotProfile 

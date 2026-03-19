@@ -32,16 +32,23 @@ bladeThickness = 3
 sharpBlade :: W.Solid
 sharpBlade =  W.prism bladeThickness (W.makeShape bladeProfile) 
 
+-- BLOCK: Animated Blade (Not shown)
+
+animatedBlade :: Double -> W.Solid
+animatedBlade f 
+    | f < 1e-3 = sharpBlade
+    | otherwise =  W.roundConditionalFillet (roundFn $ f * 10) sharpBlade
+
 -- BLOCK:Blade
 
-roundFn :: (V3 Double, V3 Double) -> Maybe Double 
-roundFn (s, e)  | (nearZero (s ^. _xy - e ^. _xy)) 
+roundFn :: Double -> (V3 Double, V3 Double) -> Maybe Double 
+roundFn radius (s, e)  | (nearZero (s ^. _xy - e ^. _xy)) 
                     && nearZero (s ^. _y) 
-                        = Just 10
+                        = Just radius
                 | otherwise = Nothing 
 
 blade :: W.Solid
-blade = W.roundConditionalFillet roundFn sharpBlade
+blade = W.roundConditionalFillet (roundFn 10) sharpBlade
 
 -- BLOCK: Slot Profile
 
