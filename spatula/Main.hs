@@ -25,11 +25,14 @@ import Linear
 import Animate (animate)
 import qualified SvgUtils
 import Transitions (easeInOutSin)
-import GenerateAudio (runBuildAudio, setTidalPattern, setTidalCPS)
+import qualified Sound.Tidal.Safe.Boot as Tidal
+import GenerateAudio (runBuildAudio, setTidalPattern, setTidalOp)
+import qualified ExampleAudio
 
 videoProps :: VideoProps
 videoProps = def
     -- & videoGenerateAudio .~ False
+    & videoGenerateVideo .~ False
 
 easeInOutSoft :: Double -> Double
 easeInOutSoft x 
@@ -74,7 +77,6 @@ main = Run.run videoProps $ do
 
             nextScene fadedCode
 
-
     let codeBlockWithDiagram blockname diagram = 
             codeBlockWithFade blockname $ \background -> 
                 WaterfallScene.stillClipWithBackground 2 background diagram
@@ -97,12 +99,11 @@ main = Run.run videoProps $ do
             _ <- tidalEffect
             addSvgDuration 1.0 still
 
-    setTidalCPS (120/60/4)
-
     codeBlockOno "Intro"
 
     codeBlockAudioOno "Audio Intro"
-    codeBlockTidalAudio "Play Intro" $
+    codeBlockTidalAudio "Play Intro" $ do
+        setTidalOp Tidal.resetCycles
         setTidalPattern ExampleAudio.intro
 
     codeBlockOno "Imports"
@@ -112,7 +113,6 @@ main = Run.run videoProps $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
-
  
     codeBlockAudioOno "Verse 1"
     codeBlockTidalAudio "Play Verse 1" $
@@ -131,6 +131,10 @@ main = Run.run videoProps $ do
             showRotating (1/150) (2*pi) (center ExampleObject.blade)  
                 . easeInOutSoft
 
+    codeBlockAudioOno "Verse 2"
+    codeBlockTidalAudio "Play Verse 2" $
+        setTidalPattern ExampleAudio.verses1And2
+
     codeBlockWithDiagram "Slot Profile"
         (ExampleObject.slotProfile 
             & W.pathDiagram W.OutLine W.Visible
@@ -141,10 +145,6 @@ main = Run.run videoProps $ do
     codeBlockWithObject "Slots" ExampleObject.slots 
 
     codeBlockWithObject "Slotted Blade" ExampleObject.slottedBlade
-
-    codeBlockAudioOno "Verse 2"
-    codeBlockTidalAudio "Play Verse 2" $
-        setTidalPattern ExampleAudio.verse2
 
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"

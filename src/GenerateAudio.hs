@@ -1,6 +1,6 @@
 module GenerateAudio (
     setTidalPattern,
-    setTidalCPS,
+    setTidalOp,
     BuildAudioError(..),
     runBuildAudio,
     logBuildAudioError
@@ -15,9 +15,9 @@ import Effectful.Error.Static
 import Effectful.Reader.Static
 import Effectful.Writer.Static.Local
 import Effectful.State.Static.Local
-import qualified Sound.Tidal.Boot as Tidal
-import qualified Sound.Tidal.Context as Tidal
-import System.IO.Unsafe (unsafePerformIO)
+import qualified Sound.Tidal.Safe.Boot as Tidal
+import qualified Sound.Tidal.Safe.Context as Tidal
+import Sound.Tidal.Boot (mkTidal)
 import Control.Monad (foldM_, forever)
 import Control.Concurrent (threadDelay, forkIO)
 import qualified System.Process as Process
@@ -26,26 +26,20 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import Control.Lens
 
-{-# NOINLINE tidalInst #-}
-tidalInst = unsafePerformIO Tidal.mkTidal
-
-instance Tidal.Tidally where tidal = tidalInst
-
 data BuildAudioError =
     SuperDirtStartupFailed
     deriving Show
 
 data BuildAudio :: Effect where
-    SetTidalPattern :: Tidal.ControlPattern -> BuildAudio m ()
-    SetTidalCPS :: Tidal.Pattern Double -> BuildAudio m ()
+    SetTidalOp :: Tidal.Op () -> BuildAudio m ()
 
 type instance DispatchOf BuildAudio = Dynamic
 
 setTidalPattern :: (BuildAudio :> es) => Tidal.ControlPattern -> Eff es ()
-setTidalPattern = send . SetTidalPattern
+setTidalPattern = send . SetTidalOp . Tidal.d1
 
-setTidalCPS :: (BuildAudio :> es) => Tidal.Pattern Double -> Eff es ()
-setTidalCPS = send . SetTidalCPS
+setTidalOp :: (BuildAudio :> es) => Tidal.Op () -> Eff es ()
+setTidalOp = send . SetTidalOp
 
 runSuperdirt :: VideoProps -> IO (Handle, Handle, Process.ProcessHandle)
 runSuperdirt props = do
@@ -93,35 +87,33 @@ forwardOutput h = forever $ do
 
 runBuildAudioNoOp :: Eff (BuildAudio : es) a -> Eff es a
 runBuildAudioNoOp = interpret $ \_ -> \case
-    SetTidalCPS _ -> pure ()
-    SetTidalPattern _ -> pure ()
+    SetTidalOp _ -> pure ()
 
 runBuildAudioTidal :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es, Error BuildAudioError :> es) => Eff (BuildAudio : es) a -> Eff es a
 runBuildAudioTidal eff = do
-    (res, patterns:: [(Double, IO ())]) <-
+    (res, patterns:: [(Double, Tidal.Op ())]) <-
         reinterpretWith (runWriter) eff $ \_ -> \case
-            SetTidalCPS cps -> do
+            SetTidalOp op -> do
                 offset <- getCurrentOffsetSeconds
-                tell [(offset, Tidal.setcps cps)]
+                tell [(offset, op)]
 
-            SetTidalPattern controlPattern -> do
-                offset <- getCurrentOffsetSeconds
-                tell [(offset, Tidal.d1 controlPattern)]
     finalOffset <- getCurrentOffsetSeconds
-    let finalAction = [(finalOffset, Tidal.hush <> putStrLn "done with tidal events")]
-    let initialAction = [(0, putStrLn "starting tidal events")]
+    let finalAction = [(finalOffset, Tidal.hush )]
+    let initialAction = [(0, pure ())]
 
     vd <- ask
     (stdinHandle, stdoutHandle, processHandle) <- liftIO $ runSuperdirt vd
     waitForReady stdoutHandle
     liftIO $ forkIO $ forwardOutput stdoutHandle
-    liftIO $ Tidal.setcps (180/60/4)
+    tidalInst <- liftIO $ mkTidal
+
     let allPatterns = (initialAction <> patterns <> finalAction)
 
     liftIO $ print $ fst <$> allPatterns
-    let doPattern curOffset (offset, eff) = do
+    let doPattern curOffset (offset, op) = do
             threadDelay (floor (1000000 * (offset - curOffset)))
-            eff
+            putStrLn $ "Tidal Event at : " <> show offset <> " Seconds"
+            Tidal.exec tidalInst op
             return offset
     liftIO $ foldM_ doPattern 0 allPatterns
 
