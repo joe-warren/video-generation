@@ -1,4 +1,4 @@
-module ExampleAudio where
+module Audio where
 
 -- BLOCK: Intro
 

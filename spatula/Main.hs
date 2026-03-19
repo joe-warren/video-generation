@@ -10,8 +10,8 @@ import VideoProps
 import qualified Transitions
 import qualified Run
 
-import qualified ExampleObject
-import qualified ExampleAudio
+import qualified Object
+import qualified Audio
 import qualified WaterfallScene
 import qualified Waterfall as W
 
@@ -28,7 +28,6 @@ import Transitions (easeInOutSin)
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
 import GenerateAudio (runBuildAudio, setTidalPattern, setTidalOp)
-import qualified ExampleAudio
 import CodeScene (codeScene)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
@@ -51,7 +50,7 @@ main = Run.run videoProps $ do
             =<< CodeScene.codeScene props 1.4
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
-    let codeBlockOno = codeBlockOno' "spatula/ExampleObject.hs" def
+    let codeBlockOno = codeBlockOno' "spatula/Object.hs" def
 
     let centerBasedOn target solid = 
             case W.axisAlignedBoundingBox target of
@@ -69,7 +68,7 @@ main = Run.run videoProps $ do
 
     let codeBlockWithFade blockname nextScene = do
             fullCode <- CodeScene.codeScene def 1.6
-                =<< CodeBlock.loadCodeBlock "spatula/ExampleObject.hs" blockname
+                =<< CodeBlock.loadCodeBlock "spatula/Object.hs" blockname
             addSvgDuration 1.2 fullCode
 
             fadedCode <- animate 0.4 
@@ -96,11 +95,11 @@ main = Run.run videoProps $ do
             def
             & CodeScene.codeSceneStyle .~ Sky.breezeDark
             
-    let codeBlockAudioOno = codeBlockOno' "spatula/ExampleAudio.hs" audioCodeBlockParams
+    let codeBlockAudioOno = codeBlockOno' "spatula/Audio.hs" audioCodeBlockParams
 
     let codeBlockTidalAudio blockname tidalEffect = do
             still <- CodeScene.codeScene audioCodeBlockParams 2.0
-                =<< CodeBlock.loadCodeBlock "spatula/ExampleAudio.hs" blockname
+                =<< CodeBlock.loadCodeBlock "spatula/Audio.hs" blockname
             _ <- tidalEffect
             addSvgDuration 1.0 still
 
@@ -110,42 +109,42 @@ main = Run.run videoProps $ do
     codeBlockAudioOno "Audio Intro"
     codeBlockTidalAudio "Play Intro" $ do
         setTidalOp Tidal.resetCycles
-        setTidalPattern ExampleAudio.intro
+        setTidalPattern Audio.intro
 
     codeBlockOno "Imports"
     codeBlockWithDiagram "Profile"
-        (ExampleObject.bladeProfile 
+        (Object.bladeProfile 
             & W.pathDiagram W.OutLine W.Visible
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
     codeBlockAudioOno "Verse 1"
-    setTidalPattern ExampleAudio.verse1
+    setTidalPattern Audio.verse1
     codeBlockAudioOno "Play Verse 1"
         
-    codeBlockWithObject "Sharp Blade" ExampleObject.sharpBlade
+    codeBlockWithObject "Sharp Blade" Object.sharpBlade
 
     codeBlockWithFade "Blade" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 2 background $ 
                 toDiagram
                 . W.uScale (1/150)
                 . center
-                . ExampleObject.animatedBlade
+                . Object.animatedBlade
                 . easeInOutStay
         WaterfallScene.animatedClipWithBackground def 5 background $ 
-            showRotating (1/150) (2*pi) (center ExampleObject.blade)  
+            showRotating (1/150) (2*pi) (center Object.blade)  
                 . easeInOutStay
 
     let doVerse2 = do
-            setTidalPattern ExampleAudio.verse2
-            setTidalOp $ Tidal.jumpMod 1 8 ExampleAudio.verse2'
+            setTidalPattern Audio.verse2
+            setTidalOp $ Tidal.jumpMod 1 8 Audio.verse2'
 
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Tempo"
     codeBlockTidalAudio "Play Verse 2" $ doVerse2
 
     codeBlockWithDiagram "Slot Profile"
-        (ExampleObject.slotProfile 
+        (Object.slotProfile 
             & W.pathDiagram W.OutLine W.Visible
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
@@ -158,50 +157,50 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 
                 toDiagram
                 . W.uScale (1/150)
-                . centerBasedOn ExampleObject.blade
-                . ExampleObject.growSlot
+                . centerBasedOn Object.blade
+                . Object.growSlot
                 . easeInOutStay
         WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 
                 toDiagram
                 . W.uScale (1/150)
-                . centerBasedOn ExampleObject.blade
-                . ExampleObject.sweepSlots
+                . centerBasedOn Object.blade
+                . Object.sweepSlots
                 . easeInOutStay
         WaterfallScene.animatedClipWithBackground def 5 background $ 
-            showRotating (1/150) (2*pi) (center ExampleObject.slottedBlade)  
+            showRotating (1/150) (2*pi) (center Object.slottedBlade)  
                 . easeInOutStay
 
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"
-    codeBlockWithObject "Handle" ExampleObject.handle
+    codeBlockWithObject "Handle" Object.handle
 
-    setTidalOp $ Tidal.jumpMod 1 8 ExampleAudio.verse1
+    setTidalOp $ Tidal.jumpMod 1 8 Audio.verse1
 
-    codeBlockWithObject "Grip" ExampleObject.grip
+    codeBlockWithObject "Grip" Object.grip
 
-    codeBlockWithObject "Handle And Grip" ExampleObject.handleWithGrip
+    codeBlockWithObject "Handle And Grip" Object.handleWithGrip
 
     doVerse2
 
-    codeBlockWithObject "Hole" ExampleObject.handleWithHole
+    codeBlockWithObject "Hole" Object.handleWithHole
         
     codeBlockOno "Negative Mask" 
     codeBlockOno "Spatula"
 
     WaterfallScene.animatedClip def 8 $ showRotating (1/150) (2*pi)
-            ( ExampleObject.spatula 
+            ( Object.spatula 
                 & center
             ) . easeInOutStay
             
     WaterfallScene.animatedClip def 8 $ showRotating' (unit _y) (1/150) (2*pi)
-            ( ExampleObject.spatula 
+            ( Object.spatula 
                 & center
             ) . easeInOutStay
 
     setTidalOp $ Tidal.jumpMod 1 8 silence
 
     WaterfallScene.animatedClip def 8 $ showRotating' (unit _x) (1/150) (2*pi)
-            ( ExampleObject.spatula 
+            ( Object.spatula 
                 & center
             ) . easeInOutStay
 

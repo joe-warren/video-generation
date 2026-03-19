@@ -1,11 +1,9 @@
-module ExampleObject where
+module Object where
 
 -- BLOCK:Intro
 
-
 -- Lets Design a Spatula
 -- Using Haskell, and Waterfall-CAD
-
 
 -- BLOCK:Imports
 -- Imports

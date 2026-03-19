@@ -79,8 +79,8 @@ library
 executable spatula-video
   main-is: Main.hs
   other-modules:
-      ExampleAudio
-      ExampleObject
+      Audio
+      Object
       Paths_video_generation
   autogen-modules:
       Paths_video_generation
