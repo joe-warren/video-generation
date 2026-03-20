@@ -135,7 +135,7 @@ growGrip f =
     let gripD = normalize handleLongLeg ^* 30
         gripPath = handlePath
             & W.reversePath 
-            & W.takePathFraction 0.4
+            & W.takePathFraction 0.5
             & W.translate gripD
     in W.sweep (W.takePathFraction f gripPath) (W.scale2D (V2 16 12) W.centeredSquare)
         & (<> handle)
@@ -145,7 +145,7 @@ roundOffGrip f =
     let gripD = normalize handleLongLeg ^* 30
         gripPath = handlePath
             & W.reversePath 
-            & W.takePathFraction 0.4
+            & W.takePathFraction 0.5
             & W.translate gripD
         roundOff = if f < 1e-3 then id else W.roundFillet (4*f)
     in W.sweep gripPath (W.scale2D (V2 16 12) W.centeredSquare)
@@ -159,7 +159,7 @@ grip =
     let gripD = normalize handleLongLeg ^* 30
         gripPath = handlePath
             & W.reversePath 
-            & W.takePathFraction 0.4
+            & W.takePathFraction 0.5
             & W.translate gripD
     in W.sweep gripPath (W.scale2D (V2 16 12) W.centeredSquare)
         & W.roundFillet 4
