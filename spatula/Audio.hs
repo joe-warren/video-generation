@@ -42,7 +42,6 @@ intro = addSwing $ stack
 verse1Melody = cat
     [ n "g  _  fs _  g  _  fs _  g  fs g  fs fs _  e  _" 
     , n "e  e  e  e  fs _  e  e  fs e  d  cs d  _  ~  ~"
-    -- 
     , n "g  _  fs _  g  _  fs _  g  fs g  fs fs _  e  _"
     , n "b  b  a  g  g  _  fs _  fs fs gs as b  _  ~  ~"
     ]
@@ -52,23 +51,23 @@ verse1Rhythm = cat
     , n "b'minor@2 b'major7 e'minor"
     , n "fs'major7@3 b'minor"
     ]
+verse1Drums = s "<cp hh:9>*4" # amp "<0.3 0.1*3>*2" # pan "<0.3 0.7>*4"
 
 -- BLOCK: Play Verse 1
 melodyInstrument x = stack 
     [ x # amp 0.4 # sound "supersaw"
     , (x |- n "12") # amp 0.8 # sound "supersaw"
     ] # decay 0.25 # attack 0.05 # hold 0.2 # release 0.7 # legato 1.20
-rhythmInstrument x = rolled x -| n "48"
+rhythmInstrument x = rolled (x -| n 48)
         # sound "superpwm" 
-        # decay 0.5 # voice 0.5 # resonance 0.0 # lfo 0
+        # decay 0.5 # voice 0.5 # resonance 0.2 # lfo 0
         # dry 0.5 # room 0.5 # size 0.5
-        # amp 1.2 
-        -- # attack 0.1 # hold 2.0 # release 1.0
+        # amp 1.2
 verse1 =
     addSwing $ stack
     [ melodyInstrument verse1Melody 
     , rhythmInstrument verse1Rhythm
-    , s "<[sn sd:3] bd>*16" # amp 0.2 # pan "<0.3 0.6>*8"
+    , verse1Drums
     ] # cps (80/60/4)
 -- BLOCK: Verse 2
 
@@ -85,6 +84,7 @@ verse2Rhythm = cat
     , n "e'minor b'major7"
     , n "fs'major7@2 fs'major7 b'minor"
     ]
+verse2Drums = s "<cp [cp hh:9]>*4" # amp "<0.3 0.1*7>" # pan "<0.3 0.7>*4"
 
 -- BLOCK: Tempo
 varyTempo inn mid out =
@@ -98,7 +98,7 @@ verse2 =
     addSwing $ stack
     [ melodyInstrument verse2Melody
     , rhythmInstrument verse2Rhythm 
-    , s "<[sn:2 bd] [sd:3]>*16" # amp 0.2 # pan "<0.3 0.6>*8"
+    , verse2Drums
     ] # cps (80/60/4)
     
 verse2' = verse2 # varyTempo (80/60/4) (140/60/4) (80/60/4) 
