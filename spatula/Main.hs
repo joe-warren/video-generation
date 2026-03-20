@@ -180,7 +180,7 @@ main = Run.run videoProps $ do
             showRotating (1/150) (2*pi) (center Object.handle)  
                 . easeInOutStay
 
-    setTidalOp $ Tidal.jumpMod 1 8 Audio.verse1
+    -- setTidalOp $ Tidal.jumpMod 1 8 Audio.verse1
 
     codeBlockWithFade "Handle And Grip" $ \background -> do 
         WaterfallScene.animatedClipWithBackground def 1 background $ 
@@ -201,7 +201,7 @@ main = Run.run videoProps $ do
             showRotating (1/150) (2*pi) (center Object.handleWithGrip)  
                 . easeInOutStay
 
-    doVerse2
+    -- doVerse2
 
     codeBlockWithFade "Hole" $ \background -> do
 
