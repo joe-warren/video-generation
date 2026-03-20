@@ -38,6 +38,6 @@ s.reboot { // server options are only updated on reboot
 		"SUPERDIRT TAPE ROLLING".postln;
 	};
 
-	s.latency = 0.3; // increase this if you get "late" messages
+	s.latency = 0.5; // increase this if you get "late" messages
 };
 );

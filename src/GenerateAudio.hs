@@ -99,7 +99,8 @@ runBuildAudioTidal eff = do
 
     finalOffset <- getCurrentOffsetSeconds
     let finalAction = [(finalOffset, Tidal.hush )]
-    let initialAction = [(0, pure ())]
+    let initialTime = 0.5
+    let initialAction = [(initialTime, pure ())]
 
     vd <- ask
     (stdinHandle, stdoutHandle, processHandle) <- liftIO $ runSuperdirt vd
@@ -115,7 +116,7 @@ runBuildAudioTidal eff = do
             putStrLn $ "Tidal Event at : " <> show offset <> " Seconds"
             Tidal.exec tidalInst op
             return offset
-    liftIO $ foldM_ doPattern 0 allPatterns
+    liftIO $ foldM_ doPattern initialTime allPatterns
 
     liftIO $ Process.terminateProcess processHandle
 
