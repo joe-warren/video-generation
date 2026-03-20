@@ -2,10 +2,8 @@ module Main
     ( main
     ) where
 
-import qualified Data.Text.IO as T
 import qualified CodeScene 
 import qualified CodeBlock
-import GenerateVideo (runBuildVideo, runWriteFrames, addSvgDuration, runTrackOffset)
 import VideoProps 
 import qualified Transitions
 import qualified Run
@@ -17,8 +15,6 @@ import qualified Waterfall as W
 
 import qualified Skylighting as Sky
 
-import Effectful.Reader.Static
-import Effectful
 import Data.Default (def)
 import Control.Lens
 import Linear
@@ -27,7 +23,8 @@ import qualified SvgUtils
 import Transitions (easeInOutSin)
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
-import GenerateAudio (runBuildAudio, setTidalPattern, setTidalOp)
+import GenerateAudio (setTidalPattern, setTidalOp)
+import GenerateVideo (addSvgDuration)
 import CodeScene (codeScene)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
@@ -159,30 +156,87 @@ main = Run.run videoProps $ do
                 . W.uScale (1/150)
                 . centerBasedOn Object.blade
                 . Object.growSlot
-                . easeInOutStay
+                . easeInOutSin
         WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 
                 toDiagram
                 . W.uScale (1/150)
                 . centerBasedOn Object.blade
                 . Object.sweepSlots
-                . easeInOutStay
+                . easeInOutSin
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/150) (2*pi) (center Object.slottedBlade)  
                 . easeInOutStay
 
     codeBlockOno "Handle Params"
     codeBlockOno "Handle Path"
-    codeBlockWithObject "Handle" Object.handle
+    codeBlockWithFade "Handle" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 2 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handle
+                . Object.animatedHandle
+                . easeInOutSin
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/150) (2*pi) (center Object.handle)  
+                . easeInOutStay
 
     setTidalOp $ Tidal.jumpMod 1 8 Audio.verse1
 
-    codeBlockWithObject "Grip" Object.grip
-
-    codeBlockWithObject "Handle And Grip" Object.handleWithGrip
+    codeBlockWithFade "Handle And Grip" $ \background -> do 
+        WaterfallScene.animatedClipWithBackground def 1 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.growGrip 
+                . easeInOutSin
+        
+        WaterfallScene.animatedClipWithBackground def 1 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.roundOffGrip 
+                . easeInOutSin
+        
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/150) (2*pi) (center Object.handleWithGrip)  
+                . easeInOutStay
 
     doVerse2
 
-    codeBlockWithObject "Hole" Object.handleWithHole
+    codeBlockWithFade "Hole" $ \background -> do
+
+        WaterfallScene.animatedClipWithBackground redScene 0.75 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.growHole
+                . easeInOutSin
+        
+        WaterfallScene.animatedClipWithBackground redScene 0.75 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.roundOffHole
+                . easeInOutSin
+
+        WaterfallScene.animatedClipWithBackground def 0.75 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.growHoleInHandle 
+                . easeInOutSin
+        
+        WaterfallScene.animatedClipWithBackground def 0.75 background $ 
+                toDiagram
+                . W.uScale (1/150)
+                . centerBasedOn Object.handleWithGrip
+                . Object.roundOffHoleInHandle
+                . easeInOutSin
+        
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/150) (2*pi) (center Object.handleWithHole)  
+                . easeInOutStay
+        
         
     codeBlockOno "Negative Mask" 
     codeBlockOno "Spatula"
@@ -193,6 +247,11 @@ main = Run.run videoProps $ do
             ) . easeInOutStay
             
     WaterfallScene.animatedClip def 8 $ showRotating' (unit _y) (1/150) (2*pi)
+            ( Object.spatula 
+                & center
+            ) . easeInOutStay
+
+    WaterfallScene.animatedClip def 8 $ showRotating' (Object.handleLongLeg) (1/150) (2*pi)
             ( Object.spatula 
                 & center
             ) . easeInOutStay

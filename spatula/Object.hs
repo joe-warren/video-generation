@@ -116,26 +116,80 @@ handlePath =
             , W.lineRelative handleLongLeg
             ]
 
+-- BLOCK: Handle Animated (Not Shown)
+
+animatedHandle :: Double -> W.Solid
+animatedHandle f = 
+    W.sweep (W.takePathFraction f handlePath) (W.scale2D (V2 10 7.5) W.centeredSquare)
+
 -- BLOCK:Handle
 
 handle :: W.Solid
 handle = 
     W.sweep handlePath (W.scale2D (V2 10 7.5) W.centeredSquare)
 
--- BLOCK:Grip
+-- BLOCK: Grip Animated (Not Shown)
 
-grip :: W.Solid
-grip = 
-    let Just (_, e) = W.pathEndpoints handlePath
-        gripD = normalize handleLongLeg ^* 30
-        gripPath = W.line (e - gripD) (e + gripD)
+growGrip :: Double -> W.Solid
+growGrip f = 
+    let gripD = normalize handleLongLeg ^* 30
+        gripPath = handlePath
+            & W.reversePath 
+            & W.takePathFraction 0.4
+            & W.translate gripD
+    in W.sweep (W.takePathFraction f gripPath) (W.scale2D (V2 16 12) W.centeredSquare)
+        & (<> handle)
+
+roundOffGrip :: Double -> W.Solid
+roundOffGrip f = 
+    let gripD = normalize handleLongLeg ^* 30
+        gripPath = handlePath
+            & W.reversePath 
+            & W.takePathFraction 0.4
+            & W.translate gripD
+        roundOff = if f < 1e-3 then id else W.roundFillet (4*f)
     in W.sweep gripPath (W.scale2D (V2 16 12) W.centeredSquare)
-        & W.roundFillet 4
+        & roundOff
+        & (<> handle)
 
 -- BLOCK: Handle And Grip
 
+grip :: W.Solid
+grip = 
+    let gripD = normalize handleLongLeg ^* 30
+        gripPath = handlePath
+            & W.reversePath 
+            & W.takePathFraction 0.4
+            & W.translate gripD
+    in W.sweep gripPath (W.scale2D (V2 16 12) W.centeredSquare)
+        & W.roundFillet 4
+
 handleWithGrip :: W.Solid
 handleWithGrip = grip <> handle
+
+-- BLOCK: Hole Animated (Not Shown)
+
+growHole :: Double -> W.Solid
+growHole f = 
+    let Just (_, e) = W.pathEndpoints handlePath
+        holeD = normalize handleLongLeg
+        holePath = W.line (e + holeD ^* 10) (e + holeD ^* 25)
+    in W.sweep (W.takePathFraction f holePath) (W.scale2D (V2 6 30) W.centeredSquare)
+
+roundOffHole :: Double -> W.Solid
+roundOffHole f = 
+    let Just (_, e) = W.pathEndpoints handlePath
+        holeD = normalize handleLongLeg
+        holePath = W.line (e + holeD ^* 10) (e + holeD ^* 25)
+        roundOff = if f < 1e-3 then id else W.roundFillet (2.75*f)
+    in W.sweep holePath (W.scale2D (V2 6 30) W.centeredSquare)
+        & roundOff
+
+growHoleInHandle :: Double -> W.Solid
+growHoleInHandle f = handleWithGrip `W.difference` growHole f
+
+roundOffHoleInHandle :: Double -> W.Solid
+roundOffHoleInHandle f = handleWithGrip `W.difference` roundOffHole f
 
 -- BLOCK:Hole
 
@@ -147,6 +201,7 @@ hole =
     in W.sweep holePath (W.scale2D (V2 6 30) W.centeredSquare)
         & W.roundFillet 2.75
 
+handleWithHole :: W.Solid
 handleWithHole = handleWithGrip `W.difference` hole
 
 -- BLOCK: Negative Mask
