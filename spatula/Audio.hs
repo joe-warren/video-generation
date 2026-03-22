@@ -51,7 +51,9 @@ verse1Rhythm =
     , n "b'minor@2 b'major7 e'minor"
     , n "fs'major7@3 b'minor"
     ]
-verse1Drums = s "<cp hh:9>*4" # amp "<0.3 0.1*3>*2" # pan "<0.3 0.7>*4"
+verse1Drums = 
+    replicate 3 (s "<cp hh:9>*4" # amp "<0.3 0.1*3>*2" # pan "<0.3 0.7>*4")
+    <> [s "[cp hh:9]*8" # amp "<0.3 0.1*3>*2" # pan 0.3]
 
 -- BLOCK: Play Verse 1
 melodyInstrument x = stack 
@@ -66,7 +68,7 @@ verse1 =
     addSwing $ stack
     [ melodyInstrument $ cat verse1Melody 
     , rhythmInstrument $ cat verse1Rhythm
-    , verse1Drums
+    , cat verse1Drums
     ] # cps (80/60/4)
 -- BLOCK: Verse 2
 
@@ -83,8 +85,7 @@ verse2Rhythm =
     , n "e'minor b'major7"
     , n "fs'major7@2 fs'major7 b'minor"
     ]
-verse2Drums = s "<cp [cp hh:9]>*4" # amp "<0.3 0.1*7>" # pan "<0.3 0.7>*4"
-
+verse2Drums = s "<cp [cp hh:9]>*4" # amp "0.3 0.1*7" # pan "<0.3 0.7>*4"
 -- BLOCK: Tempo
 varyTempo inn mid out =
     let a = slow 2 (inn + saw * (mid-inn))
@@ -103,9 +104,9 @@ verse2 =
     
 verse2' =     
     addSwing $ stack
-    [ melodyInstrument . cat $ verse2Melody <> verse2Melody <> verse1Melody
-    , rhythmInstrument .cat $ verse2Rhythm  <> verse2Rhythm <> verse1Melody
-    , verse2Drums 
+    [ melodyInstrument . cat $ verse2Melody <> verse2Melody <> verse1Melody 
+    , rhythmInstrument . cat $ verse2Rhythm  <> verse2Rhythm <> verse1Rhythm
+    , cat (replicate 8 verse2Drums <> verse1Drums)
     ] # varyTempo (80/60/4) (140/60/4) (80/60/4) 
 
 
