@@ -218,4 +218,4 @@ spatula = (slottedBlade <> handleWithHole) `W.difference` negativeMask
 
 -- BLOCK: Outro
 
--- With Apologies to Guy Steele
+-- With apologies to Guy Steele
