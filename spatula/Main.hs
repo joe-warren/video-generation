@@ -103,10 +103,10 @@ main = Run.run videoProps $ do
     codeBlockOno "Intro"
 
     codeBlockAudioOno "Intro"
+    setTidalOp Tidal.resetCycles
+    setTidalPattern Audio.intro
     codeBlockAudioOno "Audio Intro"
-    codeBlockTidalAudio "Play Intro" $ do
-        setTidalOp Tidal.resetCycles
-        setTidalPattern Audio.intro
+    codeBlockAudioOno "Play Intro"
 
     codeBlockOno "Imports"
     codeBlockWithDiagram "Profile"
@@ -115,8 +115,8 @@ main = Run.run videoProps $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
-    codeBlockAudioOno "Verse 1"
     setTidalPattern Audio.verse1
+    codeBlockAudioOno "Verse 1"
     codeBlockAudioOno "Play Verse 1"
         
     codeBlockWithObject "Sharp Blade" Object.sharpBlade
@@ -132,13 +132,11 @@ main = Run.run videoProps $ do
             showRotating (1/150) (2*pi) (center Object.blade)  
                 . easeInOutStay
 
-    let doVerse2 = do
-            setTidalPattern Audio.verse2
-            setTidalOp $ Tidal.jumpMod 1 8 Audio.verse2'
-
+    setTidalPattern Audio.verse2
+    setTidalOp $ Tidal.jumpMod 1 8 Audio.verse2'
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Tempo"
-    codeBlockTidalAudio "Play Verse 2" $ doVerse2
+    codeBlockAudioOno "Play Verse 2" 
 
     codeBlockWithDiagram "Slot Profile"
         (Object.slotProfile 
