@@ -2,7 +2,7 @@ module Object where
 
 -- BLOCK:Intro
 
--- Lets Design a Spatula
+-- Lets design a spatula
 -- Using Haskell, and Waterfall-CAD
 
 -- BLOCK:Imports

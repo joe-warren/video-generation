@@ -31,7 +31,7 @@ import qualified Codec.Picture as JP
 
 videoProps :: VideoProps
 videoProps = def
-   -- & videoGenerateAudio .~ False
+   -- videoGenerateAudio .~ False
    -- & videoGenerateVideo .~ False
 
 easeInOutStay :: Double -> Double
@@ -42,12 +42,18 @@ easeInOutStay x
 
 main :: IO ()
 main = Run.run videoProps $ do
-    let codeBlockOno' srcfile props blockname = 
-            addSvgDuration 0.8
+    let codeBlockOno' duration srcfile props blockname = 
+            addSvgDuration duration
             =<< CodeScene.codeScene props 1.4
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
-    let codeBlockOno = codeBlockOno' "spatula/Object.hs" def
+    let objectFile = "spatula/Object.hs"
+        codeBlockOno = codeBlockOno' 0.8 objectFile def
+        audioFile = "spatula/Audio.hs"
+        audioCodeBlockParams = 
+            def
+            & CodeScene.codeSceneStyle .~ Sky.breezeDark
+        codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
     let centerBasedOn target solid = 
             case W.axisAlignedBoundingBox target of
@@ -65,7 +71,7 @@ main = Run.run videoProps $ do
 
     let codeBlockWithFade blockname nextScene = do
             fullCode <- CodeScene.codeScene def 1.6
-                =<< CodeBlock.loadCodeBlock "spatula/Object.hs" blockname
+                =<< CodeBlock.loadCodeBlock objectFile blockname
             addSvgDuration 1.2 fullCode
 
             fadedCode <- animate 0.4 
@@ -87,18 +93,6 @@ main = Run.run videoProps $ do
                 WaterfallScene.animatedClipWithBackground def 5 background $ 
                     showRotating (1/150) (2*pi) (center object)  
                     . easeInOutStay
-
-    let audioCodeBlockParams = 
-            def
-            & CodeScene.codeSceneStyle .~ Sky.breezeDark
-            
-    let codeBlockAudioOno = codeBlockOno' "spatula/Audio.hs" audioCodeBlockParams
-
-    let codeBlockTidalAudio blockname tidalEffect = do
-            still <- CodeScene.codeScene audioCodeBlockParams 2.0
-                =<< CodeBlock.loadCodeBlock "spatula/Audio.hs" blockname
-            _ <- tidalEffect
-            addSvgDuration 1.0 still
 
     codeBlockOno "Intro"
 
@@ -254,13 +248,13 @@ main = Run.run videoProps $ do
                 & center
             ) . easeInOutStay
 
-    setTidalOp $ Tidal.jumpMod 1 8 silence
-
     WaterfallScene.animatedClip def 8 $ showRotating' (unit _x) (1/150) (2*pi)
             ( Object.spatula 
                 & center
             ) . easeInOutStay
 
+    setTidalOp $ Tidal.jumpMod 1 4 silence
+
     codeBlockOno "Outro" 
-    codeBlockAudioOno "Outro"
+    codeBlockOno' 5 audioFile audioCodeBlockParams "Outro"
 --}
