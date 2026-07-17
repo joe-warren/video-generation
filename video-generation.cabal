@@ -76,6 +76,51 @@ library
     , waterfall-cad-svg
   default-language: Haskell2010
 
+executable hook-video
+  main-is: Main.hs
+  other-modules:
+      Audio
+      Object
+      Paths_video_generation
+  autogen-modules:
+      Paths_video_generation
+  hs-source-dirs:
+      hook
+  default-extensions:
+      OverloadedStrings
+      RecordWildCards
+      GADTs
+      DataKinds
+      KindSignatures
+      TypeFamilies
+      LambdaCase
+      TypeOperators
+      FlexibleContexts
+      AllowAmbiguousTypes
+      TemplateHaskell
+      MultiParamTypeClasses
+      ScopedTypeVariables
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      JuicyPixels
+    , base >=4.7 && <5
+    , containers
+    , data-default
+    , effectful
+    , ghc
+    , ghc-paths
+    , lens
+    , linear
+    , process
+    , skylighting
+    , svg-tree
+    , text
+    , tidal
+    , video-generation
+    , waterfall-cad
+    , waterfall-cad-svg
+  default-language: Haskell2010
+
 executable spatula-video
   main-is: Main.hs
   other-modules:
