@@ -41,6 +41,15 @@ easeInOutStay x
     | otherwise = 1
     where fac = 0.9
 
+animateDiagramLines :: W.Diagram -> Double -> W.Diagram
+animateDiagramLines diagram fraction = 
+    mconcat 
+        [ W.pathDiagram lineType visibility (W.takePathFraction fraction line)
+        | lineType <- [W.OutLine, W.SharpLine]
+        , visibility <- [W.Visible, W.Hidden]
+        , line <-  W.diagramLines lineType visibility diagram
+        ]
+
 main :: IO ()
 main = Run.run videoProps $ do
     let codeBlockOno' duration srcfile props blockname = 
@@ -116,9 +125,53 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             toDiagram
                 . W.uScale (1/7)
-                . centerBasedOn (Object.singleHookWire Object.properties)
+                . W.translate (negate $ unit _z) 
                 . (Object.singleHookWireAnimation Object.properties) 
+                . easeInOutSin
         WaterfallScene.animatedClipWithBackground def 5 background $ 
-            showRotating (1/7) (2*pi) (center $ Object.singleHookWire Object.properties)  
+            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
-    
+
+    codeBlockWithFade "HalfArrowhead" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 3 background $ 
+            animateDiagramLines ( toDiagram . W.uScale (1/7)
+                $ center (Object.defaultHalfArrowHead))
+            . easeInOutStay 
+        {--
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (center $ Object.defaultHalfArrowHead)  
+                . easeInOutStay
+        --}
+
+    codeBlockWithFade "Arrowhead" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 3 background $ 
+            toDiagram
+                . W.uScale (1/7)
+                . (Object.defaultArrowheadAnimation) 
+                . easeInOutSin
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (Object.defaultArrowheadAnimation 1)  
+                . easeInOutStay
+
+
+    codeBlockWithFade "Single Hook With Arrowhead" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 3 background $ 
+            toDiagram
+                . W.uScale (1/7)
+                . W.translate (negate $ unit _z) 
+                . (Object.singleHookWithArrowheadAnimation Object.properties) 
+                . easeInOutSin
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWithArrowhead Object.properties)  
+                . easeInOutStay
+
+    codeBlockWithFade "Whole Hook" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            toDiagram
+                . W.uScale (1/7)
+                . W.translate (negate $ unit _z) 
+                . (Object.animateInHook Object.properties) 
+                . easeInOutSin
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
+                . easeInOutStay

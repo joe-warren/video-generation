@@ -119,7 +119,7 @@ singleHookWireAnimation props@(HookProperties {..}) fraction =
     in mconcat 
         [ if hoopF == 0 then mempty else (`W.sweep` profile) $ W.takePathFraction hoopF hoopPath
         , (`W.sweep` profile) $ W.takePathFraction curveF (W.reversePath curvePath)
-        , W.translate (unit _z ^* 0.01)$ (`W.sweep` profile) $ W.takePathFraction shaftF shaftPath
+        , W.translate (unit _z ^* 0.001)$ (`W.sweep` profile) $ W.takePathFraction shaftF shaftPath
         ]
 
 -- BLOCK: SingleHookWire
@@ -131,11 +131,10 @@ singleHookWire props = mconcat
     , hookCurve props
     ]
 
--- BLOCK:Arrowhead
+-- BLOCK:HalfArrowhead
 
-
-arrowhead :: Double -> ArrowheadProperties -> W.Solid
-arrowhead hookRadius (ArrowheadProperties {..})= 
+halfArrowhead :: Double -> ArrowheadProperties -> W.Solid
+halfArrowhead hookRadius (ArrowheadProperties {..})= 
     -- | set the arrowhead thickness, such that, for a given width,
     -- the edge of the hook is tangent to the surface of the arrowhead 
     let y = arrowheadWidth / 2 
@@ -151,36 +150,106 @@ arrowhead hookRadius (ArrowheadProperties {..})=
                 ]
             ]
             (Just (arrowheadHeight *^ unit _z))
+
+-- BLOCK: defaultHalfArrowHead (notShown)
+
+defaultHalfArrowHead :: W.Solid
+defaultHalfArrowHead = halfArrowhead (hookRadius properties) (arrowheadProperties properties)
+
+-- BLOCK: Arrowhead
+
+arrowhead :: Double -> ArrowheadProperties -> W.Solid
+arrowhead hookRadius props@(ArrowheadProperties {..})= 
+    halfArrowhead hookRadius props 
         & mconcat [id, W.mirror (unit _y)]
         & W.rotate (unit _z) arrowheadAngle
 
+        
+-- BLOCK: Arrowhead Animation (NotShown)
+
+growFromBottom :: W.Solid -> Double -> W.Solid
+growFromBottom s fraction =
+    case W.axisAlignedBoundingBox s of 
+        Nothing -> mempty
+        Just (lo, hi) -> 
+            W.intersection s (W.aabbToSolid (lo, hi & _z .~ ((lo + ((hi-lo) ^* fraction)) ^. _z )))
+
+
+defaultArrowheadAnimation :: Double -> W.Solid
+defaultArrowheadAnimation fraction = 
+    halfArrowhead (hookRadius properties) (arrowheadProperties properties)
+        & mconcat [id, (`growFromBottom` fraction) . W.mirror (unit _y)]
+
+
+-- BLOCK: Single Hook With Arrowhead
+
+singleHookWithArrowhead :: HookProperties -> W.Solid
+singleHookWithArrowhead props@(HookProperties {..}) = mconcat 
+    [ hookHoop props
+    , hookShaft props
+    , hookCurve props
+    , let arrowheadPosition = 
+            maybe (error "failed to get pathEndpoints" ) snd 
+                $ W.pathEndpoints (hookCurvePath props)
+      in arrowhead hookRadius arrowheadProperties
+            & W.rotate (unit _y) (pi-sweepAngle)
+            & W.translate arrowheadPosition
+    ]
+
+    
+-- BLOCK: Single Hook With Arrowhead Animation (Not Shown)
+
+singleHookWithArrowheadAnimation :: HookProperties -> Double ->  W.Solid
+singleHookWithArrowheadAnimation props@(HookProperties {..}) fraction = mconcat 
+    [ hookHoop props
+    , hookShaft props
+    , hookCurve props
+    , let arrowheadPosition = 
+            maybe (error "failed to get pathEndpoints" ) snd 
+                $ W.pathEndpoints (hookCurvePath props)
+      in arrowhead hookRadius arrowheadProperties
+            & (`growFromBottom` fraction)
+            & W.rotate (unit _y) (pi-sweepAngle)
+            & W.translate arrowheadPosition
+    ]
+
+    
+-- BLOCK: Whole Hook
+
 hook :: HookProperties -> W.Solid
-hook (HookProperties {..})= mconcat 
-    [ W.torus (hoopRadius + hookRadius) hookRadius
-        & W.rotate (unit _x) (pi/2)
-        & W.translate ((hoopHeight + hoopRadius + hookRadius) *^ unit _z)
-    , W.unitCylinder 
-        & W.scale (V3 hookRadius hookRadius hoopHeight)
-    , let v = (negate sweepRadius *^ unit _x)
-          rotate = W.rotate (negate $ unit _y)
-          sweepPath = 
-                ( let                   
-                  in W.arcVia v (rotate (sweepAngle/2) v) (rotate sweepAngle v)
-                )
-          arrowheadPosition = maybe (error "failed to get pathEndpoints" ) snd $ W.pathEndpoints sweepPath
-          positionedArrowhead = 
-                arrowhead hookRadius arrowheadProperties
-                    & W.rotate (unit _y) (pi-sweepAngle)
-                    & W.translate arrowheadPosition
-      in W.sweep sweepPath (W.uScale2D hookRadius W.unitCircle )
-            & (<> positionedArrowhead)
-            & W.translate (sweepRadius *^ unit _x)
+hook props@(HookProperties {..}) = mconcat 
+    [ hookHoop props
+    , hookShaft props
+    , let arrowheadPosition = 
+            maybe (error "failed to get pathEndpoints" ) snd 
+                $ W.pathEndpoints (hookCurvePath props)
+      in arrowhead hookRadius arrowheadProperties
+            & W.rotate (unit _y) (pi-sweepAngle)
+            & W.translate arrowheadPosition
+            & (<> hookCurve props)
             & iterate (W.rotate (unit _z) (pi * 2 / fromIntegral nHooks))
             & take nHooks 
             & mconcat
     ]
 
-hook' :: W.Solid
-hook' = hook properties
+-- BLOCK: Animate whole Hook (Not Shown)
 
 
+animateInHook :: HookProperties -> Double -> W.Solid
+animateInHook props@(HookProperties {..}) fraction =
+    if fraction <= 1e-2
+        then singleHookWithArrowhead props 
+        else mconcat 
+            [ hookHoop props
+            , hookShaft props
+            , let arrowheadPosition = 
+                    maybe (error "failed to get pathEndpoints" ) snd 
+                        $ W.pathEndpoints (hookCurvePath props)
+              in arrowhead hookRadius arrowheadProperties
+                    & W.rotate (unit _y) (pi-sweepAngle)
+                    & W.translate arrowheadPosition
+                    & (<> hookCurve props)
+                    & iterate (W.rotate (unit _z) (pi * 2 * fraction / fromIntegral nHooks))
+                    & take nHooks 
+                    & mconcat
+            ]
