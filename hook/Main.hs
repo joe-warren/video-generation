@@ -32,8 +32,8 @@ import qualified Codec.Picture as JP
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ False
-   -- & videoGenerateVideo .~ False
+    & videoGenerateAudio .~ True
+    & videoGenerateVideo .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -108,15 +108,21 @@ main = Run.run videoProps $ do
 
     codeBlockAudioOno "Intro"
     setTidalOp Tidal.resetCycles
-    -- setTidalPattern Audio.intro
-    -- codeBlockAudioOno "Audio Intro"
-    -- codeBlockAudioOno "Play Intro"
+    setTidalPattern Audio.intro
+    codeBlockAudioOno "Audio Intro"
+    codeBlockAudioOno "Play Intro"
 
     codeBlockOno "Imports"
     codeBlockOno "PropertiesDef"
     codeBlockOno "ArrowheadPropertiesDef"
+
+    setTidalPattern Audio.verse1
+    codeBlockAudioOno "Verse 1"
+    codeBlockAudioOno "Play Verse 1"
+
     codeBlockOno "Degrees"
     codeBlockOno "PropertiesValue"
+
     codeBlockOno "Hoop"
     codeBlockOno "HookShaft"
     codeBlockOno "HookCurve"
@@ -131,6 +137,10 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
+
+    setTidalPattern Audio.verse2
+    codeBlockAudioOno "Verse 2"
+    codeBlockAudioOno "Play Verse 2"
 
     codeBlockWithFade "HalfArrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
@@ -154,6 +164,8 @@ main = Run.run videoProps $ do
                 . easeInOutStay
 
 
+
+
     codeBlockWithFade "Single Hook With Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
             toDiagram
@@ -165,6 +177,8 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWithArrowhead Object.properties)  
                 . easeInOutStay
 
+    setTidalPattern Audio.verse1
+
     codeBlockWithFade "Whole Hook" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             toDiagram
@@ -175,3 +189,6 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
                 . easeInOutStay
+
+
+    setTidalOp $ Tidal.jumpMod 1 4 silence
