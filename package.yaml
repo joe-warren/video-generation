@@ -36,6 +36,8 @@ dependencies:
 - effectful
 - data-default
 - tidal
+- filepath
+- directory
 
 default-extensions: 
 - OverloadedStrings

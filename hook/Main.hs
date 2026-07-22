@@ -24,7 +24,7 @@ import Transitions (easeInOutSin)
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp)
-import GenerateVideo (addSvgDuration)
+import GenerateVideo (addSvgDuration, addImageDuration)
 import CodeScene (codeScene)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
@@ -32,8 +32,9 @@ import qualified Codec.Picture as JP
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ True
+    & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
+    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -106,6 +107,8 @@ main = Run.run videoProps $ do
 
     codeBlockOno "Intro"
 
+    addImageDuration 3 "hook/images/thingiverse.png"
+
     codeBlockAudioOno "Intro"
     setTidalOp Tidal.resetCycles
     setTidalPattern Audio.intro
@@ -126,7 +129,7 @@ main = Run.run videoProps $ do
     codeBlockOno "Hoop"
     codeBlockOno "HookShaft"
     codeBlockOno "HookCurve"
-    -- codeBlockWithObject "SingleHookWire" (Object.singleHookWire Object.properties)
+
     codeBlockWithFade "SingleHookWire" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             toDiagram
@@ -147,11 +150,6 @@ main = Run.run videoProps $ do
             animateDiagramLines ( toDiagram . W.uScale (1/7)
                 $ center (Object.defaultHalfArrowHead))
             . easeInOutStay 
-        {--
-        WaterfallScene.animatedClipWithBackground def 5 background $ 
-            showRotating (1/7) (2*pi) (center $ Object.defaultHalfArrowHead)  
-                . easeInOutStay
-        --}
 
     codeBlockWithFade "Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
@@ -189,6 +187,7 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
                 . easeInOutStay
+
 
 
     setTidalOp $ Tidal.jumpMod 1 4 silence

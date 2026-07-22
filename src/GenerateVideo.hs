@@ -7,10 +7,10 @@
 , getCurrentOffsetSeconds
 , addSvgFrame
 , addSvgDuration
+, addImageDuration
 , runBuildVideo
 , runWriteFrames
 , runTrackOffset
-, getCurrentOffsetSeconds
 ) where
 
 import VideoProps
@@ -27,19 +27,28 @@ import Control.Monad ((<=<), replicateM_, when)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
+import System.FilePath (takeExtension)
 import Effectful.State.Static.Local
 import Control.Lens
+import System.Directory (copyFile)
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
 
 data WriteFrames :: Effect where
     WriteSvgFrame :: Svg.Document -> WriteFrames m FramePath
+    WriteFileFrame :: FilePath -> WriteFrames m FramePath
 
 type instance DispatchOf WriteFrames = Dynamic
 
+writeFrame :: (WriteFrames :> es) => Frame -> Eff es FramePath
+writeFrame (SvgFrame doc) = send $ WriteSvgFrame doc
+writeFrame (FileFrame path) = send $ WriteFileFrame path
+
+data Frame = SvgFrame Svg.Document | FileFrame FilePath
+
 data BuildVideo :: Effect where
-    AddFrame :: Svg.Document -> BuildVideo m ()
-    AddDuration :: Double -> Svg.Document -> BuildVideo m ()
+    AddFrame :: Frame -> BuildVideo m ()
+    AddDuration :: Double -> Frame -> BuildVideo m ()
 
 type instance DispatchOf BuildVideo = Dynamic
 
@@ -48,32 +57,47 @@ data TrackOffset :: Effect where
 
 type instance DispatchOf TrackOffset = Dynamic
 
+
 addSvgFrame :: (BuildVideo :> es) => Svg.Document -> Eff es ()
-addSvgFrame = send . AddFrame 
+addSvgFrame = send . AddFrame . SvgFrame
 
 addSvgDuration :: (BuildVideo :> es) => Double -> Svg.Document -> Eff es ()
-addSvgDuration dur = send . AddDuration dur
+addSvgDuration dur = send . AddDuration dur . SvgFrame
+
+addImageDuration :: (BuildVideo :> es) => Double -> FilePath -> Eff es ()
+addImageDuration dur = send . AddDuration dur . FileFrame
 
 getCurrentOffsetSeconds :: (TrackOffset :> es) =>  Eff es Double
 getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames = do
-    reinterpret (evalState (0::Integer)) $ \_ -> \case
-        WriteSvgFrame document -> do
+    reinterpret (evalState (0::Integer)) $ \_ -> \action -> do
+
             (index::Integer) <- get
             vd <- ask
-            let name = printf "%04d" index <> ".svg"
+            let extension = 
+                    case action of 
+                        WriteFileFrame path -> takeExtension path
+                        WriteSvgFrame _ -> ".svg"
+            let name = printf "%04d" index <> extension
             let path = vd ^. videoScratchDir <> "/" <> name
-            liftIO $ Svg.saveXmlFile path document
+            
             modify (+1) 
-            if (vd ^. videoConvertViaPng) 
-                then do
-                    let pngName = printf "%04d" index <> ".png"
-                    let pngPath = vd ^. videoScratchDir <> "/" <> pngName
-                    liftIO $ convertFile path pngPath
-                    return $ FramePath pngName
-                else return $ FramePath name
+            
+            case action of 
+                WriteFileFrame file -> do
+                    liftIO $ copyFile file path
+                    return $ FramePath name
+                WriteSvgFrame document -> do
+                    liftIO $ Svg.saveXmlFile path document
+                    if (vd ^. videoConvertViaPng) 
+                        then do
+                            let pngName = printf "%04d" index <> ".png"
+                            let pngPath = vd ^. videoScratchDir <> "/" <> pngName
+                            liftIO $ convertFile path pngPath
+                            return $ FramePath pngName
+                        else return $ FramePath name
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
 runTrackOffset = 
@@ -104,13 +128,13 @@ runBuildVideoFfmpeg eff = do
     handle <- liftIO $ openFile concatFileName WriteMode
     let writeOneFrame fp = T.hPutStr handle (concatLine vd fp)
     res <- reinterpretWith (evalState (0::Double))eff $ \_ -> \case 
-        AddFrame f -> liftIO . writeOneFrame =<< send (WriteSvgFrame f)
+        AddFrame f -> liftIO . writeOneFrame =<< writeFrame f
         AddDuration dur f -> do
             currentPos <- get
             let newPos = currentPos + (dur * fromIntegral (vd ^. videoFPS))
                 (nFrames, posRemainder) =  properFraction newPos
             when (nFrames > 0) $ do 
-                fp <- send $ WriteSvgFrame f
+                fp <- writeFrame f
                 liftIO $ replicateM_ nFrames (writeOneFrame fp)
             put posRemainder
     liftIO $ hClose handle
@@ -132,8 +156,6 @@ runBuildVideo eff = do
     if vd ^. videoGenerateVideo 
         then runBuildVideoFfmpeg eff
         else runBuildVideoNoop eff
-
-
 
 convertFile :: FilePath -> FilePath -> IO ()
 convertFile inputFile outputFile = do
