@@ -40,6 +40,7 @@ dependencies:
 - directory
 - bytestring
 - base64
+- Diff
 
 default-extensions: 
 - OverloadedStrings
@@ -55,6 +56,7 @@ default-extensions:
 - TemplateHaskell
 - MultiParamTypeClasses
 - ScopedTypeVariables
+- TupleSections
 
 ghc-options:
 - -Wall

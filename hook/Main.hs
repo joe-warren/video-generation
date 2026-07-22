@@ -34,6 +34,7 @@ videoProps = def
     & videoOutputFile .~ "hook.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
+    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -65,6 +66,7 @@ main = Run.run videoProps $ do
             & CodeScene.codeSceneStyle .~ Sky.breezeDark
         codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
+    {--
     let centerBasedOn target solid = 
             case W.axisAlignedBoundingBox target of
                 Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
@@ -104,11 +106,21 @@ main = Run.run videoProps $ do
                     showRotating (1/7) (2*pi) (center object)  
                     . easeInOutStay
 
+    --}
+
+    join 
+        (CodeScene.diffScene def 5
+            <$> (CodeBlock.loadCodeBlock objectFile "Single Hook With Arrowhead") 
+            <*> (CodeBlock.loadCodeBlock objectFile "Whole Hook")
+        )
+
     codeBlockOno "Intro"
 
     addImageDuration 3 "hook/images/thingiverse.png"
 
     codeBlockAudioOno "Intro"
+
+    {--
     setTidalOp Tidal.resetCycles
     setTidalPattern Audio.intro
     codeBlockAudioOno "Audio Intro"
@@ -116,6 +128,7 @@ main = Run.run videoProps $ do
 
     codeBlockOno "Imports"
     codeBlockOno "PropertiesDef"
+    - Diff
     codeBlockOno "ArrowheadPropertiesDef"
 
     setTidalPattern Audio.verse1
@@ -139,6 +152,8 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
+
+    --}
 
     {--
 

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.38.1.
+-- This file has been generated from package.yaml by hpack version 0.39.6.
 --
 -- see: https://github.com/sol/hpack
 
@@ -56,9 +56,11 @@ library
       TemplateHaskell
       MultiParamTypeClasses
       ScopedTypeVariables
+      TupleSections
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      JuicyPixels
+      Diff
+    , JuicyPixels
     , base >=4.7 && <5
     , base64
     , bytestring
@@ -104,9 +106,11 @@ executable hook-video
       TemplateHaskell
       MultiParamTypeClasses
       ScopedTypeVariables
+      TupleSections
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      JuicyPixels
+      Diff
+    , JuicyPixels
     , base >=4.7 && <5
     , base64
     , bytestring
@@ -153,9 +157,11 @@ executable spatula-video
       TemplateHaskell
       MultiParamTypeClasses
       ScopedTypeVariables
+      TupleSections
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      JuicyPixels
+      Diff
+    , JuicyPixels
     , base >=4.7 && <5
     , base64
     , bytestring
@@ -201,9 +207,11 @@ test-suite video-generation-test
       TemplateHaskell
       MultiParamTypeClasses
       ScopedTypeVariables
+      TupleSections
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      JuicyPixels
+      Diff
+    , JuicyPixels
     , base >=4.7 && <5
     , base64
     , bytestring

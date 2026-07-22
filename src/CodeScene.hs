@@ -5,6 +5,7 @@ import SvgUtils
 import GenerateVideo (BuildVideo, addSvgDuration)
 
 import Data.Text (Text)
+import Data.List (intersperse, intercalate, inits, tails)
 import qualified Data.Text as T
 import qualified Skylighting as Sky
 import qualified Graphics.Svg as Svg
@@ -20,6 +21,7 @@ import Effectful
 import Effectful.Reader.Static
 import Effectful.Error.Static
 import Data.Default
+import Data.Algorithm.Diff (Diff, PolyDiff (..), getGroupedDiffBy)
 
 data CodeSceneProps = CodeSceneProps
     { _codeSceneFileExtension :: Text
@@ -179,4 +181,70 @@ codeScene cs duration text = do
                             * durationWeight letterType
                             / normalizedLength
                 in addSvgDuration dur frame 
-            return . snd $ lastFrame 
+            return . snd $ lastFrame
+
+        
+data DiffTok = Newline | DiffTok Sky.Token
+
+compareDiffToc :: DiffTok -> DiffTok -> Bool
+compareDiffToc Newline Newline = True
+compareDiffToc (DiffTok (_, textA)) (DiffTok (_, textB)) = textA == textB
+compareDiffToc _ _ = False
+
+linesToDiffToks :: [[Sky.Token]] -> [DiffTok]
+linesToDiffToks = intercalate [Newline] . fmap (fmap DiffTok)
+
+diffToksToLines :: [DiffTok] -> [[Sky.Token]]
+diffToksToLines = 
+    let step Newline ls = [] : ls
+        step (DiffTok tok) (l:ls) = (tok:l) : ls
+        step (DiffTok tok) [] = [[tok]]
+    in foldr step [[]]
+
+diffToSequence :: [Diff [DiffTok]] -> [[DiffTok]]
+diffToSequence diff = 
+    let prefixes x = 
+            let go (DiffTok (tokType, t)) = (DiffTok . (tokType, ) <$> drop 1 (T.inits t))
+                go Newline = [Newline]
+            in do
+                prefix <- drop 1 $ inits x 
+                traverseOf _last go prefix
+        during (Both x _) = pure x
+        during (Second x) = prefixes x
+        during (First x) = reverse . prefixes $ x
+        before (Both x _) = x
+        before (First x) = x
+        before (Second x) = []
+        after (Both x _) = x
+        after (First x) = []
+        after (Second x) = x
+    in do
+        (done, focus : todo) <- zip (inits diff) (tails diff)
+        mid <- during focus
+        pure $ foldMap after done <> mid <> foldMap before todo
+
+diffScene :: 
+    ( BuildVideo :> es
+    , Reader VideoProps :> es
+    , Error HighlightError :> es
+    ) => CodeSceneProps -> Double -> Text -> Text -> Eff es Svg.Document
+diffScene cs duration textBefore textAfter = do
+    let highlight' t = linesToDiffToks <$> highlight (cs ^. codeSceneFileExtension) t
+    highlightBefore <- highlight' textBefore
+    highlightAfter <- highlight' textAfter
+
+    vd <- ask
+
+    let diff = getGroupedDiffBy compareDiffToc highlightBefore highlightAfter
+        transitionFrames =
+            snd 
+            . last
+            . linesToSvg vd cs 
+            . diffToksToLines 
+            <$> diffToSequence diff
+        len = length transitionFrames
+        frameDur = duration / fromIntegral len
+ 
+    forM_ transitionFrames (addSvgDuration frameDur)
+    
+    return . last $ transitionFrames
