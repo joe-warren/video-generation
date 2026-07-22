@@ -60,6 +60,8 @@ library
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
+    , base64
+    , bytestring
     , containers
     , data-default
     , directory
@@ -106,6 +108,8 @@ executable hook-video
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
+    , base64
+    , bytestring
     , containers
     , data-default
     , directory
@@ -153,6 +157,8 @@ executable spatula-video
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
+    , base64
+    , bytestring
     , containers
     , data-default
     , directory
@@ -199,6 +205,8 @@ test-suite video-generation-test
   build-depends:
       JuicyPixels
     , base >=4.7 && <5
+    , base64
+    , bytestring
     , containers
     , data-default
     , directory

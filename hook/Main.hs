@@ -34,7 +34,6 @@ videoProps = def
     & videoOutputFile .~ "hook.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
-    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 

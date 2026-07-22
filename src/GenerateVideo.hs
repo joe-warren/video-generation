@@ -32,6 +32,9 @@ import System.FilePath (takeExtension)
 import Effectful.State.Static.Local
 import Control.Lens
 import System.Directory (copyFile)
+import Data.ByteString as BS
+import Data.ByteString.Base64 (encodeBase64)
+import Data.Base64.Types (extractBase64)
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
 
@@ -93,12 +96,9 @@ runWriteFrames = do
 
             case action of 
                 WriteFileFrame file -> do
-                    let extension = takeExtension file
-                        name = printf "%04d" index <> extension
-                        path = vd ^. videoScratchDir <> "/" <> name
 
-                    liftIO $ copyFile file path
-                    liftIO . writeSVG $ imageFile vd name
+                    contents <- liftIO $ BS.readFile file
+                    liftIO . writeSVG $ imageFile vd ("data:image/png;base64," <> T.unpack (extractBase64 (encodeBase64 contents)))
                 WriteSvgFrame document -> liftIO $ writeSVG document
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a

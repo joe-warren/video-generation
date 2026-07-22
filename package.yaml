@@ -38,6 +38,8 @@ dependencies:
 - tidal
 - filepath
 - directory
+- bytestring
+- base64
 
 default-extensions: 
 - OverloadedStrings
