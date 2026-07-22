@@ -141,6 +141,8 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
 
+    {--
+
     setTidalPattern Audio.verse2
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
@@ -189,5 +191,5 @@ main = Run.run videoProps $ do
                 . easeInOutStay
 
 
-
+    --}
     setTidalOp $ Tidal.jumpMod 1 4 silence

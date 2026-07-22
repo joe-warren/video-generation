@@ -21,6 +21,7 @@ import Data.Text (Text)
 import qualified Data.Text.IO as T
 import qualified System.Process as Process
 import qualified Graphics.Svg as Svg
+import SvgUtils (imageFile)
 import Effectful
 import Effectful.Dispatch.Dynamic
 import Control.Monad ((<=<), replicateM_, when)
@@ -73,31 +74,32 @@ getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames = do
     reinterpret (evalState (0::Integer)) $ \_ -> \action -> do
-
             (index::Integer) <- get
             vd <- ask
-            let extension = 
-                    case action of 
-                        WriteFileFrame path -> takeExtension path
-                        WriteSvgFrame _ -> ".svg"
-            let name = printf "%04d" index <> extension
-            let path = vd ^. videoScratchDir <> "/" <> name
             
             modify (+1) 
             
-            case action of 
-                WriteFileFrame file -> do
-                    liftIO $ copyFile file path
-                    return $ FramePath name
-                WriteSvgFrame document -> do
-                    liftIO $ Svg.saveXmlFile path document
+            let writeSVG document = do
+                    let name = printf "%04d" index <> ".svg"
+                        path = vd ^. videoScratchDir <> "/" <> name
+                    Svg.saveXmlFile path document
                     if (vd ^. videoConvertViaPng) 
                         then do
                             let pngName = printf "%04d" index <> ".png"
                             let pngPath = vd ^. videoScratchDir <> "/" <> pngName
-                            liftIO $ convertFile path pngPath
+                            convertFile path pngPath
                             return $ FramePath pngName
                         else return $ FramePath name
+
+            case action of 
+                WriteFileFrame file -> do
+                    let extension = takeExtension file
+                        name = printf "%04d" index <> extension
+                        path = vd ^. videoScratchDir <> "/" <> name
+
+                    liftIO $ copyFile file path
+                    liftIO . writeSVG $ imageFile vd name
+                WriteSvgFrame document -> liftIO $ writeSVG document
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
 runTrackOffset = 

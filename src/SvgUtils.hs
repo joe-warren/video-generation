@@ -6,6 +6,7 @@ module SvgUtils
 , addBackground
 , makeOpaque
 , blankCanvas
+, imageFile
 , white
 , black
 ) where
@@ -64,6 +65,23 @@ blankCanvas vd c =
         h = Svg.Num .fromIntegral $ vd ^. videoHeight
     in Svg.Document Nothing (Just w) (Just h) mempty mempty mempty mempty mempty
         & addBackground c
+
+addImageFile :: VideoProps -> FilePath -> Svg.Document -> Svg.Document
+addImageFile vd fp doc =
+    let w = fromMaybe (Svg.Num 0) $ doc ^. Svg.width
+        h = fromMaybe (Svg.Num 0) $ doc ^. Svg.height
+        img =
+            Svg.defaultSvg 
+                & Svg.imageCornerUpperLeft .~ (Svg.Px 0, Svg.Px 0)
+                & Svg.imageWidth .~ w
+                & Svg.imageHeight .~ h
+                & Svg.imageHref .~ fp
+                & Svg.ImageTree
+    in doc & Svg.elements %~ (<> pure img)
+
+imageFile :: VideoProps -> FilePath -> Svg.Document
+imageFile vd fp = blankCanvas vd white
+    & addImageFile vd fp
 
 makeOpaque :: Svg.Document -> Double -> Svg.Document
 makeOpaque d opacity = 
