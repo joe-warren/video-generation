@@ -2,6 +2,7 @@ module Audio where
 
 -- BLOCK: Audio Intro
 
+-- The Soundtrack: using Tidal Cycles
 import Sound.Tidal.Boot
 
 introMelody =

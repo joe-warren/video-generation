@@ -136,8 +136,6 @@ main = Run.run videoProps $ do
 
     codeBlockOno "Properties Def"
 
-    codeBlockOno "Arrowhead Properties Def"
-
     setTidalPattern Audio.verse1
     codeBlockAudioOno "Verse 1"
     codeBlockAudioOno "Play Verse 1"

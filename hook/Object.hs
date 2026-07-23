@@ -7,20 +7,13 @@ module Object where
 -- BLOCK:Imports
 
 -- Since then, I've built a Haskell CAD framework, called Waterfall-CAD
--- Lets use it to reimplmenent the hook in Haskell 
+-- Lets Haskell and Waterfall-CAD to reimplement the hook
 
 -- Imports
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
 
--- BLOCK:Arrowhead Properties Def
-data ArrowheadProperties = ArrowheadProperties
-    { arrowheadWidth :: Double 
-    , arrowheadHeight :: Double 
-    , arrowheadNotchDepth :: Double
-    , arrowheadAngle :: Double
-    }
 
 -- BLOCK:Properties Def
 data HookProperties = HookProperties 
@@ -31,6 +24,13 @@ data HookProperties = HookProperties
     , hoopHeight :: Double
     , nHooks :: Int
     , arrowheadProperties :: ArrowheadProperties
+    }
+
+data ArrowheadProperties = ArrowheadProperties
+    { arrowheadWidth :: Double 
+    , arrowheadHeight :: Double 
+    , arrowheadNotchDepth :: Double
+    , arrowheadAngle :: Double
     }
 
 
