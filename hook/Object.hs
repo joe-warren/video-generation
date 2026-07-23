@@ -2,16 +2,19 @@ module Object where
 
 -- BLOCK:Intro
 
--- Lets design a hook
--- Using Haskell, and Waterfall-CAD
+-- In 2018, I designed a parametric hook, using OpenSCAD
 
 -- BLOCK:Imports
+
+-- Since then, I've built a Haskell CAD framework, called Waterfall-CAD
+-- Lets use it to reimplmenent the hook in Haskell 
+
 -- Imports
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
 
--- BLOCK:ArrowheadPropertiesDef
+-- BLOCK:Arrowhead Properties Def
 data ArrowheadProperties = ArrowheadProperties
     { arrowheadWidth :: Double 
     , arrowheadHeight :: Double 
@@ -19,7 +22,7 @@ data ArrowheadProperties = ArrowheadProperties
     , arrowheadAngle :: Double
     }
 
--- BLOCK:PropertiesDef
+-- BLOCK:Properties Def
 data HookProperties = HookProperties 
     { hookRadius :: Double
     , sweepRadius :: Double
@@ -36,7 +39,7 @@ data HookProperties = HookProperties
 degrees :: Double -> Double 
 degrees = (* (pi / 180))
 
--- BLOCK:PropertiesValue
+-- BLOCK:Properties Value
 properties = HookProperties 
     { hookRadius = 0.25
     , sweepRadius = 1.25
@@ -52,7 +55,7 @@ properties = HookProperties
         }
     }
 
--- BLOCK: Hoop
+-- BLOCK: Hoop and Shaft
 
 hookHoop:: HookProperties -> W.Solid
 hookHoop (HookProperties {..})= 
@@ -60,14 +63,13 @@ hookHoop (HookProperties {..})=
         & W.rotate (unit _x) (pi/2)
         & W.translate ((hoopHeight + hoopRadius + hookRadius) *^ unit _z)
 
--- BLOCK: HookShaft     
 hookShaft:: HookProperties -> W.Solid
 hookShaft (HookProperties {..}) =
     W.unitCylinder 
         & W.scale (V3 hookRadius hookRadius hoopHeight)
 
         
--- BLOCK: HookCurve
+-- BLOCK: Hook Curve
 hookCurvePath :: HookProperties -> W.Path
 hookCurvePath (HookProperties {..}) = 
     let v = (negate sweepRadius *^ unit _x)
@@ -122,7 +124,7 @@ singleHookWireAnimation props@(HookProperties {..}) fraction =
         , W.translate (unit _z ^* 0.001)$ (`W.sweep` profile) $ W.takePathFraction shaftF shaftPath
         ]
 
--- BLOCK: SingleHookWire
+-- BLOCK: Single Hook Wire
 
 singleHookWire :: HookProperties -> W.Solid
 singleHookWire props = mconcat 
@@ -131,7 +133,7 @@ singleHookWire props = mconcat
     , hookCurve props
     ]
 
--- BLOCK:HalfArrowhead
+-- BLOCK:Half Arrowhead
 
 halfArrowhead :: Double -> ArrowheadProperties -> W.Solid
 halfArrowhead hookRadius (ArrowheadProperties {..})= 

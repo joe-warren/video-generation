@@ -1,9 +1,5 @@
 module Audio where
 
--- BLOCK: Intro
-
--- Music with Tidal-Cycles
-
 -- BLOCK: Audio Intro
 
 import Sound.Tidal.Boot
@@ -113,6 +109,7 @@ pipes =
       # room (range 0.1 0.5 (fast 10 $ tri))
 
 -- BLOCK: Play Intro
+
 intro = addSwing $ stack
     [ cat introMelody # pipes
     ,  rolled (cat introRhythm -| n "24"
@@ -122,16 +119,8 @@ intro = addSwing $ stack
         # egrate11 0.5
         # eglevel12 0.1
         # eglevel13 1)
-        --}
-        {--
-        # sustain 0.1
-        # amp 0.3
-        # decay 0.0
-        # voice 0.5
-        # resonance 0.0
-        # lfo 0) 
-        --}
     ] # cps (180/60/8)
+
 -- BLOCK: Verse 1
 
 verse1Melody =

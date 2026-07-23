@@ -34,7 +34,6 @@ videoProps = def
     & videoOutputFile .~ "hook.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
-    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -66,7 +65,6 @@ main = Run.run videoProps $ do
             & CodeScene.codeSceneStyle .~ Sky.breezeDark
         codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
-    {--
     let centerBasedOn target solid = 
             case W.axisAlignedBoundingBox target of
                 Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
@@ -96,6 +94,25 @@ main = Run.run videoProps $ do
 
             nextScene fadedCode
 
+    let diffBlockWithFade blockNameBefore blockName nextScene = do
+            
+            codeBefore <- CodeBlock.loadCodeBlock objectFile blockNameBefore
+            codeAfter <- CodeBlock.loadCodeBlock objectFile blockName
+
+            fullCode <- CodeScene.diffScene def 1.6 codeBefore codeAfter
+
+            addSvgDuration 1.2 fullCode
+
+            fadedCode <- animate 0.4 
+                ( SvgUtils.addBackground SvgUtils.white 
+                . SvgUtils.makeOpaque fullCode 
+                . (+ 1.0)
+                . (* (-0.925))
+                . easeInOutSin
+                )
+
+            nextScene fadedCode
+
     let codeBlockWithDiagram blockname diagram = 
             codeBlockWithFade blockname $ \background -> 
                 WaterfallScene.stillClipWithBackground def 2 background diagram
@@ -106,43 +123,32 @@ main = Run.run videoProps $ do
                     showRotating (1/7) (2*pi) (center object)  
                     . easeInOutStay
 
-    --}
-
-    join 
-        (CodeScene.diffScene def 5
-            <$> (CodeBlock.loadCodeBlock objectFile "Single Hook With Arrowhead") 
-            <*> (CodeBlock.loadCodeBlock objectFile "Whole Hook")
-        )
-
     codeBlockOno "Intro"
 
     addImageDuration 3 "hook/images/thingiverse.png"
 
-    codeBlockAudioOno "Intro"
+    codeBlockOno "Imports"
 
-    {--
     setTidalOp Tidal.resetCycles
     setTidalPattern Audio.intro
     codeBlockAudioOno "Audio Intro"
     codeBlockAudioOno "Play Intro"
 
-    codeBlockOno "Imports"
-    codeBlockOno "PropertiesDef"
-    - Diff
-    codeBlockOno "ArrowheadPropertiesDef"
+    codeBlockOno "Properties Def"
+
+    codeBlockOno "Arrowhead Properties Def"
 
     setTidalPattern Audio.verse1
     codeBlockAudioOno "Verse 1"
     codeBlockAudioOno "Play Verse 1"
 
     codeBlockOno "Degrees"
-    codeBlockOno "PropertiesValue"
+    codeBlockOno "Properties Value"
 
-    codeBlockOno "Hoop"
-    codeBlockOno "HookShaft"
-    codeBlockOno "HookCurve"
+    codeBlockOno "Hoop and Shaft"
+    codeBlockOno "Hook Curve"
 
-    codeBlockWithFade "SingleHookWire" $ \background -> do
+    codeBlockWithFade "Single Hook Wire" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             toDiagram
                 . W.uScale (1/7)
@@ -153,15 +159,11 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
 
-    --}
-
-    {--
-
     setTidalPattern Audio.verse2
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
 
-    codeBlockWithFade "HalfArrowhead" $ \background -> do
+    codeBlockWithFade "Half Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
             animateDiagramLines ( toDiagram . W.uScale (1/7)
                 $ center (Object.defaultHalfArrowHead))
@@ -177,10 +179,7 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (Object.defaultArrowheadAnimation 1)  
                 . easeInOutStay
 
-
-
-
-    codeBlockWithFade "Single Hook With Arrowhead" $ \background -> do
+    diffBlockWithFade "Single Hook Wire" "Single Hook With Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
             toDiagram
                 . W.uScale (1/7)
@@ -193,7 +192,7 @@ main = Run.run videoProps $ do
 
     setTidalPattern Audio.verse1
 
-    codeBlockWithFade "Whole Hook" $ \background -> do
+    diffBlockWithFade "Single Hook With Arrowhead" "Whole Hook" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
             toDiagram
                 . W.uScale (1/7)
