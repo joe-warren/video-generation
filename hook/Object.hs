@@ -236,7 +236,6 @@ hook props@(HookProperties {..}) = mconcat
 
 -- BLOCK: Animate whole Hook (Not Shown)
 
-
 animateInHook :: HookProperties -> Double -> W.Solid
 animateInHook props@(HookProperties {..}) fraction =
     if fraction <= 1e-2
@@ -252,6 +251,86 @@ animateInHook props@(HookProperties {..}) fraction =
                     & W.translate arrowheadPosition
                     & (<> hookCurve props)
                     & iterate (W.rotate (unit _z) (pi * 2 * fraction / fromIntegral nHooks))
-                    & take nHooks 
+                    & take nHooks
                     & mconcat
             ]
+
+-- BLOCK: Properties Value 2
+
+properties2 = HookProperties
+    { hookRadius = 0.25
+    , sweepRadius = 1.25
+    , sweepAngle = degrees 240
+    , hoopRadius = 0.25
+    , hoopHeight = 3
+    , nHooks = 5
+    , arrowheadProperties = ArrowheadProperties
+        { arrowheadWidth = 1
+        , arrowheadHeight = 1.2
+        , arrowheadNotchDepth = 0.5
+        , arrowheadAngle = degrees 30
+        }
+    }
+
+-- BLOCK: Interpolated Properties
+
+interpolate :: Double -> Double -> Double -> Double
+interpolate t a b = (1 - t) * a + t * b
+
+interpolateArrowhead :: Double -> ArrowheadProperties -> ArrowheadProperties -> ArrowheadProperties
+interpolateArrowhead t a b =
+    let i f = interpolate t (f a) (f b)
+    in ArrowheadProperties
+        { arrowheadWidth = i arrowheadWidth
+        , arrowheadHeight = i arrowheadHeight
+        , arrowheadNotchDepth = i arrowheadNotchDepth
+        , arrowheadAngle = i arrowheadAngle
+        }
+
+interpolateProperties :: Double -> HookProperties -> HookProperties -> HookProperties
+interpolateProperties t a b =
+    let i f = interpolate t (f a) (f b)
+    in HookProperties
+        { hookRadius = i hookRadius
+        , sweepRadius = i sweepRadius
+        , sweepAngle = i sweepAngle
+        , hoopRadius = i hoopRadius
+        , hoopHeight = i hoopHeight
+        , nHooks = max (nHooks a) (nHooks b)
+        , arrowheadProperties =
+            interpolateArrowhead t (arrowheadProperties a) (arrowheadProperties b)
+        }
+
+-- BLOCK: Interpolated Hook
+
+hookAngles :: Int -> Int -> Double -> [Double]
+hookAngles nA nB t =
+    let n = max nA nB
+        angle m i = 2 * pi * fromIntegral ((i * m) `div` n) / fromIntegral m
+        blend i = interpolate t (angle nA i) (angle nB i)
+        groupOf m i = [ blend j | j <- [0 .. n - 1], angle m j == angle m i ]
+        minSeparation = degrees 10
+        snap m i a
+            | let g = groupOf m i
+            , length g > 1 && maximum g - minimum g < minSeparation = angle m i
+            | otherwise = a
+    in [ snap nA i . snap nB i $ blend i | i <- [0 .. n - 1] ]
+
+interpolatedHook :: HookProperties -> HookProperties -> Double -> W.Solid
+interpolatedHook propsA propsB t =
+    let props = interpolateProperties t propsA propsB
+        arrowheadPosition =
+            maybe (error "failed to get pathEndpoints" ) snd
+                $ W.pathEndpoints (hookCurvePath props)
+        single = arrowhead (hookRadius props) (arrowheadProperties props)
+            & W.rotate (unit _y) (pi - sweepAngle props)
+            & W.translate arrowheadPosition
+            & (<> hookCurve props)
+    in mconcat
+        [ hookHoop props
+        , hookShaft props
+        , mconcat
+            [ single & W.rotate (unit _z) a
+            | a <- hookAngles (nHooks propsA) (nHooks propsB) t
+            ]
+        ]

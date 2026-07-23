@@ -34,6 +34,7 @@ videoProps = def
     & videoOutputFile .~ "hook.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
+    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -201,6 +202,18 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
                 . easeInOutStay
 
+    let propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter = 
+            diffBlockWithFade blocknameA blocknameB $ \background -> do
+                WaterfallScene.animatedClipWithBackground def 5 background $ 
+                    toDiagram
+                        . W.uScale (1/7)
+                        . W.translate (negate $ unit _z) 
+                        . (Object.interpolatedHook propertiesBefore propertiesAfter) 
+                        . easeInOutSin
+                WaterfallScene.animatedClipWithBackground def 5 background $ 
+                    showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
+                        . easeInOutStay
 
-    --}
+    propertiesDiffBlock "Properties Value" "Properties Value 2" Object.properties Object.properties2
+
     setTidalOp $ Tidal.jumpMod 1 4 silence
