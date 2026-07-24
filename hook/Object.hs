@@ -255,20 +255,89 @@ animateInHook props@(HookProperties {..}) fraction =
                     & mconcat
             ]
 
--- BLOCK: Properties Value 2
+-- BLOCK: Properties Rotated Head
 
-properties2 = HookProperties
+propertiesRotatedHead = HookProperties
+    { hookRadius = 0.25
+    , sweepRadius = 1.25
+    , sweepAngle = degrees 200
+    , hoopRadius = 0.25
+    , hoopHeight = 2
+    , nHooks = 3
+    , arrowheadProperties = ArrowheadProperties 
+        { arrowheadWidth = 1
+        , arrowheadHeight = 1.2
+        , arrowheadNotchDepth = 0.5
+        , arrowheadAngle = degrees 90
+        }
+    }
+
+-- BLOCK: Properties Five Hooks
+
+propertiesFiveHooks = HookProperties
+    { hookRadius = 0.25
+    , sweepRadius = 1.25
+    , sweepAngle = degrees 200
+    , hoopRadius = 0.25
+    , hoopHeight = 2
+    , nHooks = 5
+    , arrowheadProperties = ArrowheadProperties 
+        { arrowheadWidth = 1
+        , arrowheadHeight = 1.2
+        , arrowheadNotchDepth = 0.5
+        , arrowheadAngle = degrees 0
+        }
+    }
+
+-- BLOCK: Properties High Sweep Angle
+
+propertiesHighSweepAngle = HookProperties
     { hookRadius = 0.25
     , sweepRadius = 1.25
     , sweepAngle = degrees 240
     , hoopRadius = 0.25
-    , hoopHeight = 3
+    , hoopHeight = 2
     , nHooks = 5
-    , arrowheadProperties = ArrowheadProperties
+    , arrowheadProperties = ArrowheadProperties 
         { arrowheadWidth = 1
         , arrowheadHeight = 1.2
         , arrowheadNotchDepth = 0.5
-        , arrowheadAngle = degrees 30
+        , arrowheadAngle = degrees 0
+        }
+    }
+
+-- BLOCK: Properties Low Sweep Angle
+
+propertiesLowSweepAngle = HookProperties
+    { hookRadius = 0.25
+    , sweepRadius = 1.25
+    , sweepAngle = degrees 90
+    , hoopRadius = 0.25
+    , hoopHeight = 2
+    , nHooks = 5
+    , arrowheadProperties = ArrowheadProperties 
+        { arrowheadWidth = 1
+        , arrowheadHeight = 1.2
+        , arrowheadNotchDepth = 0.5
+        , arrowheadAngle = degrees 0
+        }
+    }
+
+    
+-- BLOCK: Properties Chonky
+
+propertiesChonky = HookProperties
+    { hookRadius = 0.75
+    , sweepRadius = 1.25
+    , sweepAngle = degrees 180
+    , hoopRadius = 0.25
+    , hoopHeight = 1
+    , nHooks = 3
+    , arrowheadProperties = ArrowheadProperties 
+        { arrowheadWidth = 4
+        , arrowheadHeight = 1.2
+        , arrowheadNotchDepth = 0.5
+        , arrowheadAngle = degrees 0
         }
     }
 
@@ -309,7 +378,7 @@ hookAngles nA nB t =
         angle m i = 2 * pi * fromIntegral ((i * m) `div` n) / fromIntegral m
         blend i = interpolate t (angle nA i) (angle nB i)
         groupOf m i = [ blend j | j <- [0 .. n - 1], angle m j == angle m i ]
-        minSeparation = degrees 10
+        minSeparation = degrees 5
         snap m i a
             | let g = groupOf m i
             , length g > 1 && maximum g - minimum g < minSeparation = angle m i

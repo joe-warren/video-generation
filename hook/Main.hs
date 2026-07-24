@@ -53,6 +53,7 @@ animateDiagramLines diagram fraction =
 
 main :: IO ()
 main = Run.run videoProps $ do
+
     let codeBlockOno' duration srcfile props blockname = 
             addSvgDuration duration
             =<< CodeScene.codeScene props 1.4
@@ -79,7 +80,7 @@ main = Run.run videoProps $ do
             & W.rotate axis (angle * t)
             & toDiagram
         showRotating = showRotating' (unit _z)
-    
+
     let codeBlockWithFade blockname nextScene = do
             fullCode <- CodeScene.codeScene def 1.6
                 =<< CodeBlock.loadCodeBlock objectFile blockname
@@ -123,7 +124,7 @@ main = Run.run videoProps $ do
                 WaterfallScene.animatedClipWithBackground def 5 background $ 
                     showRotating (1/7) (2*pi) (center object)  
                     . easeInOutStay
-
+                    
     codeBlockOno "Intro"
 
     addImageDuration 3 "hook/images/thingiverse.png"
@@ -214,6 +215,14 @@ main = Run.run videoProps $ do
                     showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
                         . easeInOutStay
 
-    propertiesDiffBlock "Properties Value" "Properties Value 2" Object.properties Object.properties2
+    propertiesDiffBlock "Properties Value" "Properties Rotated Head" Object.properties Object.propertiesRotatedHead
+
+    propertiesDiffBlock "Properties Rotated Head" "Properties Five Hooks" Object.propertiesRotatedHead Object.propertiesFiveHooks
+    
+    propertiesDiffBlock "Properties Five Hooks" "Properties High Sweep Angle" Object.propertiesFiveHooks Object.propertiesHighSweepAngle
+    
+    propertiesDiffBlock "Properties High Sweep Angle" "Properties Low Sweep Angle" Object.propertiesHighSweepAngle Object.propertiesLowSweepAngle
+
+    propertiesDiffBlock "Properties Low Sweep Angle" "Properties Chonky" Object.propertiesLowSweepAngle Object.propertiesChonky
 
     setTidalOp $ Tidal.jumpMod 1 4 silence
