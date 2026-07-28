@@ -91,8 +91,7 @@ pipes =
 vibes = 
       sound "superfm" # amp 0.8
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0 
-      # fmratio 1 1  # fmratio 2 3.5 
-      # fmmod 1 2 0.6 # fmmod 1 3 0.2 # fmmod 3 2 1 
+      # fmratio 1 1  # fmratio 2 3.5 # fmmod 1 2 0.6
       # fmeglevel 1 1 1 # fmeglevel 1 2 0.3 # fmeglevel 1 3 0 # fmeglevel 1 4 0
       # fmegrate 1 1 20 # fmegrate 1 2 0.5 # fmegrate 1 3 0.2 # fmegrate 1 4 1
       # fmeglevel 2 1 1 # fmeglevel 2 2 0 # fmeglevel 2 3 0 # fmeglevel 2 4 0
