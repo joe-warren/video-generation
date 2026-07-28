@@ -32,9 +32,9 @@ import qualified Codec.Picture as JP
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ False
+    & videoGenerateAudio .~ True
     & videoGenerateVideo .~ True
-    & videoConvertViaPng .~ True
+    & videoConvertViaPng .~ False
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -138,12 +138,15 @@ main = Run.run videoProps $ do
 
     codeBlockOno "Properties Def"
 
-    setTidalPattern Audio.verse1
+    codeBlockOno "Degrees"
+
+    codeBlockOno "Properties Value"
+
+    setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse1)
+    -- setTidalPattern Audio.verse1
     codeBlockAudioOno "Verse 1"
     codeBlockAudioOno "Play Verse 1"
 
-    codeBlockOno "Degrees"
-    codeBlockOno "Properties Value"
 
     codeBlockOno "Hoop and Shaft"
     codeBlockOno "Hook Curve"
@@ -159,7 +162,7 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
                 . easeInOutStay
 
-    setTidalPattern Audio.verse2
+    setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse2)
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
 
@@ -217,6 +220,8 @@ main = Run.run videoProps $ do
 
     propertiesDiffBlock "Properties Value" "Properties Rotated Head" Object.properties Object.propertiesRotatedHead
 
+    setTidalPattern Audio.verse2
+
     propertiesDiffBlock "Properties Rotated Head" "Properties Five Hooks" Object.propertiesRotatedHead Object.propertiesFiveHooks
     
     propertiesDiffBlock "Properties Five Hooks" "Properties High Sweep Angle" Object.propertiesFiveHooks Object.propertiesHighSweepAngle
@@ -226,3 +231,9 @@ main = Run.run videoProps $ do
     propertiesDiffBlock "Properties Low Sweep Angle" "Properties Chonky" Object.propertiesLowSweepAngle Object.propertiesChonky
 
     setTidalOp $ Tidal.jumpMod 1 4 silence
+
+    codeBlockOno "Printed"
+
+    addImageDuration 3 "hook/images/printed.jpg"
+
+    codeBlockOno "Links"

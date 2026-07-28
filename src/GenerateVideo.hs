@@ -32,9 +32,10 @@ import System.FilePath (takeExtension)
 import Effectful.State.Static.Local
 import Control.Lens
 import System.Directory (copyFile)
-import Data.ByteString as BS
+import qualified Data.ByteString as BS
 import Data.ByteString.Base64 (encodeBase64)
 import Data.Base64.Types (extractBase64)
+import Data.Char (toLower)
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
 
@@ -98,7 +99,13 @@ runWriteFrames = do
                 WriteFileFrame file -> do
 
                     contents <- liftIO $ BS.readFile file
-                    liftIO . writeSVG $ imageFile vd ("data:image/png;base64," <> T.unpack (extractBase64 (encodeBase64 contents)))
+
+                    let replaceJpg "jpg" = "jpeg"
+                        replaceJpg x = x 
+                        mimeSuffix = replaceJpg . fmap toLower . drop 1 . takeExtension $ file
+                        header = "data:image/" <> mimeSuffix <> ";base64,"
+
+                    liftIO . writeSVG $ imageFile vd (header <> T.unpack (extractBase64 (encodeBase64 contents)))
                 WriteSvgFrame document -> liftIO $ writeSVG document
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a

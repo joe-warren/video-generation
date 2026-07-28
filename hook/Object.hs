@@ -403,3 +403,14 @@ interpolatedHook propsA propsB t =
             | a <- hookAngles (nHooks propsA) (nHooks propsB) t
             ]
         ]
+
+-- BLOCK: Printed
+
+-- I 3D printed it
+
+-- BLOCK: Links
+
+-- Links to the model, and to the sourcecode
+-- are in the video description
+--
+-- Thanks for watching
