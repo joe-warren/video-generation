@@ -20,18 +20,6 @@ introRhythm =
     ]
 
 -- BLOCK: Parameter Setup
-addSwing = swingBy (1/6) 8
-
-amp1 = pF "amp1"
-amp2 = pF "amp2"
-amp3 = pF "amp3"
-amp4 = pF "amp4"
-amp5 = pF "amp5"
-amp6 = pF "amp6"
-
-egrate11 = pF "egrate11"
-eglevel12 = pF "eglevel12"
-eglevel13 = pF "eglevel13"
 
 -- sets the amount of operator 'op' in the superfm output mix
 -- (1 <= op <= 6)
@@ -98,6 +86,8 @@ vibes =
       # fmegrate 2 1 20 # fmegrate 2 2 0.7 # fmegrate 2 3 1 # fmegrate 2 4 1
 
 -- BLOCK: Play Intro
+
+addSwing = swingBy (1/6) 8
 
 intro = addSwing $ stack
     [ cat introMelody # pipes
