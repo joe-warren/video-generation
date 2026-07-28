@@ -58,27 +58,27 @@ fmegrate op step = pF ("egrate" ++ show op ++ show step)
 
 -- BLOCK: Pipes
 
--- Parameters for an FM Synth
-pipes = 
+-- Parameters for an FM synth
+pipes =
       sound "superfm" # amp 1.6
-      # fmamp 1 1 # fmamp 2 0 # fmamp 3 1 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0 
+      # fmamp 1 1 # fmamp 2 0 # fmamp 3 1 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
       # fmratio 1 1 # fmratio 2 0.5 # fmratio 3 0.26
       # fmdetune 2 1
-      # fmmod 1 1 5 # fmmod 1 2 0.5 # fmmod 1 3 0.2 # fmmod 3 2 2 
+      # fmmod 1 1 5 # fmmod 1 2 0.5 # fmmod 1 3 0.2 # fmmod 3 2 2
       # fmeglevel 1 1 1 # fmeglevel 1 2 0.25 # fmeglevel 1 3 0 # fmeglevel 1 4 0
       # fmegrate 1 1 20 # fmegrate 1 2 0.05 # fmegrate 1 3 0.1 # fmegrate 1 4 1
       # fmeglevel 2 1 1 # fmeglevel 2 2 0 # fmeglevel 2 3 0 # fmeglevel 2 4 0
       # fmegrate 2 1 2 # fmegrate 2 2 0.3 # fmegrate 2 3 0.7 # fmegrate 2 4 1
       # fmeglevel 3 1 1 # fmeglevel 3 2 0.2 # fmeglevel 3 3 0 # fmeglevel 3 4 1
-      # fmegrate 3 1 20  # fmegrate 3 2 0.5 # fmegrate 3 3 0.4 # fmegrate 3 4 1
+      # fmegrate 3 1 20 # fmegrate 3 2 0.5 # fmegrate 3 3 0.4 # fmegrate 3 4 1
       # room (range 0.1 0.5 (fast 10 $ tri))
 
 
 -- BLOCK: Vibes
-      
-vibes = 
+
+vibes =
       sound "superfm" # amp 0.8
-      # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0 
+      # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
       # fmratio 1 1 # fmratio 2 3.5 # fmmod 1 2 0.6
       # fmeglevel 1 1 1 # fmeglevel 1 2 0.3 # fmeglevel 1 3 0 # fmeglevel 1 4 0
       # fmegrate 1 1 20 # fmegrate 1 2 0.5 # fmegrate 1 3 0.2 # fmegrate 1 4 1
