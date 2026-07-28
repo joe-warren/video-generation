@@ -151,7 +151,7 @@ linesToSvg vd cs lines =
             & join
                 
         frameColor = fromMaybe black $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
-        frameBGColor = fromMaybe white $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
+        frameBGColor = fromMaybe white $ convertColor <$> Sky.backgroundColor (cs ^. codeSceneStyle)
 
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
