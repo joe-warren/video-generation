@@ -18,8 +18,8 @@ introRhythm =
     , n "g'major d'major"
     , n "a'dom7  d'major"
     ]
--- BLOCK: Pipes
 
+-- BLOCK: Parameter Setup
 addSwing = swingBy (1/6) 8
 
 amp1 = pF "amp1"
@@ -67,60 +67,44 @@ fmeglevel op step = pF ("eglevel" ++ show op ++ show step)
 fmegrate :: Int -> Int -> Pattern Double -> ControlPattern
 fmegrate op step = pF ("egrate" ++ show op ++ show step)
 
+
+-- BLOCK: Pipes
+
+-- Parameters for an FM Synth
 pipes = 
       sound "superfm" # amp 1.6
-      # fmamp 1 1      -- amplitudes default to '1', so probably need to set all 6 of them...
-      # fmamp 2 0
-      # fmamp 3 1
-      # fmamp 4 0
-      # fmamp 5 0
-      # fmamp 6 0
-      # fmratio 1 1 -- oscillator frequency is note * ratio + detune Hz.
-      # fmratio 2 0.5 -- (range 0.25 20 (slow 3 $ tri))
+      # fmamp 1 1 # fmamp 2 0 # fmamp 3 1 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0 
+      # fmratio 1 1  # fmratio 2 0.5 # fmratio 3 0.26
       # fmdetune 2 1
-      # fmratio 3 0.26
-      # fmmod 1 1 5   
-      # fmmod 1 2 0.5 -- (range 0 4 (slow 4 $ sine))   -- fmmod a b Pattern  = modulate op a with op b..
-      # fmmod 1 3 0.2 -- (range 0.1 0.2 (slow 3 $ tri))
-      # fmmod 3 2 2 -- (range 0 3 (slow 2 $ sine))
-      # fmeglevel 1 1 "1" -- envelope generator has 4 rates and 4 steps for each operator...
-      # fmeglevel 1 2 "0.25"
-      # fmeglevel 1 3 "0"
-      # fmeglevel 1 4 "0"
-      # fmegrate 1 1 "20"  
-      # fmegrate 1 2 "0.05"
-      # fmegrate 1 3 "0.1"
-      # fmegrate 1 4 "1"
-      # fmeglevel 2 1 "1" -- envelope generator has 4 rates and 4 steps for each operator...
-      # fmeglevel 2 2 "0"
-      # fmeglevel 2 3 "0"
-      # fmeglevel 2 4 "0"
-      # fmegrate 2 1 "2"  
-      # fmegrate 2 2 "0.3"
-      # fmegrate 2 3 "0.7"
-      # fmegrate 2 4 "1"
-      # fmeglevel 3 1 "1" -- envelope generator has 4 rates and 4 steps for each operator...
-      # fmeglevel 3 2 "0.2"
-      # fmeglevel 3 3 "0"
-      # fmeglevel 3 4 "1"
-      # fmegrate 3 1 "20"  
-      # fmegrate 3 2 "0.5"
-      # fmegrate 3 3 "0.4"
-      # fmegrate 3 4 "1"
+      # fmmod 1 1 5 # fmmod 1 2 0.5 # fmmod 1 3 0.2 # fmmod 3 2 2 
+      # fmeglevel 1 1 1 # fmeglevel 1 2 0.25 # fmeglevel 1 3 0 # fmeglevel 1 4 0
+      # fmegrate 1 1 20 # fmegrate 1 2 0.05 # fmegrate 1 3 0.1 # fmegrate 1 4 1
+      # fmeglevel 2 1 1 # fmeglevel 2 2 0 # fmeglevel 2 3 0 # fmeglevel 2 4 0
+      # fmegrate 2 1 2 # fmegrate 2 2 0.3 # fmegrate 2 3 0.7 # fmegrate 2 4 1
+      # fmeglevel 3 1 1 # fmeglevel 3 2 0.2 # fmeglevel 3 3 0 # fmeglevel 3 4 1
+      # fmegrate 3 1 20  # fmegrate 3 2 0.5 # fmegrate 3 3 0.4 # fmegrate 3 4 1
       # room (range 0.1 0.5 (fast 10 $ tri))
+
+
+-- BLOCK: Vibes
+      
+vibes = 
+      sound "superfm" # amp 0.8
+      # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0 
+      # fmratio 1 1  # fmratio 2 3.5 
+      # fmmod 1 2 0.6 # fmmod 1 3 0.2 # fmmod 3 2 1 
+      # fmeglevel 1 1 1 # fmeglevel 1 2 0.3 # fmeglevel 1 3 0 # fmeglevel 1 4 0
+      # fmegrate 1 1 20 # fmegrate 1 2 0.5 # fmegrate 1 3 0.2 # fmegrate 1 4 1
+      # fmeglevel 2 1 1 # fmeglevel 2 2 0 # fmeglevel 2 3 0 # fmeglevel 2 4 0
+      # fmegrate 2 1 20 # fmegrate 2 2 0.7 # fmegrate 2 3 1 # fmegrate 2 4 1
 
 -- BLOCK: Play Intro
 
 intro = addSwing $ stack
     [ cat introMelody # pipes
-    ,  rolled (cat introRhythm -| n "24"
-        # sound "superfm"
-        # n 0 
-        # amp1 1 # amp2 0 # amp3 0 # amp4 0 # amp5 0 # amp6 0
-        # egrate11 0.5
-        # eglevel12 0.1
-        # eglevel13 1)
-    ] # cps (180/60/8)
+    , rolled (cat introRhythm -| n "24" 
+        # vibes
+    )] # cps (180/60/8)
 
 -- BLOCK: Verse 1
 
@@ -148,9 +132,8 @@ melodyInstrument x = stack
     ] # legato 1.20
 
 rhythmInstrument x = rolledBy (1/16) (x -| n "24*8")
-        # sound "supervibe" # decay 0.5
-        # dry 0.25 # room 0.25 # size 0.5
-        # amp "<0.6 0.2*3>*2"
+        # vibes
+        # amp "<2 1.2*3>*2"
 
 verse1 =
     addSwing $ stack
