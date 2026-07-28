@@ -148,7 +148,6 @@ codeBlockWithImageBackground blockname imageFilename alignment duration = do
 
 main :: IO ()
 main = Run.run videoProps $ do
-                    
     codeBlockWithImageBackground "Intro" "hook/images/thingiverse.png" CodeScene.Bottom 3.0
 
     codeBlockOno "Imports"
@@ -158,6 +157,7 @@ main = Run.run videoProps $ do
     codeBlockAudioOno "Audio Intro"
     codeBlockAudioOno "Pipes"
     codeBlockAudioOno "Vibes"
+    codeBlockAudioOno "Play Intro"
 
     codeBlockOno "Properties Def"
 
