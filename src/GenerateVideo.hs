@@ -7,7 +7,6 @@
 , getCurrentOffsetSeconds
 , addSvgFrame
 , addSvgDuration
-, addImageDuration
 , runBuildVideo
 , runWriteFrames
 , runTrackOffset
@@ -21,39 +20,28 @@ import Data.Text (Text)
 import qualified Data.Text.IO as T
 import qualified System.Process as Process
 import qualified Graphics.Svg as Svg
-import SvgUtils (imageFile)
 import Effectful
 import Effectful.Dispatch.Dynamic
-import Control.Monad ((<=<), replicateM_, when)
+import Control.Monad (replicateM_, when)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
-import System.FilePath (takeExtension)
 import Effectful.State.Static.Local
 import Control.Lens
-import System.Directory (copyFile)
-import qualified Data.ByteString as BS
-import Data.ByteString.Base64 (encodeBase64)
-import Data.Base64.Types (extractBase64)
-import Data.Char (toLower)
 
 data FramePath = FramePath { framePathFilePath :: FilePath } 
 
 data WriteFrames :: Effect where
     WriteSvgFrame :: Svg.Document -> WriteFrames m FramePath
-    WriteFileFrame :: FilePath -> WriteFrames m FramePath
 
 type instance DispatchOf WriteFrames = Dynamic
 
-writeFrame :: (WriteFrames :> es) => Frame -> Eff es FramePath
-writeFrame (SvgFrame doc) = send $ WriteSvgFrame doc
-writeFrame (FileFrame path) = send $ WriteFileFrame path
-
-data Frame = SvgFrame Svg.Document | FileFrame FilePath
+writeFrame :: (WriteFrames :> es) => Svg.Document -> Eff es FramePath
+writeFrame doc = send $ WriteSvgFrame doc
 
 data BuildVideo :: Effect where
-    AddFrame :: Frame -> BuildVideo m ()
-    AddDuration :: Double -> Frame -> BuildVideo m ()
+    AddFrame :: Svg.Document -> BuildVideo m ()
+    AddDuration :: Double -> Svg.Document -> BuildVideo m ()
 
 type instance DispatchOf BuildVideo = Dynamic
 
@@ -62,15 +50,11 @@ data TrackOffset :: Effect where
 
 type instance DispatchOf TrackOffset = Dynamic
 
-
 addSvgFrame :: (BuildVideo :> es) => Svg.Document -> Eff es ()
-addSvgFrame = send . AddFrame . SvgFrame
+addSvgFrame = send . AddFrame
 
 addSvgDuration :: (BuildVideo :> es) => Double -> Svg.Document -> Eff es ()
-addSvgDuration dur = send . AddDuration dur . SvgFrame
-
-addImageDuration :: (BuildVideo :> es) => Double -> FilePath -> Eff es ()
-addImageDuration dur = send . AddDuration dur . FileFrame
+addSvgDuration dur = send . AddDuration dur 
 
 getCurrentOffsetSeconds :: (TrackOffset :> es) =>  Eff es Double
 getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
@@ -78,35 +62,21 @@ getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames = do
     reinterpret (evalState (0::Integer)) $ \_ -> \action -> do
-            (index::Integer) <- get
-            vd <- ask
-            
-            modify (+1) 
-            
-            let writeSVG document = do
+            case action of 
+                WriteSvgFrame document -> do
+                    (index::Integer) <- get
+                    modify (+1) 
+                    vd <- ask
                     let name = printf "%04d" index <> ".svg"
                         path = vd ^. videoScratchDir <> "/" <> name
-                    Svg.saveXmlFile path document
+                    liftIO $ Svg.saveXmlFile path document
                     if (vd ^. videoConvertViaPng) 
                         then do
                             let pngName = printf "%04d" index <> ".png"
-                            let pngPath = vd ^. videoScratchDir <> "/" <> pngName
-                            convertFile path pngPath
+                            let pngPath = (vd ^. videoScratchDir) <> "/" <> pngName
+                            liftIO $ convertFile path pngPath
                             return $ FramePath pngName
                         else return $ FramePath name
-
-            case action of 
-                WriteFileFrame file -> do
-
-                    contents <- liftIO $ BS.readFile file
-
-                    let replaceJpg "jpg" = "jpeg"
-                        replaceJpg x = x 
-                        mimeSuffix = replaceJpg . fmap toLower . drop 1 . takeExtension $ file
-                        header = "data:image/" <> mimeSuffix <> ";base64,"
-
-                    liftIO . writeSVG $ imageFile vd (header <> T.unpack (extractBase64 (encodeBase64 contents)))
-                WriteSvgFrame document -> liftIO $ writeSVG document
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
 runTrackOffset = 

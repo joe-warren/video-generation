@@ -31,6 +31,7 @@ library
       Eval
       GenerateAudio
       GenerateVideo
+      ImageScene
       Run
       SvgUtils
       Transitions

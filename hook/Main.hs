@@ -24,7 +24,8 @@ import Transitions (easeInOutSin)
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp)
-import GenerateVideo (addSvgDuration, addImageDuration)
+import GenerateVideo (addSvgDuration)
+import ImageScene (addImageDuration)
 import CodeScene (codeScene)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
