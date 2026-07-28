@@ -101,9 +101,8 @@ vibes =
 
 intro = addSwing $ stack
     [ cat introMelody # pipes
-    , rolled (cat introRhythm -| n "24" 
-        # vibes
-    )] # cps (180/60/8)
+    , rolled (cat introRhythm -| n "24" # vibes)
+    ] # cps (180/60/8)
 
 -- BLOCK: Verse 1
 
