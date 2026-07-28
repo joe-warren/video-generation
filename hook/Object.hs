@@ -2,12 +2,15 @@ module Object where
 
 -- BLOCK:Intro
 
--- In 2018, I designed a parametric hook, using OpenSCAD
+-- In 2018, I designed a parametric hook
+-- 
+-- I used OpenSCAD
 
 -- BLOCK:Imports
 
 -- Since then, I've built a Haskell CAD framework, called Waterfall-CAD
--- Lets Haskell and Waterfall-CAD to reimplement the hook
+-- 
+-- Using Haskell, and Waterfall-CAD, lets reimplement the hook
 
 -- Imports
 import Linear

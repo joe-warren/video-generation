@@ -33,7 +33,7 @@ import qualified Codec.Picture as JP
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ True
+    & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
@@ -58,13 +58,13 @@ codeBlockOno' duration srcfile props blockname =
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
 objectFile = "hook/Object.hs"
-codeBlockOno = codeBlockOno' 0.8 objectFile def
+codeBlockOno = codeBlockOno' 0.8 objectFile (def & CodeScene.codeSceneAlignment .~ CodeScene.Bottom)
 audioFile = "hook/Audio.hs"
 audioCodeBlockParams = 
     def
     & CodeScene.codeSceneStyle .~ Sky.breezeDark
 
-codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
+-- codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
 centerBasedOn target solid = 
     case W.axisAlignedBoundingBox target of
@@ -140,10 +140,11 @@ main :: IO ()
 main = Run.run videoProps $ do
                     
     codeBlockOno "Intro"
-
     addImageDuration 3 "hook/images/thingiverse.png"
 
     codeBlockOno "Imports"
+
+    {--
 
     setTidalOp Tidal.resetCycles
     setTidalPattern Audio.intro
@@ -240,3 +241,4 @@ main = Run.run videoProps $ do
     addImageDuration 3 "hook/images/printed.jpg"
 
     codeBlockOno "Links"
+    --}

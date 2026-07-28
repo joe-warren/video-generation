@@ -23,12 +23,16 @@ import Effectful.Error.Static
 import Data.Default
 import Data.Algorithm.Diff (Diff, PolyDiff (..), getGroupedDiffBy)
 
+data Alignment = Top | Middle | Bottom 
+    deriving Show
+
 data CodeSceneProps = CodeSceneProps
     { _codeSceneFileExtension :: Text
     , _codeSceneColumns :: Integer
     , _codeSceneBorderColumns :: Integer
     , _codeSceneFrameWidth :: Double
     , _codeSceneStyle :: Sky.Style
+    , _codeSceneAlignment :: Alignment
     } deriving (Show)
 
 instance Default CodeSceneProps where
@@ -38,6 +42,7 @@ instance Default CodeSceneProps where
         , _codeSceneBorderColumns = 2 
         , _codeSceneFrameWidth = 2.0
         , _codeSceneStyle = Sky.haddock
+        , _codeSceneAlignment = Middle
         }
 
 makeLenses ''CodeSceneProps
@@ -120,7 +125,10 @@ linesToSvg vd cs lines =
 
         xDelta = fromIntegral $ (vd ^. videoWidth - (charWidth vd cs * ((cs ^. codeSceneColumns) + 2 * cs ^. codeSceneBorderColumns))) `div` 2
         xOff = xDelta + (fromIntegral $ charWidth vd cs * cs ^. codeSceneBorderColumns)
-        yOff = fromIntegral ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
+        yOff = fromIntegral $ case cs ^. codeSceneAlignment of 
+            Top -> lineHeight vd cs
+            Middle -> (vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2
+            Bottom -> vd ^. videoHeight - fromIntegral (length lines + 2) * lineHeight vd cs
 
         transform (i, elems) =  second (translate xOff (yOff + fromIntegral (lineHeight vd cs) * i)) <$> elems
         elems = lines
@@ -142,7 +150,7 @@ linesToSvg vd cs lines =
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ 
                     ( Svg.Px $ xDelta + (fromIntegral (cs ^. codeSceneBorderColumns) - 0.5) * fromIntegral (charWidth vd cs)
-                    , Svg.Px . fromInteger $ ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
+                    , Svg.Px yOff
                     )
                 & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((cs ^. codeSceneColumns + 1) * charWidth vd cs)))
                 & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd cs))
