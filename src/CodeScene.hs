@@ -22,6 +22,7 @@ import Effectful.Reader.Static
 import Effectful.Error.Static
 import Data.Default
 import Data.Algorithm.Diff (Diff, PolyDiff (..), getGroupedDiffBy)
+import GHC.Float (double2Float)
 
 data Alignment = Top | Middle | Bottom 
     deriving Show
@@ -31,9 +32,19 @@ data CodeSceneProps = CodeSceneProps
     , _codeSceneColumns :: Integer
     , _codeSceneBorderColumns :: Integer
     , _codeSceneFrameWidth :: Double
+    , _codeSceneFrameAlpha :: Double
     , _codeSceneStyle :: Sky.Style
     , _codeSceneAlignment :: Alignment
-    } deriving (Show)
+    , _codeSceneBackground :: Sky.Style -> VideoProps -> Svg.Document
+    }
+
+
+setAlpha :: Double -> JP.PixelRGBA8 -> JP.PixelRGBA8
+setAlpha alpha (JP.PixelRGBA8 r g b _) = JP.PixelRGBA8 r g b (floor (alpha * 255))
+
+convertColor :: Sky.Color -> JP.PixelRGBA8
+convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
+
 
 instance Default CodeSceneProps where
     def = CodeSceneProps 
@@ -41,8 +52,12 @@ instance Default CodeSceneProps where
         , _codeSceneColumns = 80
         , _codeSceneBorderColumns = 2 
         , _codeSceneFrameWidth = 2.0
+        , _codeSceneFrameAlpha = 0.75
         , _codeSceneStyle = Sky.haddock
         , _codeSceneAlignment = Middle
+        , _codeSceneBackground = \style ->
+            let backgroundColor = fromMaybe white $ convertColor <$> Sky.backgroundColor style
+            in (`blankCanvas` backgroundColor)
         }
 
 makeLenses ''CodeSceneProps
@@ -83,8 +98,6 @@ highlight extension text = do
     wrapTokenizerError $ Sky.tokenize tokenizerConfig syntax text
 
 
-convertColor :: Sky.Color -> JP.PixelRGBA8
-convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
 
 tokenColour :: CodeSceneProps -> Sky.TokenType -> JP.PixelRGBA8
 tokenColour cs tokType =
@@ -136,15 +149,9 @@ linesToSvg vd cs lines =
             & zip [1..]
             & fmap transform
             & join
-        backgroundColor = fromMaybe white $ convertColor <$> Sky.backgroundColor (cs ^. codeSceneStyle)
-        background = Svg.RectangleTree $ 
-            Svg.defaultSvg 
-                & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
-                & Svg.rectWidth .~ w
-                & Svg.rectHeight .~ h
-                & colour backgroundColor
                 
         frameColor = fromMaybe black $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
+        frameBGColor = fromMaybe white $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
 
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
@@ -154,14 +161,19 @@ linesToSvg vd cs lines =
                     )
                 & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((cs ^. codeSceneColumns + 1) * charWidth vd cs)))
                 & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd cs))
-                & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
                 & strokeColour frameColor
                 & strokeWidth 2
+                & colour frameBGColor
+                & Svg.drawAttr . Svg.fillOpacity .~ Just (double2Float (cs ^. codeSceneFrameAlpha))
 
         makePages _ [] = []
         makePages prev ((letterType, letter):xs) = 
-            let group = Svg.GroupTree $ Svg.Group mempty (background : frame : letter : prev) Nothing Svg.defaultSvg
-                document = Svg.Document Nothing (Just w) (Just h) [group] mempty mempty mempty mempty
+            let group = Svg.GroupTree $ Svg.Group mempty (frame : letter : prev) Nothing Svg.defaultSvg
+                document = 
+                    (cs ^. codeSceneBackground)
+                        (cs ^. codeSceneStyle)
+                        vd 
+                    & Svg.elements %~ (<> [group])
             in (letterType, document) : makePages (letter:prev) xs
         in makePages [] elems
 

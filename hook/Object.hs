@@ -410,10 +410,7 @@ interpolatedHook propsA propsB t =
 -- BLOCK: Printed
 
 -- I 3D printed it
-
--- BLOCK: Links
-
--- Links to the model, and to the sourcecode
--- are in the video description
+--
+-- Links to the model, and to the sourcecode, are in the video description
 --
 -- Thanks for watching

@@ -25,15 +25,15 @@ import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp)
 import GenerateVideo (addSvgDuration)
-import ImageScene (addImageDuration)
-import CodeScene (codeScene)
+import ImageScene (addImageDuration, loadImage)
+import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
 
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ False
+    & videoGenerateAudio .~ True
     & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
@@ -58,13 +58,15 @@ codeBlockOno' duration srcfile props blockname =
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
 objectFile = "hook/Object.hs"
-codeBlockOno = codeBlockOno' 0.8 objectFile (def & CodeScene.codeSceneAlignment .~ CodeScene.Bottom)
+codeBlockOno = codeBlockOno' 0.8 objectFile def
+
 audioFile = "hook/Audio.hs"
+audioCodeBlockParams :: CodeScene.CodeSceneProps
 audioCodeBlockParams = 
     def
     & CodeScene.codeSceneStyle .~ Sky.breezeDark
 
--- codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
+codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
 centerBasedOn target solid = 
     case W.axisAlignedBoundingBox target of
@@ -136,15 +138,20 @@ propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter =
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
                 . easeInOutStay
 
+                
+codeBlockWithImageBackground blockname imageFilename alignment duration = do 
+    image <- loadImage imageFilename
+    let props = def 
+            & CodeScene.codeSceneAlignment .~ alignment
+            & CodeScene.codeSceneBackground .~ const (const image) 
+    codeBlockOno' duration objectFile props blockname
+
 main :: IO ()
 main = Run.run videoProps $ do
                     
-    codeBlockOno "Intro"
-    addImageDuration 3 "hook/images/thingiverse.png"
+    codeBlockWithImageBackground "Intro" "hook/images/thingiverse.png" CodeScene.Bottom 3.0
 
     codeBlockOno "Imports"
-
-    {--
 
     setTidalOp Tidal.resetCycles
     setTidalPattern Audio.intro
@@ -236,9 +243,4 @@ main = Run.run videoProps $ do
 
     setTidalOp $ Tidal.jumpMod 1 4 silence
 
-    codeBlockOno "Printed"
-
-    addImageDuration 3 "hook/images/printed.jpg"
-
-    codeBlockOno "Links"
-    --}
+    codeBlockWithImageBackground "Printed" "hook/images/printed.jpg" CodeScene.Bottom 10
