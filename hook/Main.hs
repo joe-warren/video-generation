@@ -52,79 +52,92 @@ animateDiagramLines diagram fraction =
         , line <-  W.diagramLines lineType visibility diagram
         ]
 
-main :: IO ()
-main = Run.run videoProps $ do
-
-    let codeBlockOno' duration srcfile props blockname = 
+codeBlockOno' duration srcfile props blockname = 
             addSvgDuration duration
             =<< CodeScene.codeScene props 1.4
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
-    let objectFile = "hook/Object.hs"
-        codeBlockOno = codeBlockOno' 0.8 objectFile def
-        audioFile = "hook/Audio.hs"
-        audioCodeBlockParams = 
-            def
-            & CodeScene.codeSceneStyle .~ Sky.breezeDark
-        codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
+objectFile = "hook/Object.hs"
+codeBlockOno = codeBlockOno' 0.8 objectFile def
+audioFile = "hook/Audio.hs"
+audioCodeBlockParams = 
+    def
+    & CodeScene.codeSceneStyle .~ Sky.breezeDark
 
-    let centerBasedOn target solid = 
-            case W.axisAlignedBoundingBox target of
-                Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
-                Nothing -> solid
-        center = join centerBasedOn
+codeBlockAudioOno = codeBlockOno' 0.8 audioFile audioCodeBlockParams
 
-    let toDiagram =
-            W.solidDiagram (V3 2 2 1)
-        showRotating' axis scale angle solid t = solid
-            & W.uScale scale 
-            & W.rotate axis (angle * t)
-            & toDiagram
-        showRotating = showRotating' (unit _z)
+centerBasedOn target solid = 
+    case W.axisAlignedBoundingBox target of
+        Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
+        Nothing -> solid
 
-    let codeBlockWithFade blockname nextScene = do
-            fullCode <- CodeScene.codeScene def 1.6
-                =<< CodeBlock.loadCodeBlock objectFile blockname
-            addSvgDuration 1.2 fullCode
+center = join centerBasedOn
 
-            fadedCode <- animate 0.4 
-                ( SvgUtils.addBackground SvgUtils.white 
-                . SvgUtils.makeOpaque fullCode 
-                . (+ 1.0)
-                . (* (-0.925))
+toDiagram = W.solidDiagram (V3 2 2 1)
+showRotating' axis scale angle solid t =
+    solid
+    & W.uScale scale 
+    & W.rotate axis (angle * t)
+    & toDiagram
+showRotating = showRotating' (unit _z)
+
+codeBlockWithFade blockname nextScene = do
+    fullCode <- CodeScene.codeScene def 1.6
+        =<< CodeBlock.loadCodeBlock objectFile blockname
+    addSvgDuration 1.2 fullCode
+
+    fadedCode <- animate 0.4 
+        ( SvgUtils.addBackground SvgUtils.white 
+        . SvgUtils.makeOpaque fullCode 
+        . (+ 1.0)
+        . (* (-0.925))
+        . easeInOutSin
+        )
+
+    nextScene fadedCode
+
+diffBlockWithFade blockNameBefore blockName nextScene = do
+    codeBefore <- CodeBlock.loadCodeBlock objectFile blockNameBefore
+    codeAfter <- CodeBlock.loadCodeBlock objectFile blockName
+
+    fullCode <- CodeScene.diffScene def 1.6 codeBefore codeAfter
+
+    addSvgDuration 1.2 fullCode
+
+    fadedCode <- animate 0.4 
+        ( SvgUtils.addBackground SvgUtils.white 
+        . SvgUtils.makeOpaque fullCode 
+        . (+ 1.0)
+        . (* (-0.925))
+        . easeInOutSin
+        )
+
+    nextScene fadedCode
+
+codeBlockWithDiagram blockname diagram = 
+    codeBlockWithFade blockname $ \background -> 
+        WaterfallScene.stillClipWithBackground def 2 background diagram
+
+codeBlockWithObject blockname object = do
+    codeBlockWithFade blockname $ \background -> 
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (center object)  
+            . easeInOutStay
+
+propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter = 
+    diffBlockWithFade blocknameA blocknameB $ \background -> do
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            toDiagram
+                . W.uScale (1/7)
+                . W.translate (negate $ unit _z) 
+                . (Object.interpolatedHook propertiesBefore propertiesAfter) 
                 . easeInOutSin
-                )
+        WaterfallScene.animatedClipWithBackground def 5 background $ 
+            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
+                . easeInOutStay
 
-            nextScene fadedCode
-
-    let diffBlockWithFade blockNameBefore blockName nextScene = do
-            
-            codeBefore <- CodeBlock.loadCodeBlock objectFile blockNameBefore
-            codeAfter <- CodeBlock.loadCodeBlock objectFile blockName
-
-            fullCode <- CodeScene.diffScene def 1.6 codeBefore codeAfter
-
-            addSvgDuration 1.2 fullCode
-
-            fadedCode <- animate 0.4 
-                ( SvgUtils.addBackground SvgUtils.white 
-                . SvgUtils.makeOpaque fullCode 
-                . (+ 1.0)
-                . (* (-0.925))
-                . easeInOutSin
-                )
-
-            nextScene fadedCode
-
-    let codeBlockWithDiagram blockname diagram = 
-            codeBlockWithFade blockname $ \background -> 
-                WaterfallScene.stillClipWithBackground def 2 background diagram
-
-    let codeBlockWithObject blockname object = do
-            codeBlockWithFade blockname $ \background -> 
-                WaterfallScene.animatedClipWithBackground def 5 background $ 
-                    showRotating (1/7) (2*pi) (center object)  
-                    . easeInOutStay
+main :: IO ()
+main = Run.run videoProps $ do
                     
     codeBlockOno "Intro"
 
@@ -207,17 +220,6 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
                 . easeInOutStay
 
-    let propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter = 
-            diffBlockWithFade blocknameA blocknameB $ \background -> do
-                WaterfallScene.animatedClipWithBackground def 5 background $ 
-                    toDiagram
-                        . W.uScale (1/7)
-                        . W.translate (negate $ unit _z) 
-                        . (Object.interpolatedHook propertiesBefore propertiesAfter) 
-                        . easeInOutSin
-                WaterfallScene.animatedClipWithBackground def 5 background $ 
-                    showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
-                        . easeInOutStay
 
     propertiesDiffBlock "Properties Value" "Properties Rotated Head" Object.properties Object.propertiesRotatedHead
 
