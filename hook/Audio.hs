@@ -48,7 +48,7 @@ fmratio op = pF ("ratio" ++ show op)
 fmdetune :: Int -> Pattern Double -> ControlPattern
 fmdetune op = pF ("detune" ++ show op)
 
--- set the modulation of oerator opa by operator opb
+-- set the modulation of operator opa by operator opb
 -- if opa == opb, then the modulation amount is multiplied by the
 -- 'feedback' parameter
 fmmod :: Int -> Int -> Pattern Double -> ControlPattern
@@ -58,7 +58,7 @@ fmmod opa opb = pF ("mod" ++ show opa ++ show opb)
 fmfeedback :: Pattern Double -> ControlPattern
 fmfeedback = pF "feedback"
 
--- Envelope definition: each operator has an envelop with 4 steps
+-- Envelope definition: each operator has an envelope with 4 steps
 fmeglevel :: Int -> Int -> Pattern Double -> ControlPattern
 fmeglevel op step = pF ("eglevel" ++ show op ++ show step)
 
@@ -80,7 +80,7 @@ pipes =
       # fmdetune 2 1
       # fmratio 3 0.26
       # fmmod 1 1 5   
-      # fmmod 1 2 0.5 -- (range 0 4 (slow 4 $ sine))   -- fmod a b Pattern  = modulate op a with op b..
+      # fmmod 1 2 0.5 -- (range 0 4 (slow 4 $ sine))   -- fmmod a b Pattern  = modulate op a with op b..
       # fmmod 1 3 0.2 -- (range 0.1 0.2 (slow 3 $ tri))
       # fmmod 3 2 2 -- (range 0 3 (slow 2 $ sine))
       # fmeglevel 1 1 "1" -- envelope generator has 4 rates and 4 steps for each operator...

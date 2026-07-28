@@ -10,7 +10,7 @@ module Object where
 
 -- Since then, I've built a Haskell CAD framework, called Waterfall-CAD
 -- 
--- Using Haskell, and Waterfall-CAD, lets reimplement the hook
+-- Using Haskell and Waterfall-CAD, let's reimplement the hook
 
 -- Imports
 import Linear
@@ -60,13 +60,13 @@ properties = HookProperties
 
 -- BLOCK: Hoop and Shaft
 
-hookHoop:: HookProperties -> W.Solid
-hookHoop (HookProperties {..})= 
+hookHoop :: HookProperties -> W.Solid
+hookHoop (HookProperties {..}) = 
     W.torus (hoopRadius + hookRadius) hookRadius
         & W.rotate (unit _x) (pi/2)
         & W.translate ((hoopHeight + hoopRadius + hookRadius) *^ unit _z)
 
-hookShaft:: HookProperties -> W.Solid
+hookShaft :: HookProperties -> W.Solid
 hookShaft (HookProperties {..}) =
     W.unitCylinder 
         & W.scale (V3 hookRadius hookRadius hoopHeight)
@@ -139,8 +139,8 @@ singleHookWire props = mconcat
 -- BLOCK:Half Arrowhead
 
 halfArrowhead :: Double -> ArrowheadProperties -> W.Solid
-halfArrowhead hookRadius (ArrowheadProperties {..})= 
-    -- | set the arrowhead thickness, such that, for a given width,
+halfArrowhead hookRadius (ArrowheadProperties {..}) = 
+    -- set the arrowhead thickness, such that for a given width,
     -- the edge of the hook is tangent to the surface of the arrowhead 
     let y = arrowheadWidth / 2 
         l = y * arrowheadHeight / (arrowheadHeight + arrowheadNotchDepth)
@@ -156,15 +156,15 @@ halfArrowhead hookRadius (ArrowheadProperties {..})=
             ]
             (Just (arrowheadHeight *^ unit _z))
 
--- BLOCK: defaultHalfArrowHead (notShown)
+-- BLOCK: defaultHalfArrowhead (notShown)
 
-defaultHalfArrowHead :: W.Solid
-defaultHalfArrowHead = halfArrowhead (hookRadius properties) (arrowheadProperties properties)
+defaultHalfArrowhead :: W.Solid
+defaultHalfArrowhead = halfArrowhead (hookRadius properties) (arrowheadProperties properties)
 
 -- BLOCK: Arrowhead
 
 arrowhead :: Double -> ArrowheadProperties -> W.Solid
-arrowhead hookRadius props@(ArrowheadProperties {..})= 
+arrowhead hookRadius props@(ArrowheadProperties {..}) = 
     halfArrowhead hookRadius props 
         & mconcat [id, W.mirror (unit _y)]
         & W.rotate (unit _z) arrowheadAngle
@@ -411,6 +411,6 @@ interpolatedHook propsA propsB t =
 
 -- I 3D printed it
 --
--- Links to the model, and to the sourcecode, are in the video description
+-- Links to the model, and to the source code, are in the video description
 --
 -- Thanks for watching

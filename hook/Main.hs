@@ -191,7 +191,7 @@ main = Run.run videoProps $ do
     codeBlockWithFade "Half Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 3 background $ 
             animateDiagramLines ( toDiagram . W.uScale (1/7)
-                $ center (Object.defaultHalfArrowHead))
+                $ center (Object.defaultHalfArrowhead))
             . easeInOutStay 
 
     codeBlockWithFade "Arrowhead" $ \background -> do
