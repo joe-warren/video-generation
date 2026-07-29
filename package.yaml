@@ -57,6 +57,7 @@ default-extensions:
 - MultiParamTypeClasses
 - ScopedTypeVariables
 - TupleSections
+- NoMonomorphismRestriction
 
 ghc-options:
 - -Wall
