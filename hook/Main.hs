@@ -32,7 +32,7 @@ import Control.Monad (join)
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ True
+    & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
@@ -149,6 +149,7 @@ codeBlockWithImageBackground blockname imageFilename alignment duration = do
 
 main :: IO ()
 main = Run.run videoProps $ do
+    {--
     codeBlockWithImageBackground "Intro" "hook/images/thingiverse.png" CodeScene.Bottom (2.8 * tf)
 
     codeBlockOno "Imports"
@@ -189,22 +190,27 @@ main = Run.run videoProps $ do
     setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse2)
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
+    --}
 
     codeBlockOno "Half Arrowhead"
 
     codeBlockWithFade "Arrowhead" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
-            animateDiagramLines ( toDiagram . W.uScale (1/7)
-                $ center (Object.defaultHalfArrowhead))
+        let position = W.uScale (1/3) . W.translate (negate $ unit _z ^* 0.5)
+        WaterfallScene.animatedClipWithBackground def (1.5*tf) background $ 
+            animateDiagramLines 
+                (toDiagram . position $ Object.defaultHalfArrowhead)
             . easeInOutStay 
-        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (1.5*tf) background $ 
             toDiagram
-                . W.uScale (1/7)
+                . position
                 . (Object.defaultArrowheadAnimation) 
                 . easeInOutSin
         WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
-            showRotating (1/7) (2*pi) (Object.defaultArrowheadAnimation 1)  
+            showRotating (1) (2*pi) 
+                    (position $ Object.defaultArrowheadAnimation 1)  
                 . easeInOutStay
+
+    {--
 
     diffBlockWithFade "Single Hook Wire" "Single Hook With Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
@@ -246,3 +252,5 @@ main = Run.run videoProps $ do
     setTidalOp $ Tidal.jumpMod 1 4 silence
 
     codeBlockWithImageBackground "Printed" "hook/images/printed.jpg" CodeScene.Bottom (8*tf)
+
+    --}
