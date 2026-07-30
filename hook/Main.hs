@@ -56,7 +56,7 @@ codeBlockOno' duration srcfile props blockname =
             =<< CodeScene.codeScene props (1.2 * tf)
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
--- 8 beats to a bar, 3 beats per second
+-- 8 beats to a bar, 3 beats per second, ( tf = half a bar)
 tf = 8/6
 
 objectFile = "hook/Object.hs"
@@ -190,13 +190,13 @@ main = Run.run videoProps $ do
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
 
-    codeBlockWithFade "Half Arrowhead" $ \background -> do
+    codeBlockOno "Half Arrowhead"
+
+    codeBlockWithFade "Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
             animateDiagramLines ( toDiagram . W.uScale (1/7)
                 $ center (Object.defaultHalfArrowhead))
             . easeInOutStay 
-
-    codeBlockWithFade "Arrowhead" $ \background -> do
         WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
             toDiagram
                 . W.uScale (1/7)
