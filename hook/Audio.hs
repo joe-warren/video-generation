@@ -183,3 +183,10 @@ verse2Alt =
     , rhythmInstrumentAlt . cat $ verse2Rhythm <> verse2Rhythm <> verse1Rhythm
     , cat (replicate 8 verse2Drums <> verse1Drums)
     ] # cps (180/60/8)
+
+playout = n "b4 d  cs e  d  fs e  g  fs  _  d  _  d  _  _ _ " 
+
+playPlayout =
+    addSwing $ stack
+    [ melodyInstrumentAlt $ cat (playout : replicate 3 silence)
+    ] # cps (180/60/8)

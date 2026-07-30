@@ -28,6 +28,7 @@ import GenerateVideo (addSvgDuration)
 import ImageScene (addImageDuration, loadImage)
 import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
+import qualified Sound.Tidal.Boot as Audio
 
 videoProps :: VideoProps
 videoProps = def
@@ -232,7 +233,6 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook Object.properties)  
                 . easeInOutStay
 
-
     setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse2Alt)
 
     propertiesDiffBlock "Properties Value" "Properties Rotated Head" Object.properties Object.propertiesRotatedHead
@@ -245,6 +245,8 @@ main = Run.run videoProps $ do
 
     propertiesDiffBlock "Properties Low Sweep Angle" "Properties Chonky" Object.propertiesLowSweepAngle Object.propertiesChonky
 
-    setTidalOp $ Tidal.jumpMod 1 4 silence
+    setTidalOp $ Tidal.jumpMod 1 4 (Audio.playPlayout)
 
-    codeBlockWithImageBackground "Printed" "hook/images/printed.jpg" CodeScene.Bottom (8*tf)
+    codeBlockWithImageBackground "Printed" "hook/images/printed.jpg" CodeScene.Bottom (6.8*tf)
+    
+    setTidalOp $ Tidal.jumpMod 1 4 (Audio.silence)
