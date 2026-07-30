@@ -5,6 +5,7 @@ import SvgUtils
 import GenerateVideo (BuildVideo, addSvgDuration)
 
 import Data.Text (Text)
+import Data.List (intersperse, intercalate, inits, tails)
 import qualified Data.Text as T
 import qualified Skylighting as Sky
 import qualified Graphics.Svg as Svg
@@ -20,14 +21,30 @@ import Effectful
 import Effectful.Reader.Static
 import Effectful.Error.Static
 import Data.Default
+import Data.Algorithm.Diff (Diff, PolyDiff (..), getGroupedDiffBy)
+import GHC.Float (double2Float)
+
+data Alignment = Top | Middle | Bottom 
+    deriving Show
 
 data CodeSceneProps = CodeSceneProps
     { _codeSceneFileExtension :: Text
     , _codeSceneColumns :: Integer
     , _codeSceneBorderColumns :: Integer
     , _codeSceneFrameWidth :: Double
+    , _codeSceneFrameAlpha :: Double
     , _codeSceneStyle :: Sky.Style
-    } deriving (Show)
+    , _codeSceneAlignment :: Alignment
+    , _codeSceneBackground :: Sky.Style -> VideoProps -> Svg.Document
+    }
+
+
+setAlpha :: Double -> JP.PixelRGBA8 -> JP.PixelRGBA8
+setAlpha alpha (JP.PixelRGBA8 r g b _) = JP.PixelRGBA8 r g b (floor (alpha * 255))
+
+convertColor :: Sky.Color -> JP.PixelRGBA8
+convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
+
 
 instance Default CodeSceneProps where
     def = CodeSceneProps 
@@ -35,7 +52,12 @@ instance Default CodeSceneProps where
         , _codeSceneColumns = 80
         , _codeSceneBorderColumns = 2 
         , _codeSceneFrameWidth = 2.0
+        , _codeSceneFrameAlpha = 0.75
         , _codeSceneStyle = Sky.haddock
+        , _codeSceneAlignment = Middle
+        , _codeSceneBackground = \style ->
+            let backgroundColor = fromMaybe white $ convertColor <$> Sky.backgroundColor style
+            in (`blankCanvas` backgroundColor)
         }
 
 makeLenses ''CodeSceneProps
@@ -76,8 +98,6 @@ highlight extension text = do
     wrapTokenizerError $ Sky.tokenize tokenizerConfig syntax text
 
 
-convertColor :: Sky.Color -> JP.PixelRGBA8
-convertColor (Sky.RGB r g b) = JP.PixelRGBA8 r g b 255
 
 tokenColour :: CodeSceneProps -> Sky.TokenType -> JP.PixelRGBA8
 tokenColour cs tokType =
@@ -118,7 +138,10 @@ linesToSvg vd cs lines =
 
         xDelta = fromIntegral $ (vd ^. videoWidth - (charWidth vd cs * ((cs ^. codeSceneColumns) + 2 * cs ^. codeSceneBorderColumns))) `div` 2
         xOff = xDelta + (fromIntegral $ charWidth vd cs * cs ^. codeSceneBorderColumns)
-        yOff = fromIntegral ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
+        yOff = fromIntegral $ case cs ^. codeSceneAlignment of 
+            Top -> lineHeight vd cs
+            Middle -> (vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2
+            Bottom -> vd ^. videoHeight - fromIntegral (length lines + 2) * lineHeight vd cs
 
         transform (i, elems) =  second (translate xOff (yOff + fromIntegral (lineHeight vd cs) * i)) <$> elems
         elems = lines
@@ -126,32 +149,31 @@ linesToSvg vd cs lines =
             & zip [1..]
             & fmap transform
             & join
-        backgroundColor = fromMaybe white $ convertColor <$> Sky.backgroundColor (cs ^. codeSceneStyle)
-        background = Svg.RectangleTree $ 
-            Svg.defaultSvg 
-                & Svg.rectUpperLeftCorner .~ (Svg.Px 0, Svg.Px 0)
-                & Svg.rectWidth .~ w
-                & Svg.rectHeight .~ h
-                & colour backgroundColor
                 
         frameColor = fromMaybe black $ convertColor <$> Sky.defaultColor (cs ^. codeSceneStyle)
+        frameBGColor = fromMaybe white $ convertColor <$> Sky.backgroundColor (cs ^. codeSceneStyle)
 
         frame = Svg.RectangleTree $ 
             Svg.defaultSvg 
                 & Svg.rectUpperLeftCorner .~ 
                     ( Svg.Px $ xDelta + (fromIntegral (cs ^. codeSceneBorderColumns) - 0.5) * fromIntegral (charWidth vd cs)
-                    , Svg.Px . fromInteger $ ((vd ^. videoHeight - fromIntegral (length lines) * lineHeight vd cs) `div` 2)
+                    , Svg.Px yOff
                     )
                 & Svg.rectWidth .~ (Svg.Px $ (fromIntegral ((cs ^. codeSceneColumns + 1) * charWidth vd cs)))
                 & Svg.rectHeight .~ (Svg.Px $ fromIntegral (length lines + 1) * fromIntegral (lineHeight vd cs))
-                & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
                 & strokeColour frameColor
                 & strokeWidth 2
+                & colour frameBGColor
+                & Svg.drawAttr . Svg.fillOpacity .~ Just (double2Float (cs ^. codeSceneFrameAlpha))
 
         makePages _ [] = []
         makePages prev ((letterType, letter):xs) = 
-            let group = Svg.GroupTree $ Svg.Group mempty (background : frame : letter : prev) Nothing Svg.defaultSvg
-                document = Svg.Document Nothing (Just w) (Just h) [group] mempty mempty mempty mempty
+            let group = Svg.GroupTree $ Svg.Group mempty (frame : letter : prev) Nothing Svg.defaultSvg
+                document = 
+                    (cs ^. codeSceneBackground)
+                        (cs ^. codeSceneStyle)
+                        vd 
+                    & Svg.elements %~ (<> [group])
             in (letterType, document) : makePages (letter:prev) xs
         in makePages [] elems
 
@@ -179,4 +201,70 @@ codeScene cs duration text = do
                             * durationWeight letterType
                             / normalizedLength
                 in addSvgDuration dur frame 
-            return . snd $ lastFrame 
+            return . snd $ lastFrame
+
+        
+data DiffTok = Newline | DiffTok Sky.Token
+
+compareDiffToc :: DiffTok -> DiffTok -> Bool
+compareDiffToc Newline Newline = True
+compareDiffToc (DiffTok (_, textA)) (DiffTok (_, textB)) = textA == textB
+compareDiffToc _ _ = False
+
+linesToDiffToks :: [[Sky.Token]] -> [DiffTok]
+linesToDiffToks = intercalate [Newline] . fmap (fmap DiffTok)
+
+diffToksToLines :: [DiffTok] -> [[Sky.Token]]
+diffToksToLines = 
+    let step Newline ls = [] : ls
+        step (DiffTok tok) (l:ls) = (tok:l) : ls
+        step (DiffTok tok) [] = [[tok]]
+    in foldr step [[]]
+
+diffToSequence :: [Diff [DiffTok]] -> [[DiffTok]]
+diffToSequence diff = 
+    let prefixes x = 
+            let go (DiffTok (tokType, t)) = (DiffTok . (tokType, ) <$> drop 1 (T.inits t))
+                go Newline = [Newline]
+            in do
+                prefix <- drop 1 $ inits x 
+                traverseOf _last go prefix
+        during (Both x _) = pure x
+        during (Second x) = prefixes x
+        during (First x) = reverse . prefixes $ x
+        before (Both x _) = x
+        before (First x) = x
+        before (Second x) = []
+        after (Both x _) = x
+        after (First x) = []
+        after (Second x) = x
+    in do
+        (done, focus : todo) <- zip (inits diff) (tails diff)
+        mid <- during focus
+        pure $ foldMap after done <> mid <> foldMap before todo
+
+diffScene :: 
+    ( BuildVideo :> es
+    , Reader VideoProps :> es
+    , Error HighlightError :> es
+    ) => CodeSceneProps -> Double -> Text -> Text -> Eff es Svg.Document
+diffScene cs duration textBefore textAfter = do
+    let highlight' t = linesToDiffToks <$> highlight (cs ^. codeSceneFileExtension) t
+    highlightBefore <- highlight' textBefore
+    highlightAfter <- highlight' textAfter
+
+    vd <- ask
+
+    let diff = getGroupedDiffBy compareDiffToc highlightBefore highlightAfter
+        transitionFrames =
+            snd 
+            . last
+            . linesToSvg vd cs 
+            . diffToksToLines 
+            <$> diffToSequence diff
+        len = length transitionFrames
+        frameDur = duration / fromIntegral len
+ 
+    forM_ transitionFrames (addSvgDuration frameDur)
+    
+    return . last $ transitionFrames

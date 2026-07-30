@@ -10,7 +10,6 @@
 , runBuildVideo
 , runWriteFrames
 , runTrackOffset
-, getCurrentOffsetSeconds
 ) where
 
 import VideoProps
@@ -23,7 +22,7 @@ import qualified System.Process as Process
 import qualified Graphics.Svg as Svg
 import Effectful
 import Effectful.Dispatch.Dynamic
-import Control.Monad ((<=<), replicateM_, when)
+import Control.Monad (replicateM_, when)
 import Effectful.Reader.Static
 import Text.Printf (printf)
 import System.IO (openFile, IOMode (WriteMode), hClose)
@@ -37,6 +36,9 @@ data WriteFrames :: Effect where
 
 type instance DispatchOf WriteFrames = Dynamic
 
+writeFrame :: (WriteFrames :> es) => Svg.Document -> Eff es FramePath
+writeFrame doc = send $ WriteSvgFrame doc
+
 data BuildVideo :: Effect where
     AddFrame :: Svg.Document -> BuildVideo m ()
     AddDuration :: Double -> Svg.Document -> BuildVideo m ()
@@ -49,31 +51,32 @@ data TrackOffset :: Effect where
 type instance DispatchOf TrackOffset = Dynamic
 
 addSvgFrame :: (BuildVideo :> es) => Svg.Document -> Eff es ()
-addSvgFrame = send . AddFrame 
+addSvgFrame = send . AddFrame
 
 addSvgDuration :: (BuildVideo :> es) => Double -> Svg.Document -> Eff es ()
-addSvgDuration dur = send . AddDuration dur
+addSvgDuration dur = send . AddDuration dur 
 
 getCurrentOffsetSeconds :: (TrackOffset :> es) =>  Eff es Double
 getCurrentOffsetSeconds = send GetCurrentOffsetSeconds
 
 runWriteFrames :: (IOE :> es, Reader VideoProps :> es) => Eff (WriteFrames : es) a -> Eff (es) a
 runWriteFrames = do
-    reinterpret (evalState (0::Integer)) $ \_ -> \case
-        WriteSvgFrame document -> do
-            (index::Integer) <- get
-            vd <- ask
-            let name = printf "%04d" index <> ".svg"
-            let path = vd ^. videoScratchDir <> "/" <> name
-            liftIO $ Svg.saveXmlFile path document
-            modify (+1) 
-            if (vd ^. videoConvertViaPng) 
-                then do
-                    let pngName = printf "%04d" index <> ".png"
-                    let pngPath = vd ^. videoScratchDir <> "/" <> pngName
-                    liftIO $ convertFile path pngPath
-                    return $ FramePath pngName
-                else return $ FramePath name
+    reinterpret (evalState (0::Integer)) $ \_ -> \action -> do
+            case action of 
+                WriteSvgFrame document -> do
+                    (index::Integer) <- get
+                    modify (+1) 
+                    vd <- ask
+                    let name = printf "%04d" index <> ".svg"
+                        path = vd ^. videoScratchDir <> "/" <> name
+                    liftIO $ Svg.saveXmlFile path document
+                    if (vd ^. videoConvertViaPng) 
+                        then do
+                            let pngName = printf "%04d" index <> ".png"
+                            let pngPath = (vd ^. videoScratchDir) <> "/" <> pngName
+                            liftIO $ convertFile path pngPath
+                            return $ FramePath pngName
+                        else return $ FramePath name
                 
 runTrackOffset:: (BuildVideo :> es, Reader VideoProps :> es) => Eff (TrackOffset : es) a -> Eff (es) a
 runTrackOffset = 
@@ -104,13 +107,13 @@ runBuildVideoFfmpeg eff = do
     handle <- liftIO $ openFile concatFileName WriteMode
     let writeOneFrame fp = T.hPutStr handle (concatLine vd fp)
     res <- reinterpretWith (evalState (0::Double))eff $ \_ -> \case 
-        AddFrame f -> liftIO . writeOneFrame =<< send (WriteSvgFrame f)
+        AddFrame f -> liftIO . writeOneFrame =<< writeFrame f
         AddDuration dur f -> do
             currentPos <- get
             let newPos = currentPos + (dur * fromIntegral (vd ^. videoFPS))
                 (nFrames, posRemainder) =  properFraction newPos
             when (nFrames > 0) $ do 
-                fp <- send $ WriteSvgFrame f
+                fp <- writeFrame f
                 liftIO $ replicateM_ nFrames (writeOneFrame fp)
             put posRemainder
     liftIO $ hClose handle
@@ -132,8 +135,6 @@ runBuildVideo eff = do
     if vd ^. videoGenerateVideo 
         then runBuildVideoFfmpeg eff
         else runBuildVideoNoop eff
-
-
 
 convertFile :: FilePath -> FilePath -> IO ()
 convertFile inputFile outputFile = do

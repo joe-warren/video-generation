@@ -36,6 +36,11 @@ dependencies:
 - effectful
 - data-default
 - tidal
+- filepath
+- directory
+- bytestring
+- base64
+- Diff
 
 default-extensions: 
 - OverloadedStrings
@@ -51,6 +56,8 @@ default-extensions:
 - TemplateHaskell
 - MultiParamTypeClasses
 - ScopedTypeVariables
+- TupleSections
+- NoMonomorphismRestriction
 
 ghc-options:
 - -Wall
@@ -70,6 +77,15 @@ executables:
   spatula-video:
     main:                Main.hs
     source-dirs:         spatula
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - video-generation
+  hook-video:
+    main:                Main.hs
+    source-dirs:         hook
     ghc-options:
     - -threaded
     - -rtsopts
