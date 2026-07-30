@@ -32,7 +32,7 @@ import Control.Monad (join)
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ False
+    & videoGenerateAudio .~ True
     & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
@@ -120,17 +120,17 @@ diffBlockWithFade blockNameBefore blockName nextScene = do
 
 codeBlockWithDiagram blockname diagram = 
     codeBlockWithFade blockname $ \background -> 
-        WaterfallScene.stillClipWithBackground def (2 * tf) background diagram
+        WaterfallScene.stillClipWithBackground def (3 * tf) background diagram
 
 codeBlockWithObject blockname object = do
     codeBlockWithFade blockname $ \background -> 
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
             showRotating (1/7) (2*pi) (center object)  
             . easeInOutStay
 
 propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter = 
     diffBlockWithFade blocknameA blocknameB $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
             toDiagram
                 . W.uScale (1/7)
                 . W.translate (negate $ unit _z) 
@@ -149,7 +149,6 @@ codeBlockWithImageBackground blockname imageFilename alignment duration = do
 
 main :: IO ()
 main = Run.run videoProps $ do
-    {--
     codeBlockWithImageBackground "Intro" "hook/images/thingiverse.png" CodeScene.Bottom (2.8 * tf)
 
     codeBlockOno "Imports"
@@ -177,7 +176,7 @@ main = Run.run videoProps $ do
     codeBlockOno "Hook Curve"
 
     codeBlockWithFade "Single Hook Wire" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
             toDiagram
                 . W.uScale (1/7)
                 . W.translate (negate $ unit _z) 
@@ -190,7 +189,6 @@ main = Run.run videoProps $ do
     setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse2)
     codeBlockAudioOno "Verse 2"
     codeBlockAudioOno "Play Verse 2"
-    --}
 
     codeBlockOno "Half Arrowhead"
 
@@ -210,10 +208,8 @@ main = Run.run videoProps $ do
                     (position $ Object.defaultArrowheadAnimation 1)  
                 . easeInOutStay
 
-    {--
-
     diffBlockWithFade "Single Hook Wire" "Single Hook With Arrowhead" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
             toDiagram
                 . W.uScale (1/7)
                 . W.translate (negate $ unit _z) 
@@ -226,7 +222,7 @@ main = Run.run videoProps $ do
     setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse2')
 
     diffBlockWithFade "Single Hook With Arrowhead" "Whole Hook" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
+        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
             toDiagram
                 . W.uScale (1/7)
                 . W.translate (negate $ unit _z) 
@@ -252,5 +248,3 @@ main = Run.run videoProps $ do
     setTidalOp $ Tidal.jumpMod 1 4 silence
 
     codeBlockWithImageBackground "Printed" "hook/images/printed.jpg" CodeScene.Bottom (8*tf)
-
-    --}
