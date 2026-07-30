@@ -160,12 +160,13 @@ main = Run.run videoProps $ do
     codeBlockAudioOno "Vibes"
     codeBlockAudioOno "Play Intro"
 
-    codeBlockOno "Properties Def"
-
     setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse1)
-    -- setTidalPattern Audio.verse1
+    --setTidalPattern Audio.verse1
+
     codeBlockAudioOno "Verse 1"
     codeBlockAudioOno "Play Verse 1"
+
+    codeBlockOno "Properties Def"
 
     codeBlockOno "Degrees"
 
