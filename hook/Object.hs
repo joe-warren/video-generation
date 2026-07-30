@@ -3,7 +3,7 @@ module Object where
 -- BLOCK:Intro
 
 -- In 2018, I designed a parametric hook
--- 
+--
 -- I used OpenSCAD, a Programmable CAD framework
 
 -- BLOCK:Imports
@@ -12,8 +12,8 @@ module Object where
 --
 -- It's called Waterfall-CAD
 --
--- It's written in Haskell, a purely functional programming language 
--- 
+-- It's written in Haskell, a purely functional programming language
+--
 -- Using Haskell and Waterfall-CAD, let's reimplement the hook
 
 import Linear
