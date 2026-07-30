@@ -4,11 +4,13 @@ module Object where
 
 -- In 2018, I designed a parametric hook
 -- 
--- I used OpenSCAD
+-- I used OpenSCAD, a Programmable CAD framework
 
 -- BLOCK:Imports
 
--- Since then, I've built a Haskell CAD framework, called Waterfall-CAD
+-- Since then, I've built my own library for Programmable CAD, called Waterfall-CAD
+--
+-- It's based around Haskell, a purely functional programming language 
 -- 
 -- Using Haskell and Waterfall-CAD, let's reimplement the hook
 
