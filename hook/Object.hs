@@ -8,13 +8,14 @@ module Object where
 
 -- BLOCK:Imports
 
--- Since then, I've built my own library for Programmable CAD, called Waterfall-CAD
+-- Since then, I've built my own library for Programmable CAD
+
+-- It's called Waterfall-CAD
 --
--- It's based around Haskell, a purely functional programming language 
+-- It's written in Haskell, a purely functional programming language 
 -- 
 -- Using Haskell and Waterfall-CAD, let's reimplement the hook
 
--- Imports
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
