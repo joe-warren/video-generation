@@ -113,6 +113,7 @@ verse1Rhythm =
 verse1Drums =
     replicate 3 (s "<cp hh:9>*4" # amp "<0.3 0.1*3>*2" # pan "<0.3 0.7>*4")
     <> [s "[cp hh:9]*8" # amp "<0.3 0.1*3>*2" # pan 0.3]
+
 -- BLOCK: Play Verse 1
 melodyInstrument x = stack
     [ (x |+ n "12") # amp 0.4 # pipes
@@ -129,6 +130,7 @@ verse1 =
     , rhythmInstrument $ cat verse1Rhythm
     , cat verse1Drums
     ] # cps (180/60/8)
+
 -- BLOCK: Verse 2
 
 verse2Melody =
@@ -146,7 +148,9 @@ verse2Rhythm =
     ]
 
 verse2Drums = s "<cp [cp hh:9]>*4" # amp "0.3 0.1*7" # pan "<0.3 0.7>*4"
+
 -- BLOCK: Play Verse 2
+
 verse2 =
     addSwing $ stack
     [ melodyInstrument $ cat verse2Melody
@@ -154,11 +158,28 @@ verse2 =
     , verse2Drums
     ] # cps (180/60/8)
 
+
+-- BLOCK: Alt Verse 2 Not Shown
+
 verse2' =
     addSwing $ stack
     [ melodyInstrument . cat $ verse2Melody <> verse2Melody <> verse1Melody
     , rhythmInstrument . cat $ verse2Rhythm <> verse2Rhythm <> verse1Rhythm
     , cat (replicate 8 verse2Drums <> verse1Drums)
     ] # cps (180/60/8)
--- BLOCK: Outro
 
+melodyInstrumentAlt x = stack
+    [ (x |+ n "12") # amp 0.4 # vibes
+    , x # amp 0.8 # vibes
+    ] # legato 1.20
+
+rhythmInstrumentAlt x = rolledBy (1/16) (x -| n "24*8")
+        # pipes
+        # amp "<2 1.2*3>*2"
+
+verse2Alt =
+    addSwing $ stack
+    [ melodyInstrumentAlt . cat $ verse2Melody <> verse2Melody <> verse1Melody
+    , rhythmInstrumentAlt . cat $ verse2Rhythm <> verse2Rhythm <> verse1Rhythm
+    , cat (replicate 8 verse2Drums <> verse1Drums)
+    ] # cps (180/60/8)

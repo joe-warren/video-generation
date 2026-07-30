@@ -215,7 +215,7 @@ main = Run.run videoProps $ do
             showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWithArrowhead Object.properties)  
                 . easeInOutStay
 
-    setTidalPattern Audio.verse1
+    setTidalPattern Audio.verse2'
 
     diffBlockWithFade "Single Hook With Arrowhead" "Whole Hook" $ \background -> do
         WaterfallScene.animatedClipWithBackground def 5 background $ 
@@ -231,7 +231,7 @@ main = Run.run videoProps $ do
 
     propertiesDiffBlock "Properties Value" "Properties Rotated Head" Object.properties Object.propertiesRotatedHead
 
-    setTidalPattern Audio.verse2
+    setTidalPattern Audio.verse2Alt
 
     propertiesDiffBlock "Properties Rotated Head" "Properties Five Hooks" Object.propertiesRotatedHead Object.propertiesFiveHooks
     
