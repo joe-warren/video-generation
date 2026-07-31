@@ -91,7 +91,7 @@ addSwing = swingBy (1/6) 8
 
 intro = addSwing $ stack
     [ cat introMelody # pipes
-    , rolled (cat introRhythm -| n "24" # vibes)
+    , rolledBy (1/16) (cat introRhythm -| n "24*8" # vibes)
     ] # cps (180/60/8)
 
 -- BLOCK: Verse 1
@@ -120,9 +120,9 @@ melodyInstrument x = stack
     , x # amp 0.8 # pipes
     ] # legato 1.20
 
-rhythmInstrument x = rolledBy (1/16) (x -| n "24*8")
+rhythmInstrument x = rolledBy (1/16) (x -| n "12*8")
         # vibes
-        # amp "<2 1.2*3>*2"
+        # amp "<1.2 0.8*3>*2"
 
 verse1 =
     addSwing $ stack
@@ -173,9 +173,9 @@ melodyInstrumentAlt x = stack
     , x # amp 0.8 # vibes
     ] # legato 1.20
 
-rhythmInstrumentAlt x = rolledBy (1/16) (x -| n "24*8")
+rhythmInstrumentAlt x = rolledBy (1/16) (x -| n "12*8")
         # pipes
-        # amp "<2 1.2*3>*2"
+        # amp "<1.2 0.8*3>*2"
 
 verse2Alt =
     addSwing $ stack
