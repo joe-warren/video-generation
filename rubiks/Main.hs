@@ -20,7 +20,6 @@ import Control.Lens
 import Linear
 import Animate (animate)
 import qualified SvgUtils
-import Transitions (easeInOutSin)
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp)
@@ -32,9 +31,9 @@ import qualified Sound.Tidal.Boot as Audio
 
 videoProps :: VideoProps
 videoProps = def
-    & videoOutputFile .~ "hook.mp4"
-    & videoGenerateAudio .~ True
-    & videoGenerateVideo .~ False
+    & videoOutputFile .~ "rubik.mp4"
+    & videoGenerateAudio .~ False
+    & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
 easeInOutStay :: Double -> Double
@@ -79,6 +78,7 @@ centerBasedOn target solid =
 center = join centerBasedOn
 
 toDiagram = W.solidDiagram (V3 2 2 1)
+
 showRotating' axis scale angle solid t =
     solid
     & W.uScale scale 
@@ -96,7 +96,7 @@ codeBlockWithFade blockname nextScene = do
         . SvgUtils.makeOpaque fullCode 
         . (+ 1.0)
         . (* (-0.925))
-        . easeInOutSin
+        . Transitions.easeInOutSin
         )
 
     nextScene fadedCode
@@ -114,7 +114,7 @@ diffBlockWithFade blockNameBefore blockName nextScene = do
         . SvgUtils.makeOpaque fullCode 
         . (+ 1.0)
         . (* (-0.925))
-        . easeInOutSin
+        . Transitions.easeInOutSin
         )
 
     nextScene fadedCode
@@ -129,68 +129,36 @@ codeBlockWithObject blockname object = do
             showRotating (1/7) (2*pi) (center object)  
             . easeInOutStay
 
-propertiesDiffBlock blocknameA blocknameB propertiesBefore propertiesAfter = 
-    diffBlockWithFade blocknameA blocknameB $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
-            toDiagram
-                . W.uScale (1/7)
-                . W.translate (negate $ unit _z) 
-                . (Object.interpolatedHook propertiesBefore propertiesAfter) 
-                . easeInOutSin
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
-            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.hook propertiesAfter)  
-                . easeInOutStay
+diagram :: W.Solid -> W.Diagram        
+diagram = W.solidDiagram (V3 2 2 1) . W.uScale (0.01)
 
 main :: IO ()
 main = Run.run videoProps $ do
-
     codeBlockOno "Imports"
 
     setTidalOp Tidal.resetCycles
+
     setTidalPattern Audio.intro
     codeBlockAudioOno "Audio Intro"
 
-    setTidalOp $ Tidal.jumpMod 1 4 (Audio.intro)
+    codeBlockWithFade "Single Segment" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+            diagram
+            . Object.singleSegmentStage1 
+            . Transitions.easeInOutSin
+        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+            diagram
+            . Object.singleSegmentStage2
+            . Transitions.easeInOutSin
+    
 
 
-    codeBlockOno "Properties Def"
-
-    codeBlockOno "Degrees"
-
-    codeBlockOno "Properties Value"
-
-    codeBlockOno "Hoop and Shaft"
-    codeBlockOno "Hook Curve"
-
-    codeBlockWithFade "Single Hook Wire" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
-            toDiagram
-                . W.uScale (1/7)
-                . W.translate (negate $ unit _z) 
-                . (Object.singleHookWireAnimation Object.properties) 
-                . easeInOutSin
+    codeBlockWithFade "Combined Segments" $ \background -> do
         WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
-            showRotating (1/7) (2*pi) (W.translate (negate $ unit _z) $ Object.singleHookWire Object.properties)  
-                . easeInOutStay
+            diagram
+            . Object.combinedSegmentsAnimated 
+            . Transitions.easeInOutSin
 
-    setTidalOp $ Tidal.jumpMod 1 4 (Audio.verse)
-    codeBlockAudioOno "Verse"
-    codeBlockAudioOno "Play Verse"
 
-    codeBlockOno "Half Arrowhead"
 
-    codeBlockWithFade "Arrowhead" $ \background -> do
-        let position = W.uScale (1/3) . W.translate (negate $ unit _z ^* 0.5)
-        WaterfallScene.animatedClipWithBackground def (1.5*tf) background $ 
-            animateDiagramLines 
-                (toDiagram . position $ Object.defaultHalfArrowhead)
-            . easeInOutStay 
-        WaterfallScene.animatedClipWithBackground def (1.5*tf) background $ 
-            toDiagram
-                . position
-                . (Object.defaultArrowheadAnimation) 
-                . easeInOutSin
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
-            showRotating (1) (2*pi) 
-                    (position $ Object.defaultArrowheadAnimation 1)  
-                . easeInOutStay
+
