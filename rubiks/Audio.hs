@@ -7,13 +7,13 @@ import Sound.Tidal.Boot
 
 -- one cycle is two bars of 4/4, sixteen quavers
 melody =
-    [ n "fs@3 e  fs@2 g  a  b@3  a  fs@4"
-    , n "g@3  fs e@2  fs e  cs   e@7"
-    , n "~@2  a  a    d6@3  cs6  b@2  a@6"
-    , n "b@2  a  g@2  fs a@2 g   fs@2 e  d@4"
+    [ n "c@2 d@2 e c d@2 e@2 g@2 g@4"
+    , n "a   f   d@2 g e c@2 d@8"
+    , n "e   f   g   c b@2 a@2 ~@2 g c g@2 f@2"
+    , n "~@2 e   g4  e@2 d@2 c@5 ~@3"
     ]
 
-tempo = cps (120/60/8)
+tempo = cps (92/60/8)
 
 intro = cat melody # pipes # tempo
 
@@ -86,10 +86,10 @@ vibes =
 -- BLOCK: Verse
 
 chords =
-    [ n "d'major"
-    , n "a'dom7"
-    , n "g'major d'major"
-    , n "e'minor@2 a'dom7 d'major"
+    [ n "c'major"
+    , n "f'major e'min7"
+    , n "c'major f'major c'major f'minor"
+    , n "c'major g'dom7 c'major@2"
     ]
 
 drums = s "[cp hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
