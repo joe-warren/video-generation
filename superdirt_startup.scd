@@ -8,7 +8,14 @@ s.reboot { // server options are only updated on reboot
 	s.options.numWireBufs = 2048; // increase this if you get "exceeded number of interconnect buffers" messages
 	s.options.maxNodes = 1024 * 32; // increase this if you are getting drop outs and the message "too many nodes"
 	s.options.numOutputBusChannels = 2; // set this to your hardware output channel size, if necessary
-	s.options.numInputBusChannels = 2; // set this to your hardware output channel size, if necessary
+	s.options.numInputBusChannels = 0; // no audio input needed; nonzero values fail on macOS when the input device runs at a different sample rate
+	if (thisProcess.platform.name == \osx) {
+		// the recording clock is driven by the output device.
+		// bluetooth devices make unreliable clocks (a "44.1kHz" bluetooth headset was observed
+		// delivering frames at 0.6x real time, temporally compressing the recording),
+		// so pin the output to the built-in speakers rather than the system default
+		s.options.outDevice = "MacBook Pro Speakers";
+	};
 	// boot the server and start SuperDirt
 	s.waitForBoot {
 		~dirt.stop; // stop any old ones, avoid duplicate dirt (if it is nil, this won't do anything)

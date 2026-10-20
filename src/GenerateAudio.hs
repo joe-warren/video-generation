@@ -47,7 +47,7 @@ runSuperdirt props = do
         Process.CreateProcess
             (Process.RawCommand
                 "pw-jack" -- run superdirt within pipewire jack emulation
-                ["sclang", "superdirt_startup.scd"] -- command line args
+                [ "sclang", "superdirt_startup.scd"] -- command line args
             )
             Nothing -- no cwd
             Nothing -- inherit environment

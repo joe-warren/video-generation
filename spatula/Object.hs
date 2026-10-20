@@ -39,11 +39,12 @@ animatedBlade f
 
 -- BLOCK:Blade
 
-roundFn :: Double -> (V3 Double, V3 Double) -> Maybe Double 
-roundFn radius (s, e)  | (nearZero (s ^. _xy - e ^. _xy)) 
-                    && nearZero (s ^. _y) 
-                        = Just radius
-                | otherwise = Nothing 
+roundFn :: Double -> W.Path -> Maybe Double
+roundFn radius edge = do
+    (s, e) <- W.pathEndpoints3D edge
+    if nearZero (s ^. _xy - e ^. _xy) && nearZero (s ^. _y)
+        then Just radius
+        else Nothing
 
 blade :: W.Solid
 blade = W.roundConditionalFillet (roundFn 10) sharpBlade
