@@ -85,12 +85,29 @@ vibes =
 
 -- BLOCK: Verse
 
-chords =
-    [ n "c'major"
-    , n "f'major e'min7"
-    , n "c'major f'major c'major f'minor"
-    , n "c'major g'dom7 c'major@2"
+pianoRight =
+    [ n "c6@2 d6@2 e6 c6 d6@2 e6@2 g6@2 g6@4"
+    , n "a6   f6   d6@2 g6 e6 c6@2 d6@8"
+    , n "e6   f6   g6   c6 b6@2 a6@2 ~@2 g6 c6 g6@2 f6@2"
+    , n "~@2  e6   c6   e6@2 d6@2 c6@5 ~@3"
     ]
+
+pianoBass =
+    [ n "c c c  c"
+    , n "c c b4 g4"
+    , n "c c c  c"
+    , n "c@3 ~ a4@2 b4@2 c@4 c ~ c4@2"
+    ]
+
+pianoChords =
+    [ n "~ g f g  ~ g f g  ~ g e g  ~ g  e g"
+    , n "~ a f a  ~ a f a  ~ g e g  ~ g  e g"
+    , n "~ g e g  ~ a f a  ~ g e g  ~ gs f gs"
+    , n "~ g e c  ~ f ~ f  ~ g e g  ~@4"
+    ]
+
+piano = stack (cat <$> [pianoRight, pianoBass, pianoChords])
+    # s "superpiano" # amp 0.6
 
 drums = s "[cp hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
 
@@ -101,12 +118,8 @@ melodyInstrument x = stack
     , x # amp 0.8 # pipes
     ] # legato 1.20
 
-rhythmInstrument x = rolledBy (1/16) (x -| n "12*8")
-        # vibes
-        # amp "<1.2 0.8*3>*2"
-
 verse = stack
     [ melodyInstrument $ cat melody
-    , rhythmInstrument $ cat chords
+    , piano
     , drums
     ] # tempo
