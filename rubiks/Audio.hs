@@ -15,7 +15,7 @@ melody =
 
 tempo = cps (92/60/8)
 
-intro = cat melody # pipes # tempo
+intro = cat melody # vibes # tempo
 
 -- BLOCK: Parameter Setup
 
@@ -73,7 +73,6 @@ pipes =
 
 
 -- BLOCK: Vibes
-
 vibes =
       sound "superfm" # amp 0.8
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
@@ -106,16 +105,19 @@ pianoChords =
     , n "~ g e c  ~ f ~ f  ~ g e g  ~@4"
     ]
 
-piano = stack (cat <$> [pianoRight, pianoBass, pianoChords])
-    # s "superpiano" # amp 0.6
-
+piano = stack 
+    [ stack (cat <$> [pianoRight, pianoBass])
+        # s "superpiano" # amp 0.6
+    , cat pianoChords 
+        # pipes # amp 0.6
+    ]
 drums = s "[cp hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
 
 -- BLOCK: Play Verse
 
 melodyInstrument x = stack
-    [ (x |+ n "12") # amp 0.4 # pipes
-    , x # amp 0.8 # pipes
+    [ (x |+ n "12") # amp 0.4 # vibes
+    , x # amp 0.8 # vibes
     ] # legato 1.20
 
 verse = stack
