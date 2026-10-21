@@ -25,15 +25,18 @@ import Animate (animate)
 import Control.Monad (void)
 
 newtype WaterfallSceneProps = WaterfallSceneProps 
-    { propsLineStyle :: W.LineStyle
+    { propsLineStyle :: W.DiagramStyle
     }
 
 instance Default WaterfallSceneProps where
-    def = WaterfallSceneProps $ W.LineStyle
-        { W.visibleLineColour = W.Colour 0 0 0
-        , W.hiddenLineColour = W.rgb24 0xC8C8FF
-        , W.hiddenLineOpacity = 1.0
-        }
+    def = WaterfallSceneProps $ 
+          W.diagramWithVisibleLine 
+            ( W.lineWithColour W.black
+            ) 
+          <> W.diagramWithHiddenLine 
+            ( W.lineWithColour (W.rgb24 0xC8C8FF)
+              <> W.lineWithOpacity 1
+            )
 
 -- | scale the diagram so that the video shows the range [-1, 1] on the smallest axis
 diagramSvg :: WaterfallSceneProps -> Svg.Document -> VideoProps -> W.Diagram -> Svg.Document

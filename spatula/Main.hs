@@ -29,7 +29,6 @@ import CodeScene (codeScene)
 import Control.Monad (join)
 import qualified Codec.Picture as JP
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
-import Waterfall.SVG (LineStyle(visibleLineColour, hiddenLineColour))
 import qualified Waterfall.SVG as W
 
 videoProps :: VideoProps
@@ -141,11 +140,14 @@ main = Run.run videoProps $ do
             & W.uScale2D (1/80)
             & WaterfallScene.centerDiagram
         )
-    let redScene = WaterfallSceneProps (W.LineStyle 
-            { W.visibleLineColour = W.rgb24 0x9b0000
-            , W.hiddenLineColour = W.rgb24 0xFFC8C8
-            , W.hiddenLineOpacity = 1
-            })
+    let redScene = WaterfallSceneProps $ 
+              W.diagramWithVisibleLine 
+                ( W.lineWithColour (W.rgb24 0x9b0000)
+                ) 
+              <> W.diagramWithHiddenLine 
+                ( W.lineWithColour (W.rgb24 0xFFC8C8)
+                  <> W.lineWithOpacity 1
+                )
 
     codeBlockWithFade "Slotted Blade" $ \background -> do
         WaterfallScene.animatedClipWithBackground redScene 0.8 background $ 

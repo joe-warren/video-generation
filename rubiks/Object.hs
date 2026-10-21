@@ -38,6 +38,8 @@ segmentGap = 1
 
 centerGap = segmentW + segmentGap
 
+combinedSegmentW = 3 * segmentW + 2 * segmentGap
+
 combinedSegments :: W.Solid
 combinedSegments = 
     let positions = [-1, 0, 1]
@@ -73,7 +75,7 @@ stickerW = segmentW - 3.5
 singleSticker :: W.Solid 
 singleSticker = W.centeredCube 
     & W.scale (V3 stickerW stickerW 0.5)
-    & W.roundConditionalFillet (W.whenEndpointsNearlyEqual _xy 2)
+    & W.roundConditionalFillet (W.whenEndpointsNearlyEqual _xy 1)
 
 -- BLOCK: Sticker Animated (not shown)
 
@@ -90,7 +92,7 @@ singleStickerStage2 f = W.centeredCube
     & W.scale (V3 stickerW stickerW 0.5)
     & (if f < 0.01 
         then id 
-        else W.roundConditionalFillet (W.whenEndpointsNearlyEqual _xy (2 * f))
+        else W.roundConditionalFillet (W.whenEndpointsNearlyEqual _xy (1 * f))
     )
 
 -- BLOCK: One Side Of Stickers
@@ -123,15 +125,11 @@ oneSideOfStickersAnimated t =
 
 -- BLOCK: Segments With Stickers
 
-combinedSegmentWidth = 
-    let (bbLow, bbHigh) = fromMaybe (zero, zero) $ W.axisAlignedBoundingBox combinedSegments
-    in (bbHigh - bbLow) ^. _x
-
 segmentsWithStickers :: W.Solid
 segmentsWithStickers = mconcat $ 
     combinedSegments : 
         [ oneSideOfStickers
-            & W.translate (h ^* (combinedSegmentWidth/2))
+            & W.translate (h ^* (combinedSegmentW/2))
             & W.rotate axis (pi/2)
             | h <- [unit _z, negate $ unit _z]
             , axis <- [unit _x, unit _y, unit _z]
@@ -145,8 +143,26 @@ segmentsWithStickersAnimated f = mconcat $
         [  (f * 3 - realToFrac index / 3) 
             & clamp
             & oneSideOfStickersAnimated
-            & W.translate (h ^* (combinedSegmentWidth/2))
+            & W.translate (h ^* (combinedSegmentW/2))
             & W.rotate axis (pi/2)
             | h <- [unit _z, negate $ unit _z]
             , (index, axis) <- zip [0..] [unit _x, unit _y, unit _z]
+        ]
+
+
+-- BLOCK: Segments With Stickers With Colour
+
+colours = [W.yellow, W.aqua, W.lime, W.red, W.fuchsia, W.white]
+
+segmentsWithStickersWithColour :: W.Solid
+segmentsWithStickersWithColour = mconcat $ 
+    W.colourSolid W.navy combinedSegments : 
+        [ oneSideOfStickers
+            & W.translate (h ^* (combinedSegmentW/2))
+            & W.rotate axis (pi/2)
+            & W.colourSolid col
+            | (col, (h, axis)) <- 
+                zip colours
+                ((,) <$> [unit _z, negate $ unit _z]
+                    <*> [unit _x, unit _y, unit _z])
         ]

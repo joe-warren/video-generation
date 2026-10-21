@@ -36,7 +36,7 @@ videoProps = def
     & videoOutputFile .~ "rubik.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
-    & videoConvertViaPng .~ False
+    & videoConvertViaPng .~ True
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -103,11 +103,16 @@ codeBlockWithFade blockname nextScene = do
 
     nextScene fadedCode
 
-waterfallProps = WaterfallSceneProps $ W.LineStyle 
-    { W.visibleLineColour = W.black
-    , W.hiddenLineColour = W.black
-    , W.hiddenLineOpacity = 0.2
-    }
+waterfallProps = WaterfallSceneProps $
+          W.diagramWithVisibleLine 
+            ( W.lineWithColour W.black
+              <> W.lineWithWidth 3
+            ) 
+          <> W.diagramWithHiddenLine 
+            ( W.lineWithColour (W.black)
+              <> W.lineWithOpacity 0.2
+              <> W.lineWithWidth 2
+            )
 
 diffBlockWithFade blockNameBefore blockName nextScene = do
     codeBefore <- CodeBlock.loadCodeBlock objectFile blockNameBefore
@@ -138,7 +143,7 @@ codeBlockWithObject blockname object = do
             . easeInOutStay
 
 diagram :: W.Solid -> W.Diagram        
-diagram = W.solidDiagram (V3 2 2 1) . W.uScale (0.01)
+diagram = W.solidDiagram (V3 2 2 1) . W.uScale (0.02)
 
 main :: IO ()
 main = Run.run videoProps $ do 
@@ -175,7 +180,6 @@ main = Run.run videoProps $ do
             diagram
             . Object.singleStickerStage2
             . Transitions.easeInOutSin
-
     
     codeBlockWithFade "One Side Of Stickers" $ \background -> do
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
@@ -183,14 +187,16 @@ main = Run.run videoProps $ do
             . Object.oneSideOfStickersAnimated
             . Transitions.easeInOutSin
 
-            
-    --}
-
     codeBlockWithFade "Segments With Stickers" $ \background -> do
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
             diagram
             . Object.segmentsWithStickersAnimated
             . Transitions.easeInOutSin
+
+    --}
+
+    diffBlockWithFade "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
+        WaterfallScene.stillClipWithBackground waterfallProps (4*tf) background $ diagram Object.segmentsWithStickersWithColour 
 
 
 
