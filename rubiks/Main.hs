@@ -12,6 +12,7 @@ import qualified Object
 import qualified Audio
 import qualified WaterfallScene
 import qualified Waterfall as W
+import qualified Waterfall.SVG as W
 
 import qualified Skylighting as Sky
 
@@ -28,6 +29,7 @@ import ImageScene (addImageDuration, loadImage)
 import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
 import qualified Sound.Tidal.Boot as Audio
+import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
 
 videoProps :: VideoProps
 videoProps = def
@@ -101,6 +103,12 @@ codeBlockWithFade blockname nextScene = do
 
     nextScene fadedCode
 
+waterfallProps = WaterfallSceneProps $ W.LineStyle 
+    { W.visibleLineColour = W.black
+    , W.hiddenLineColour = W.black
+    , W.hiddenLineOpacity = 0.4
+    }
+
 diffBlockWithFade blockNameBefore blockName nextScene = do
     codeBefore <- CodeBlock.loadCodeBlock objectFile blockNameBefore
     codeAfter <- CodeBlock.loadCodeBlock objectFile blockName
@@ -121,11 +129,11 @@ diffBlockWithFade blockNameBefore blockName nextScene = do
 
 codeBlockWithDiagram blockname diagram = 
     codeBlockWithFade blockname $ \background -> 
-        WaterfallScene.stillClipWithBackground def (3 * tf) background diagram
+        WaterfallScene.stillClipWithBackground waterfallProps (3 * tf) background diagram
 
 codeBlockWithObject blockname object = do
     codeBlockWithFade blockname $ \background -> 
-        WaterfallScene.animatedClipWithBackground def (3*tf) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (3*tf) background $ 
             showRotating (1/7) (2*pi) (center object)  
             . easeInOutStay
 
@@ -133,7 +141,8 @@ diagram :: W.Solid -> W.Diagram
 diagram = W.solidDiagram (V3 2 2 1) . W.uScale (0.01)
 
 main :: IO ()
-main = Run.run videoProps $ do
+main = Run.run videoProps $ do 
+    {--
     codeBlockOno "Imports"
 
     setTidalOp Tidal.resetCycles
@@ -151,10 +160,10 @@ main = Run.run videoProps $ do
             . Object.singleSegmentStage2
             . Transitions.easeInOutSin
     
-
+    --}
 
     codeBlockWithFade "Combined Segments" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (4*tf) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
             diagram
             . Object.combinedSegmentsAnimated 
             . Transitions.easeInOutSin
