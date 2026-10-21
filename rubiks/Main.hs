@@ -193,10 +193,20 @@ main = Run.run videoProps $ do
             . Object.segmentsWithStickersAnimated
             . Transitions.easeInOutSin
 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $
+            diagram . Object.scramble Object.segmentsWithStickers
+
     --}
-
+    {--
     diffBlockWithFade "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
-        WaterfallScene.stillClipWithBackground waterfallProps (4*tf) background $ diagram Object.segmentsWithStickersWithColour 
-
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $
+            diagram 
+            . Object.scramble Object.segmentsWithStickersWithColour 
+            . (1 -)
+    --}
+    
+    WaterfallScene.animatedClip waterfallProps (4*tf) $
+            diagram 
+            . Object.scramble Object.segmentsWithStickersWithColour
 
 

@@ -1,12 +1,14 @@
+{-# LANGUAGE RankNTypes #-}
 module Object where
+
+import Data.Foldable (fold)
+import Data.Monoid (Endo (..))
 
 -- BLOCK:Imports
 
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
-import Data.Maybe (fromMaybe)
-
 
 -- BLOCK: Single Segment
 
@@ -166,3 +168,63 @@ segmentsWithStickersWithColour = mconcat $
                 ((,) <$> [unit _z, negate $ unit _z]
                     <*> [unit _x, unit _y, unit _z])
         ]
+
+-- BLOCK: animated cube (not shown)
+
+-- This "Lensy Rubiks cube code" is inspired by code
+-- that Adam Vogt (@enthropy) posted to the waterfall-cad discord
+
+-- This is an unlawful lens
+layers :: Lens' (V3 Double) Double -> Lens' W.Solid (V3 W.Solid)
+layers basis = 
+    let mask = W.centeredCube 
+            & W.scale ((pure 1 ^* (combinedSegmentW * 3) ) & basis .~ (segmentW + segmentGap))
+        translatedMasks = (`W.translate` mask) . (^* centerGap) . (*^ unit basis)  <$> V3 (-1) 0 1
+    in lens (\s -> W.intersection s <$> translatedMasks)
+        (const fold)
+
+rotateLayer
+    :: Lens' (V3 Double) Double 
+    -> Lens' (V3 W.Solid) W.Solid
+    -> Double 
+    -> W.Solid 
+    -> W.Solid
+rotateLayer axis layer amount =
+    over (layers axis . layer) (W.rotate (unit axis) (pi/2 * amount))
+
+rotateD = rotateLayer _z _x
+rotateU = rotateLayer _z _z
+rotateR = rotateLayer _x _z
+rotateL = rotateLayer _x _x
+rotateF = rotateLayer _y _z
+rotateB = rotateLayer _y _x
+rotateD' = rotateD . negate
+rotateU' = rotateU . negate
+rotateR' = rotateR . negate
+rotateL' = rotateL . negate
+rotateF' = rotateF . negate
+rotateB' = rotateB . negate
+
+scrambleList :: [Double -> W.Solid -> W.Solid]
+scrambleList = 
+    [ rotateL
+    , rotateU
+    , rotateR
+    , rotateU'
+    , rotateR
+    , rotateU
+    , rotateL
+    , rotateF
+    ]
+
+applyScrambleList :: [Double -> W.Solid -> W.Solid] -> W.Solid -> Double -> W.Solid
+applyScrambleList list s amount = 
+    let l = length list
+        completeActions = ceiling (amount * realToFrac l) 
+        fractionalAction = (amount * realToFrac l) - (realToFrac completeActions - 1)
+    in case drop (l - completeActions) list of
+            [] -> s
+            (h:tail) -> (appEndo $ foldMap Endo (h fractionalAction : (($ 1) <$> tail))) s
+
+scramble = applyScrambleList scrambleList
+
