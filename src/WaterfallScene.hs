@@ -5,8 +5,6 @@ module WaterfallScene
 , animatedClipWithBackground
 , centerDiagram
 , WaterfallSceneProps (..)
-, waterfallHiddenColor
-, waterfallVisibleColor
 )
 where
 
@@ -26,17 +24,15 @@ import Data.Default
 import Animate (animate)
 import Control.Monad (void)
 
-data WaterfallSceneProps = WaterfallSceneProps
-    { _waterfallVisibleColor :: JP.PixelRGBA8 
-    , _waterfallHiddenColor :: JP.PixelRGBA8
+newtype WaterfallSceneProps = WaterfallSceneProps 
+    { propsLineStyle :: W.LineStyle
     }
 
-makeLenses ''WaterfallSceneProps
-
 instance Default WaterfallSceneProps where
-    def = WaterfallSceneProps 
-        { _waterfallVisibleColor = black
-        , _waterfallHiddenColor = JP.PixelRGBA8 200 200 255 255
+    def = WaterfallSceneProps $ W.LineStyle
+        { W.visibleLineColour = W.Colour 0 0 0
+        , W.hiddenLineColour = W.rgb24 0xC8C8FF
+        , W.hiddenLineOpacity = 1.0
         }
 
 -- | scale the diagram so that the video shows the range [-1, 1] on the smallest axis
@@ -47,37 +43,22 @@ diagramSvg props background vd diagram =
         w = Svg.Num . fromIntegral $ vd ^. videoWidth
         h = Svg.Num .fromIntegral $ vd ^. videoHeight
 
-        paths lt visibility =
-            W.path2DToPathCommands =<<
-                W.diagramLines lt visibility (W.uScale2D minorAxis diagram)
-
         dx = (fromInteger (vd ^. videoWidth) ) / 2
         dy = (fromInteger (vd ^. videoHeight) ) / 2
+
         addOffset = translate dx dy
 
-        document e = 
-            background 
-                & Svg.elements %~ (<> e)
-            
-        pathColour W.Visible = props ^. waterfallVisibleColor
-        pathColour W.Hidden = props ^. waterfallHiddenColor
-        
-        pathOf lt visibility = 
+        diagramDoc = W.diagramToSvgWithLineStyle (propsLineStyle props) (W.uScale2D minorAxis diagram)
+        diagramElement = 
             Svg.defaultSvg 
-                & Svg.pathDefinition .~ (paths lt visibility)
-                & Svg.drawAttr . Svg.fillColor .~ (pure Svg.FillNone)
-                & strokeColour (pathColour visibility)
-                & strokeWidth 2.0
-                & Svg.PathTree 
+                & Svg.groupChildren .~ (diagramDoc ^. Svg.elements)
                 & addOffset
-            
-        group children = Svg.GroupTree $ Svg.Group mempty children Nothing Svg.defaultSvg
-            in document . pure . group $
-                    [ pathOf lineType visibility
-                        | visibility <- [W.Hidden, W.Visible]
-                        , lineType <- [W.SharpLine, W.OutLine]
-                    ]
+                & Svg.GroupTree 
 
+        in background 
+            & Svg.elements %~ (<> [diagramElement])
+            & Svg.styleRules %~ (<> (diagramDoc ^. Svg.styleRules) )
+            
 centerDiagram :: W.Diagram -> W.Diagram
 centerDiagram d = 
     case W.diagramBoundingBox d of 
