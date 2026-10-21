@@ -106,7 +106,7 @@ codeBlockWithFade blockname nextScene = do
 waterfallProps = WaterfallSceneProps $ W.LineStyle 
     { W.visibleLineColour = W.black
     , W.hiddenLineColour = W.black
-    , W.hiddenLineOpacity = 0.4
+    , W.hiddenLineOpacity = 0.2
     }
 
 diffBlockWithFade blockNameBefore blockName nextScene = do
@@ -159,8 +159,6 @@ main = Run.run videoProps $ do
             diagram
             . Object.singleSegmentStage2
             . Transitions.easeInOutSin
-    
-    --}
 
     codeBlockWithFade "Combined Segments" $ \background -> do
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
@@ -168,6 +166,31 @@ main = Run.run videoProps $ do
             . Object.combinedSegmentsAnimated 
             . Transitions.easeInOutSin
 
+    codeBlockWithFade "Single Sticker" $ \background -> do
+        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+            diagram
+            . Object.singleStickerStage1 
+            . Transitions.easeInOutSin
+        WaterfallScene.animatedClipWithBackground def (2*tf) background $ 
+            diagram
+            . Object.singleStickerStage2
+            . Transitions.easeInOutSin
+
+    
+    codeBlockWithFade "One Side Of Stickers" $ \background -> do
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
+            diagram
+            . Object.oneSideOfStickersAnimated
+            . Transitions.easeInOutSin
+
+            
+    --}
+
+    codeBlockWithFade "Segments With Stickers" $ \background -> do
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $ 
+            diagram
+            . Object.segmentsWithStickersAnimated
+            . Transitions.easeInOutSin
 
 
 
