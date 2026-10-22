@@ -156,8 +156,10 @@ main = Run.run videoProps $ do
 
     setTidalOp Tidal.resetCycles
 
+    {--
+
     setTidalPattern Audio.intro
-    codeBlockAudioOno tfIntro "Audio Intro"
+    codeBlockAudioOno tfIntro "Melody"
     codeBlockAudioOno tfIntro "Vibes"
 
     codeBlockWithFade tfIntro "Single Segment" $ \background -> do
@@ -203,10 +205,12 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfIntro) background $
             diagram . Object.scramble Object.segmentsWithStickers
 
+    --}
+
     setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 Audio.verse
-    codeBlockAudioOno tfVerse "Verse Right"
-    codeBlockAudioOno tfVerse "Verse Bass"
-    codeBlockAudioOno tfVerse "Verse Chords"
+    codeBlockAudioOno tfVerse "Verse Parts"
+    codeBlockAudioOno tfVerse "Keys"
+    codeBlockAudioOno tfVerse "Bass"
     codeBlockAudioOno tfVerse "Play Verse"
 
     diffBlockWithFade tfVerse "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
