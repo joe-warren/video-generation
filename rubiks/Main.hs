@@ -198,15 +198,20 @@ main = Run.run videoProps $ do
             diagram . Object.scramble Object.segmentsWithStickers
 
     --}
-    {--
     diffBlockWithFade "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
+        circularWipeColour tf cubeDiagram
+            . WaterfallScene.diagramSvg 
+                waterfallProps
+                (SvgUtils.blankCanvas videoProps SvgUtils.white) 
+                videoProps 
+                . diagram $ 
+                    Object.scramble
+                    Object.segmentsWithStickersWithColour
+                    1
+
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tf) background $
             diagram 
             . Object.scramble Object.segmentsWithStickersWithColour 
             . (1 -)
-    --}
     
-    let cube =  W.centeredCube & W.uScale 30 & W.colourSolid W.blue
-        cubeDiagram = WaterfallScene.diagramSvg waterfallProps (SvgUtils.blankCanvas videoProps SvgUtils.white) videoProps . diagram $ cube
-    circularWipeColour (4 * tf) cubeDiagram
     

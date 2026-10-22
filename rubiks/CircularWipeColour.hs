@@ -13,6 +13,7 @@ import Control.Lens
 import Control.Monad (void)
 import qualified Data.Map as M
 import qualified SvgUtils
+import qualified Transitions
 
 addWipe :: VideoProps -> Svg.Document -> Double -> Svg.Document
 addWipe vd doc frac = 
@@ -21,15 +22,17 @@ addWipe vd doc frac =
         rMax = sqrt (w * w + h * h) / 2
         r = rMax * frac
 
+        -- userSpaceOnUse is the coordinate system of the masked .fill elements,
+        -- which diagramSvg has translated so that the origin is the centre of the frame
         rect = Svg.defaultSvg
-            & Svg.rectWidth .~ (Svg.Num w) 
-            & Svg.rectHeight .~ (Svg.Num h) 
-            & Svg.rectUpperLeftCorner .~ (Svg.Num 0, Svg.Num 0)
+            & Svg.rectWidth .~ (Svg.Num w)
+            & Svg.rectHeight .~ (Svg.Num h)
+            & Svg.rectUpperLeftCorner .~ (Svg.Num (-w/2), Svg.Num (-h/2))
             & Svg.drawAttr . Svg.fillColor .~ (pure . Svg.ColorRef $ SvgUtils.black)
             & Svg.RectangleTree
 
         circle = Svg.defaultSvg
-            & Svg.circleCenter .~ (Svg.Num (w/2), Svg.Num (h/2))
+            & Svg.circleCenter .~ (Svg.Num 0, Svg.Num 0)
             & Svg.circleRadius .~ (Svg.Num r)
             & Svg.drawAttr . Svg.fillColor .~ (pure . Svg.ColorRef $  SvgUtils.white)
             & Svg.CircleTree
@@ -38,7 +41,7 @@ addWipe vd doc frac =
             & Svg.maskContent .~ [rect, circle]
             & Svg.maskUnits .~ Svg.CoordUserSpace
             & Svg.maskContentUnits .~ Svg.CoordUserSpace
-            & Svg.maskPosition .~ (Svg.Num 0, Svg.Num 0)
+            & Svg.maskPosition .~ (Svg.Num (-w/2), Svg.Num (-h/2))
             & Svg.maskWidth .~ (Svg.Num w)
             & Svg.maskHeight .~ (Svg.Num h)
             & Svg.ElementMask
@@ -53,13 +56,11 @@ addWipe vd doc frac =
             & Svg.definitions %~ (<> mask)
             & Svg.styleRules %~ (<> newStyles)
 
-
-
 circularWipeColour
     :: ( BuildVideo :> es
     , Reader VideoProps :> es
     ) => Double -> Svg.Document -> Eff es ()
 circularWipeColour duration doc = do
     vd <- ask 
-    void $ animate duration (addWipe vd doc)
+    void $ animate duration (addWipe vd doc . Transitions.easeInOutSin)
 
