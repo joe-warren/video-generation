@@ -199,7 +199,7 @@ main = Run.run videoProps $ do
 
     --}
     diffBlockWithFade "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
-        circularWipeColour tf cubeDiagram
+        circularWipeColour tf
             . WaterfallScene.diagramSvg 
                 waterfallProps
                 (SvgUtils.blankCanvas videoProps SvgUtils.white) 
