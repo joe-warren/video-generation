@@ -32,7 +32,6 @@ import qualified Sound.Tidal.Boot as Audio
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
 import CircularWipeColour (circularWipeColour)
 import Transitions (easeInOutSin)
-import GHC (back)
 
 videoProps :: VideoProps
 videoProps = def

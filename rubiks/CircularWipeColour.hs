@@ -19,7 +19,8 @@ addWipe :: VideoProps -> Svg.Document -> Double -> Svg.Document
 addWipe vd doc frac = 
     let w = realToFrac $ vd ^. videoWidth
         h = realToFrac $ vd ^. videoHeight
-        rMax = sqrt (w * w + h * h) / 2
+        -- fix me if the coloured part of the image ever isn't confined to the center 
+        rMax = h / 2
         r = rMax * frac
 
         -- userSpaceOnUse is the coordinate system of the masked .fill elements,
