@@ -31,6 +31,8 @@ import Control.Monad (join)
 import qualified Sound.Tidal.Boot as Audio
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
 import CircularWipeColour (circularWipeColour)
+import Transitions (easeInOutSin)
+import GHC (back)
 
 videoProps :: VideoProps
 videoProps = def
@@ -202,7 +204,7 @@ main = Run.run videoProps $ do
         circularWipeColour tf
             . WaterfallScene.diagramSvg 
                 waterfallProps
-                (SvgUtils.blankCanvas videoProps SvgUtils.white) 
+                background
                 videoProps 
                 . diagram $ 
                     Object.scramble
@@ -213,5 +215,6 @@ main = Run.run videoProps $ do
             diagram 
             . Object.scramble Object.segmentsWithStickersWithColour 
             . (1 -)
+            . easeInOutSin
     
     
