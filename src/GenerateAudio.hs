@@ -1,6 +1,7 @@
 module GenerateAudio (
     setTidalPattern,
     setTidalOp,
+    setTidalOpEarly,
     BuildAudioError(..),
     runBuildAudio,
     logBuildAudioError
@@ -33,15 +34,18 @@ data BuildAudioError =
     deriving Show
 
 data BuildAudio :: Effect where
-    SetTidalOp :: Tidal.Op () -> BuildAudio m ()
+    SetTidalOp :: Double -> Tidal.Op () -> BuildAudio m ()
 
 type instance DispatchOf BuildAudio = Dynamic
 
 setTidalPattern :: (BuildAudio :> es) => Tidal.ControlPattern -> Eff es ()
-setTidalPattern = send . SetTidalOp . Tidal.d1
+setTidalPattern = send . SetTidalOp 0 . Tidal.d1
 
 setTidalOp :: (BuildAudio :> es) => Tidal.Op () -> Eff es ()
-setTidalOp = send . SetTidalOp
+setTidalOp = send . SetTidalOp 0
+
+setTidalOpEarly :: (BuildAudio :> es) => Double -> Tidal.Op () -> Eff es ()
+setTidalOpEarly advance = send . SetTidalOp advance
 
 -- | on linux, run sclang within pipewire jack emulation
 -- on macOS, sclang drives coreaudio directly,
@@ -111,15 +115,15 @@ forwardOutput h = forever $ do
 
 runBuildAudioNoOp :: Eff (BuildAudio : es) a -> Eff es a
 runBuildAudioNoOp = interpret $ \_ -> \case
-    SetTidalOp _ -> pure ()
+    SetTidalOp _ _ -> pure ()
 
 runBuildAudioTidal :: (IOE :> es, Reader VideoProps :> es, TrackOffset :> es, Error BuildAudioError :> es) => Eff (BuildAudio : es) a -> Eff es a
 runBuildAudioTidal eff = do
     (res, patterns:: [(Double, Tidal.Op ())]) <-
         reinterpretWith (runWriter) eff $ \_ -> \case
-            SetTidalOp op -> do
+            SetTidalOp advance op -> do
                 offset <- getCurrentOffsetSeconds
-                tell [(offset, op)]
+                tell [(offset - advance, op)]
 
     finalOffset <- getCurrentOffsetSeconds
     let finalAction = [(finalOffset, Tidal.hush )]

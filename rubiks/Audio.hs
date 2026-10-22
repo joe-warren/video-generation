@@ -5,7 +5,6 @@ module Audio where
 -- The Soundtrack: "I Can Sing a Rainbow", using Tidal Cycles
 import Sound.Tidal.Boot
 
--- one cycle is two bars of 4/4, sixteen quavers
 melody =
     [ n "c@2 d@2 e c d@2 e@2 g@2 g@4"
     , n "a   f   d@2 g e c@2 d@8"
@@ -13,9 +12,18 @@ melody =
     , n "~@2 e   g4  e@2 d@2 c@5 ~@3"
     ]
 
-tempo = cps (92/60/8)
+bpmIntro = 100
 
-intro = cat melody # vibes # tempo
+tempoIntro = cps (bpmIntro/60/8)
+
+intro = cat melody # vibes # tempoIntro
+
+-- BLOCK:  introWithPercussion
+
+introPercussion = stack
+    [ melodyInstrument $ cat melody
+    , drums
+    ] # tempoIntro
 
 -- BLOCK: Parameter Setup
 
@@ -82,7 +90,7 @@ vibes =
       # fmeglevel 2 1 1 # fmeglevel 2 2 0 # fmeglevel 2 3 0 # fmeglevel 2 4 0
       # fmegrate 2 1 20 # fmegrate 2 2 0.7 # fmegrate 2 3 1 # fmegrate 2 4 1
 
--- BLOCK: Verse
+-- BLOCK: Verse Right
 
 pianoRight =
     [ n "c6@2 d6@2 e6 c6 d6@2 e6@2 g6@2 g6@4"
@@ -91,12 +99,16 @@ pianoRight =
     , n "~@2  e6   c6   e6@2 d6@2 c6@5 ~@3"
     ]
 
+-- BLOCK: Verse Bass
+
 pianoBass =
     [ n "c c c  c"
     , n "c c b4 g4"
     , n "c c c  c"
     , n "c@3 ~ a4@2 b4@2 c@4 c ~ c4@2"
     ]
+
+-- BLOCK: Verse Chords
 
 pianoChords =
     [ n "~ g f g  ~ g f g  ~ g e g  ~ g  e g"
@@ -105,6 +117,12 @@ pianoChords =
     , n "~ g e c  ~ f ~ f  ~ g e g  ~@4"
     ]
 
+-- BLOCK: Play Verse
+
+bpmVerse = 130
+
+tempoVerse = cps (bpmVerse/60/8)
+
 piano = stack 
     [ stack (cat <$> [pianoRight, pianoBass])
         # s "superpiano" # amp 0.6
@@ -112,8 +130,6 @@ piano = stack
         # pipes # amp 0.6
     ]
 drums = s "[cp hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
-
--- BLOCK: Play Verse
 
 melodyInstrument x = stack
     [ (x |+ n "12") # amp 0.4 # vibes
@@ -124,4 +140,4 @@ verse = stack
     [ melodyInstrument $ cat melody
     , piano
     , drums
-    ] # tempo
+    ] # tempoVerse

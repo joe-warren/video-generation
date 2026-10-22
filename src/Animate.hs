@@ -17,10 +17,11 @@ animateM ::
     ) => Double -> (Double -> Eff es Svg.Document) -> Eff es Svg.Document
 animateM duration f = do
     vd <- ask
-    let nFrames = floor (duration * fromInteger (vd ^. videoFPS))
+    let nFrames = max 1 . round $ (duration * fromInteger (vd ^. videoFPS))
+        frameDuration = duration / fromInteger nFrames
 
-    let v = (/ fromInteger nFrames) . fromInteger
-    traverse_ (addSvgFrame <=< f . v) [0..nFrames]
+    let v = (/ fromInteger (max 1 (nFrames - 1))) . fromInteger
+    traverse_ (addSvgDuration frameDuration <=< f . v) [0..nFrames-1]
     f 1
 
 animate ::

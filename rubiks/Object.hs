@@ -154,6 +154,8 @@ segmentsWithStickersAnimated f = mconcat $
 
 -- BLOCK: Segments With Stickers With Colour
 
+-- Waterfall-CAD now supports Colour
+
 colours = [W.yellow, W.aqua, W.lime, W.red, W.fuchsia, W.white]
 
 segmentsWithStickersWithColour :: W.Solid
