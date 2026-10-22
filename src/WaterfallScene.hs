@@ -4,6 +4,7 @@ module WaterfallScene
 , animatedClip
 , animatedClipWithBackground
 , centerDiagram
+, diagramSvg
 , WaterfallSceneProps (..)
 )
 where

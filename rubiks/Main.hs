@@ -30,13 +30,14 @@ import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
 import qualified Sound.Tidal.Boot as Audio
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
+import CircularWipeColour (circularWipeColour)
 
 videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "rubik.mp4"
     & videoGenerateAudio .~ False
     & videoGenerateVideo .~ True
-    & videoConvertViaPng .~ True
+    & videoConvertViaPng .~ False
 
 easeInOutStay :: Double -> Double
 easeInOutStay x 
@@ -205,8 +206,7 @@ main = Run.run videoProps $ do
             . (1 -)
     --}
     
-    WaterfallScene.animatedClip waterfallProps (4*tf) $
-            diagram 
-            . Object.scramble Object.segmentsWithStickersWithColour
-
-
+    let cube =  W.centeredCube & W.uScale 30 & W.colourSolid W.blue
+        cubeDiagram = WaterfallScene.diagramSvg waterfallProps (SvgUtils.blankCanvas videoProps SvgUtils.white) videoProps . diagram $ cube
+    circularWipeColour (4 * tf) cubeDiagram
+    

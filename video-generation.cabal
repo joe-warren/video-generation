@@ -140,6 +140,7 @@ executable rubiks-video
   main-is: Main.hs
   other-modules:
       Audio
+      CircularWipeColour
       Object
       Paths_video_generation
   autogen-modules:
