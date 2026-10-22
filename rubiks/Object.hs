@@ -1,8 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 module Object where
 
-import Data.Foldable (fold)
-import Data.Monoid (Endo (..))
 
 -- BLOCK:Imports
 
@@ -176,30 +174,45 @@ segmentsWithStickersWithColour = mconcat $
 -- This "Lensy Rubiks cube code" is inspired by code
 -- that Adam Vogt (@enthropy) posted to the waterfall-cad discord
 
--- This is an unlawful lens
-layers :: Lens' (V3 Double) Double -> Lens' W.Solid (V3 W.Solid)
-layers basis = 
-    let mask = W.centeredCube 
-            & W.scale ((pure 1 ^* (combinedSegmentW * 3) ) & basis .~ (segmentW + segmentGap))
-        translatedMasks = (`W.translate` mask) . (^* centerGap) . (*^ unit basis)  <$> V3 (-1) 0 1
-    in lens (\s -> W.intersection s <$> translatedMasks)
-        (const fold)
+newtype Cube = Cube { getCubeSegments :: [(V3 Double, W.Solid)]}
 
-rotateLayer
-    :: Lens' (V3 Double) Double 
-    -> Lens' (V3 W.Solid) W.Solid
-    -> Double 
-    -> W.Solid 
-    -> W.Solid
-rotateLayer axis layer amount =
-    over (layers axis . layer) (W.rotate (unit axis) (pi/2 * amount))
+_cube :: Lens' Cube [(V3 Double, W.Solid)]
+_cube = iso getCubeSegments Cube
 
-rotateD = rotateLayer _z _x
-rotateU = rotateLayer _z _z
-rotateR = rotateLayer _x _z
-rotateL = rotateLayer _x _x
-rotateF = rotateLayer _y _z
-rotateB = rotateLayer _y _x
+cubies :: W.Solid -> Cube
+cubies s =
+    let half = centerGap / 2
+        interval c = case compare c 0 of
+            LT -> (-combinedSegmentW, -half)
+            EQ -> (-half, half)
+            GT -> (half, combinedSegmentW)
+        mask v =
+            let lo = fst . interval <$> v
+                hi = snd . interval <$> v
+            in W.centeredCube & W.scale (hi - lo) & W.translate ((lo + hi) ^/ 2)
+        positions = [-1, 0, 1]
+    in Cube [ (v, W.intersection s (mask v)) | v <- V3 <$> positions <*> positions <*> positions ]
+
+assemble :: Cube -> W.Solid
+assemble = mconcat . fmap snd . getCubeSegments
+
+layer :: Lens' (V3 Double) Double -> Int -> Traversal' Cube (V3 Double, W.Solid)
+layer axis i = _cube . traversed . filtered ((== i) . round . view (_1 . axis))
+
+rotateLayer :: Lens' (V3 Double) Double -> Int -> Double -> Cube -> Cube
+rotateLayer axis i amount =
+    let angle = pi/2 * amount
+    in over (layer axis i)
+        ( (_1 %~ rotate (axisAngle (unit axis) angle))
+        . (_2 %~ W.rotate (unit axis) angle)
+        )
+
+rotateD = rotateLayer _z (-1)
+rotateU = rotateLayer _z 1
+rotateR = rotateLayer _x 1
+rotateL = rotateLayer _x (-1)
+rotateF = rotateLayer _y 1
+rotateB = rotateLayer _y (-1)
 rotateD' = rotateD . negate
 rotateU' = rotateU . negate
 rotateR' = rotateR . negate
@@ -207,7 +220,7 @@ rotateL' = rotateL . negate
 rotateF' = rotateF . negate
 rotateB' = rotateB . negate
 
-scrambleList :: [Double -> W.Solid -> W.Solid]
+scrambleList :: [Double -> Cube -> Cube]
 scrambleList = 
     [ rotateL
     , rotateU
@@ -219,14 +232,16 @@ scrambleList =
     , rotateF
     ]
 
-applyScrambleList :: [Double -> W.Solid -> W.Solid] -> W.Solid -> Double -> W.Solid
-applyScrambleList list s amount = 
-    let l = length list
-        completeActions = ceiling (amount * realToFrac l) 
-        fractionalAction = (amount * realToFrac l) - (realToFrac completeActions - 1)
-    in case drop (l - completeActions) list of
-            [] -> s
-            (h:tail) -> (appEndo $ foldMap Endo (h fractionalAction : (($ 1) <$> tail))) s
+applyScrambleList :: [Double -> Cube -> Cube] -> W.Solid -> Double -> W.Solid
+applyScrambleList list s =
+    let moves = reverse list
+        states = scanl (\cube move -> move 1 cube) (cubies s) moves
+        l = realToFrac (length moves)
+    in \amount ->
+        let progress = amount * l
+            j = max 0 (ceiling progress - 1)
+        in if progress <= 0
+            then s
+            else assemble $ (moves !! j) (progress - realToFrac j) (states !! j)
 
 scramble = applyScrambleList scrambleList
-

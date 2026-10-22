@@ -23,12 +23,12 @@ import Animate (animate)
 import qualified SvgUtils
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
+import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp, setTidalOpEarly)
 import GenerateVideo (addSvgDuration)
 import ImageScene (addImageDuration, loadImage)
 import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
-import qualified Sound.Tidal.Boot as Audio
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
 import CircularWipeColour (circularWipeColour)
 import Transitions (easeInOutSin)
@@ -37,7 +37,7 @@ videoProps :: VideoProps
 videoProps = def
     & videoOutputFile .~ "rubik.mp4"
     & videoGenerateAudio .~ True
-    & videoGenerateVideo .~ False
+    & videoGenerateVideo .~ True
     & videoConvertViaPng .~ False
 
 easeInOutStay :: Double -> Double
@@ -89,7 +89,7 @@ showRotating' axis scale angle solid t =
     solid
     & W.uScale scale 
     & W.rotate axis (angle * t)
-    & toDiagram
+    & diagram
 showRotating = showRotating' (unit _z)
 
 codeBlockWithFade tf blockname nextScene = do
@@ -156,8 +156,6 @@ main = Run.run videoProps $ do
 
     setTidalOp Tidal.resetCycles
 
-    {--
-
     setTidalPattern Audio.intro
     codeBlockAudioOno tfIntro "Melody"
     codeBlockAudioOno tfIntro "Vibes"
@@ -205,8 +203,6 @@ main = Run.run videoProps $ do
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfIntro) background $
             diagram . Object.scramble Object.segmentsWithStickers
 
-    --}
-
     setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 Audio.verse
     codeBlockAudioOno tfVerse "Verse Parts"
     codeBlockAudioOno tfVerse "Keys"
@@ -224,6 +220,10 @@ main = Run.run videoProps $ do
                     Object.segmentsWithStickersWithColour
                     1
 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $ 
+            showRotating 1 (2*pi) (Object.scramble Object.segmentsWithStickersWithColour 1)
+            . Transitions.easeInOutBack
+
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $
             diagram 
             . Object.scramble Object.segmentsWithStickersWithColour 
@@ -234,10 +234,18 @@ main = Run.run videoProps $ do
             showRotating 1 (2*pi) Object.segmentsWithStickersWithColour
             . Transitions.easeInOutBack
 
-        setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 (Audio.silence)
+        setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 silence
     
         WaterfallScene.stillClipWithBackground waterfallProps (tfVerse * 4) background $ 
             diagram Object.segmentsWithStickersWithColour
-
+    
+    {--
+    let background = SvgUtils.blankCanvas videoProps SvgUtils.white
+    WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $
+        diagram 
+        . Object.scramble Object.segmentsWithStickersWithColour 
+        . (1 -)
+        . easeInOutSin
+    --}
             
     
