@@ -81,13 +81,12 @@ verse = swingBy (1/12) 8 $ stack
 
 -- BLOCK: Intro With Percussion
 
-
 melodyInstrument x = stack
-    [ (x |+ n "12") # amp 0.4 # vibes
-    , x # amp 0.8 # vibes
+    [ (x |+ n "12") # amp 0.8 # vibes
+    , x # amp 1.2 # vibes
     ] # legato 1.20
 
-drums = s "[cb hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
+drums = s "[sd hh:9]*8" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
 
 introPercussion = swingBy (1/10) 8 $ stack
     [ melodyInstrument $ cat melody
@@ -143,8 +142,8 @@ fmlfodepth = pF "lfodepth"
 
 -- BLOCK: Bass
 
--- after the DX7's "BASS 1" (algorithm 16)
--- with feedback applied
+-- loosely based on the DX7's "BASS 1" (algorithm 16)
+-- with additional feedback
 fmBass =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0.6 # fmamp 6 0

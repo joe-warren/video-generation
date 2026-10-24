@@ -4,7 +4,7 @@ module Object where
 
 -- BLOCK:Imports
 
--- I've made this video to show off some new features in Waterfall-CAD
+-- I've made this video to show off a new feature in Waterfall-CAD
 
 import Linear
 import Control.Lens

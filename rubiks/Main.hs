@@ -157,6 +157,7 @@ main = Run.run videoProps $ do
 
     setTidalOp Tidal.resetCycles
 
+
     setTidalPattern Audio.intro
     codeBlockAudioOnoFast tfIntro "Melody"
     codeBlockAudioOnoFast tfIntro "Vibes"
@@ -185,7 +186,6 @@ main = Run.run videoProps $ do
 
     setTidalOpEarly 0.1 $ Tidal.jumpMod 1 2 Audio.introPercussion
     codeBlockAudioOno tfIntro "Intro With Percussion"
-
     -- 14
 
     codeBlockWithFade tfIntro "Single Sticker" $ \background -> do
@@ -265,7 +265,7 @@ main = Run.run videoProps $ do
         WaterfallScene.stillClipWithBackground waterfallProps (tfVerse * 6) background $ 
             diagram Object.segmentsWithStickersWithColour
         -- 54
-    
+        
     {--
     let background = SvgUtils.blankCanvas videoProps SvgUtils.white
     WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $
