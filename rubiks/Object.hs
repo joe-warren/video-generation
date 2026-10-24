@@ -4,6 +4,8 @@ module Object where
 
 -- BLOCK:Imports
 
+-- I've made this video to show off some new features in Waterfall-CAD
+
 import Linear
 import Control.Lens
 import qualified Waterfall as W 
@@ -152,7 +154,7 @@ segmentsWithStickersAnimated f = mconcat $
 
 -- BLOCK: Segments With Stickers With Colour
 
--- Waterfall-CAD now supports Colour
+-- Waterfall-CAD now supports Colour!!!
 
 colours = [W.yellow, W.aqua, W.lime, W.red, W.fuchsia, W.white]
 

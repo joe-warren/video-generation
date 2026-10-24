@@ -23,10 +23,8 @@ import Animate (animate)
 import qualified SvgUtils
 import qualified Sound.Tidal.Safe.Boot as Tidal
 import Sound.Tidal.Boot (silence)
-import Sound.Tidal.Boot (silence)
 import GenerateAudio (setTidalPattern, setTidalOp, setTidalOpEarly)
 import GenerateVideo (addSvgDuration)
-import ImageScene (addImageDuration, loadImage)
 import CodeScene (codeScene, codeSceneBackground)
 import Control.Monad (join)
 import WaterfallScene (WaterfallSceneProps(WaterfallSceneProps))
@@ -55,9 +53,10 @@ animateDiagramLines diagram fraction =
         , line <-  W.diagramLines lineType visibility diagram
         ]
 
-codeBlockOno' tf duration srcfile props blockname = 
-            addSvgDuration (duration * tf - 1.2 * tf)
-            =<< CodeScene.codeScene props (1.2 * tf)
+codeBlockOno' tf duration srcfile props blockname =
+    let fac = if duration > 1.2 then 1.2 else duration * 0.8
+    in addSvgDuration (duration * tf - fac * tf)
+            =<< CodeScene.codeScene props (fac * tf)
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
 -- | tf = one Bar
@@ -76,6 +75,8 @@ audioCodeBlockParams =
 
 codeBlockAudioOno tf = codeBlockOno' tf 2 audioFile audioCodeBlockParams
 
+
+codeBlockAudioOnoFast tf = codeBlockOno' tf 1 audioFile audioCodeBlockParams
 centerBasedOn target solid = 
     case W.axisAlignedBoundingBox target of
         Just (lo, hi) -> W.translate ((lo + hi) ^* (-0.5)) solid
@@ -157,59 +158,77 @@ main = Run.run videoProps $ do
     setTidalOp Tidal.resetCycles
 
     setTidalPattern Audio.intro
-    codeBlockAudioOno tfIntro "Melody"
-    codeBlockAudioOno tfIntro "Vibes"
+    codeBlockAudioOnoFast tfIntro "Melody"
+    codeBlockAudioOnoFast tfIntro "Vibes"
+
+    -- 2
 
     codeBlockWithFade tfIntro "Single Segment" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground def (1*tfIntro) background $ 
             diagram
             . Object.singleSegmentStage1 
             . Transitions.easeInOutSin
-        WaterfallScene.animatedClipWithBackground def (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground def (1*tfIntro) background $ 
             diagram
             . Object.singleSegmentStage2
             . Transitions.easeInOutSin
+    
+    -- 6
 
     codeBlockWithFade tfIntro "Combined Segments" $ \background -> do
-        WaterfallScene.animatedClipWithBackground waterfallProps (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tfIntro) background $ 
             diagram
             . Object.combinedSegmentsAnimated 
             . Transitions.easeInOutSin
 
-    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 Audio.introPercussion
+    -- 12
+
+    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 2 Audio.introPercussion
+    codeBlockAudioOno tfIntro "Intro With Percussion"
+
+    -- 14
 
     codeBlockWithFade tfIntro "Single Sticker" $ \background -> do
-        WaterfallScene.animatedClipWithBackground def (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground def (tfIntro) background $ 
             diagram
             . Object.singleStickerStage1 
             . Transitions.easeInOutSin
-        WaterfallScene.animatedClipWithBackground def (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground def (tfIntro) background $ 
             diagram
             . Object.singleStickerStage2
             . Transitions.easeInOutSin
-    
+    -- 18
+
     codeBlockWithFade tfIntro "One Side Of Stickers" $ \background -> do
         WaterfallScene.animatedClipWithBackground waterfallProps (2*tfIntro) background $ 
             diagram
             . Object.oneSideOfStickersAnimated
             . Transitions.easeInOutSin
+    -- 22
 
     codeBlockWithFade tfIntro "Segments With Stickers" $ \background -> do
-        WaterfallScene.animatedClipWithBackground waterfallProps (2*tfIntro) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tfIntro) background $ 
             diagram
             . Object.segmentsWithStickersAnimated
             . Transitions.easeInOutSin
 
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfIntro) background $
             diagram . Object.scramble Object.segmentsWithStickers
+    --32
 
     setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 Audio.verse
-    codeBlockAudioOno tfVerse "Verse Parts"
-    codeBlockAudioOno tfVerse "Keys"
-    codeBlockAudioOno tfVerse "Bass"
-    codeBlockAudioOno tfVerse "Play Verse"
+    codeBlockAudioOnoFast (tfVerse/2) "Verse Parts"
+    codeBlockAudioOnoFast (tfVerse/2) "Keys"
+    codeBlockAudioOnoFast (tfVerse/2) "Bass"
+    codeBlockAudioOnoFast (tfVerse/2) "Lead"
+    codeBlockAudioOnoFast (tfVerse/2) "FM Drum Instrument"
+    codeBlockAudioOnoFast (tfVerse/2) "FM Drum Stacked"
+    codeBlockAudioOnoFast tfVerse "Play Verse"
+
+    --36
 
     diffBlockWithFade tfVerse "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
+        -- 38
         circularWipeColour tfVerse
             . WaterfallScene.diagramSvg 
                 waterfallProps
@@ -219,25 +238,33 @@ main = Run.run videoProps $ do
                     Object.scramble
                     Object.segmentsWithStickersWithColour
                     1
+        --39
 
-        WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (3*tfVerse) background $ 
             showRotating 1 (2*pi) (Object.scramble Object.segmentsWithStickersWithColour 1)
             . Transitions.easeInOutBack
+
+        -- 42
 
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $
             diagram 
             . Object.scramble Object.segmentsWithStickersWithColour 
             . (1 -)
             . easeInOutSin
+
+        -- 46
     
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $ 
             showRotating 1 (2*pi) Object.segmentsWithStickersWithColour
             . Transitions.easeInOutBack
 
+        -- 50
+
         setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 silence
     
-        WaterfallScene.stillClipWithBackground waterfallProps (tfVerse * 4) background $ 
+        WaterfallScene.stillClipWithBackground waterfallProps (tfVerse * 6) background $ 
             diagram Object.segmentsWithStickersWithColour
+        -- 54
     
     {--
     let background = SvgUtils.blankCanvas videoProps SvgUtils.white

@@ -19,7 +19,6 @@ intro = cat melody # vibes # tempoIntro
 
 -- BLOCK: Vibes
 
--- an FM synth: operator 2 modulates operator 1, at 3.5 times its frequency
 vibes =
       sound "superfm" # amp 0.8
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
@@ -49,7 +48,7 @@ brokenChords =
 
 -- BLOCK: Keys
 
--- loosely based on DX7's "E.PIANO 1", with feedback applied
+-- loosely based on DX7's "E.PIANO 1", with additional feedback
 keys =
       sound "superfm"
       # fmamp 1 0.6 # fmamp 2 0 # fmamp 4 0 # fmamp 5 0.7 # fmamp 6 0
@@ -70,7 +69,7 @@ keys =
 bpmVerse = 130
 tempoVerse = cps (bpmVerse/60/8)
 
-verse = stack
+verse = swingBy (1/12) 8 $ stack
     [ cat melody # fmLead # amp 0.6 # legato 1.1
         # orbit 1 # room 0.4 # size 0.8
     , cat rightHand # keys # amp 0.5
@@ -80,12 +79,8 @@ verse = stack
     , fmDrums
     ] # tempoVerse
 
--- BLOCK: Intro With Percussion (Not Shown)
+-- BLOCK: Intro With Percussion
 
-introPercussion = stack
-    [ melodyInstrument $ cat melody
-    , drums
-    ] # tempoIntro
 
 melodyInstrument x = stack
     [ (x |+ n "12") # amp 0.4 # vibes
@@ -93,6 +88,11 @@ melodyInstrument x = stack
     ] # legato 1.20
 
 drums = s "[cb hh:9]*4" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
+
+introPercussion = swingBy (1/10) 8 $ stack
+    [ melodyInstrument $ cat melody
+    , drums
+    ] # tempoIntro 
 
 -- BLOCK: FM Parameters (Not Shown)
 
@@ -160,7 +160,7 @@ fmBass =
       # fmEnvelope 5 [1, 0.9, 0.6, 0] [20, 1, 0.3, 1]
       # fmEnvelope 6 [1, 0.7, 0.4, 0] [20, 1, 0.3, 1]
 
--- BLOCK: Lead (Not Shown)
+-- BLOCK: Lead
 
 -- loosely based on DX7's "SYN-LEAD 1" (algorithm 18)
 -- with feedback applied
@@ -177,9 +177,8 @@ fmLead =
       # fmlfofreq 5.5 # fmlfodepth 0.004
       # fmfeedback 1.6 # fmdetune 2 (-2) # fmdetune 1 0.3 
 
--- BLOCK: FM Drums (Not Shown)
+-- BLOCK: FM Drum Instrument
 
--- hi-hat: a high carrier, modulated hard by inharmonic, fed-back operators, so it's metallic noise
 fmHat =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
@@ -189,7 +188,6 @@ fmHat =
       # fmEnvelope 2 [1, 0, 0, 0] [20, 3, 1, 1]
       # fmEnvelope 3 [1, 0, 0, 0] [20, 3, 1, 1]
 
--- snare: a low tone with a burst of noise from a wildly fed-back modulator
 fmSnare =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
@@ -198,7 +196,8 @@ fmSnare =
       # fmEnvelope 1 [1, 0.3, 0, 0] [20, 2, 0.8, 1]
       # fmEnvelope 2 [1, 0.2, 0, 0] [20, 1.5, 1, 1]
 
--- superfm has no pitch envelope, so the kick stays an 808
+-- BLOCK: FM Drum Stacked
+
 fmDrums = stack
     [ s "808bd:3*8" # amp 0.9
     , n "[~ -5]*4" # fmSnare # amp 0.6
