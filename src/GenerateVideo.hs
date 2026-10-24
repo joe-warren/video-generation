@@ -158,7 +158,6 @@ generateVideo concatFile audioFile outputFile =
         , "-f", "concat"
         , "-i", concatFile
         ] <> audioCommands <>
-        [ "-vsync", "vfr"
-        , "-pix_fmt", "yuv420p"
+        [ "-pix_fmt", "yuv420p"
         , outputFile
         ])
