@@ -229,7 +229,7 @@ main = Run.run videoProps $ do
     --36
 
     diffBlockWithFade tfVerse "Segments With Stickers" "Segments With Stickers With Colour" $ \background -> do
-        -- 38
+        -- 39
         circularWipeColour tfVerse
             . WaterfallScene.diagramSvg 
                 waterfallProps
@@ -239,13 +239,13 @@ main = Run.run videoProps $ do
                     Object.scramble
                     Object.segmentsWithStickersWithColour
                     1
-        --39
+        --40
 
-        WaterfallScene.animatedClipWithBackground waterfallProps (3*tfVerse) background $ 
+        WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $ 
             showRotating 1 (2*pi) (Object.scramble Object.segmentsWithStickersWithColour 1)
             . Transitions.easeInOutBack
 
-        -- 42
+        -- 44
 
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $
             diagram 
@@ -253,19 +253,19 @@ main = Run.run videoProps $ do
             . (1 -)
             . easeInOutSin
 
-        -- 46
+        -- 48
     
         WaterfallScene.animatedClipWithBackground waterfallProps (4*tfVerse) background $ 
             showRotating 1 (2*pi) Object.segmentsWithStickersWithColour
             . Transitions.easeInOutBack
 
-        -- 50
+        -- 52
 
         setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 silence
     
         WaterfallScene.stillClipWithBackground waterfallProps (tfVerse * 6) background $ 
             diagram Object.segmentsWithStickersWithColour
-        -- 54
+        -- 58
         
     {--
     let background = SvgUtils.blankCanvas videoProps SvgUtils.white
