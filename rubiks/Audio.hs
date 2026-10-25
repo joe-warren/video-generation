@@ -13,6 +13,7 @@ melody =
     ]
 
 bpmIntro = 100
+-- 8 beats per cycle
 tempoIntro = cps (bpmIntro/60/8)
 
 intro = cat melody # vibes # tempoIntro
@@ -48,20 +49,21 @@ brokenChords =
 
 -- BLOCK: Keys
 
--- loosely based on DX7's "E.PIANO 1", with additional feedback
+-- loosely based on the DX7's "E.PIANO 1", with additional feedback
 keys =
       sound "superfm"
-      # fmamp 1 0.6 # fmamp 2 0 # fmamp 4 0 # fmamp 5 0.7 # fmamp 6 0
-      # fmdetune 1 0.5 # fmdetune 5 (-0.7)
+      # fmamp 1 0.6 # fmamp 2 0 # fmamp 3 0
+      # fmamp 4 0 # fmamp 5 0.7 # fmamp 6 0
       # fmmod 1 2 0.8 # fmmod 5 6 0.8 # fmmod 6 6 1
+      # fmmod 2 2 1  # fmmod 3 4 3
+      # fmdetune 6 3 # fmdetune 1 0.5 # fmdetune 5 (-0.7)
+      # fmfeedback 1.2 # fmratio 2 14.3
       # fmEnvelope 1 [1, 0.75, 0, 0] [20, 0.3, 0.15, 1]
       # fmEnvelope 2 [1, 0.75, 0, 0] [20, 1, 0.3, 1]
       # fmEnvelope 3 [1, 0.95, 0, 0] [20, 0.25, 0.12, 1]
       # fmEnvelope 4 [1, 0.95, 0, 0] [20, 0.4, 0.15, 1]
       # fmEnvelope 5 [1, 0.95, 0, 0] [20, 0.25, 0.12, 1]
       # fmEnvelope 6 [1, 0.95, 0, 0] [20, 0.4, 0.15, 1]
-      # fmmod 2 2 1 # fmfeedback 1.2 # fmratio 2 14.3
-      # fmmod 3 4 3 # fmdetune 6 3
 
 
 -- BLOCK: Play Verse
@@ -82,16 +84,16 @@ verse = swingBy (1/12) 8 $ stack
 -- BLOCK: Intro With Percussion
 
 melodyInstrument x = stack
-    [ (x |+ n "12") # amp 0.8 # vibes
+    [ (x |+ n 12) # amp 0.8 # vibes
     , x # amp 1.2 # vibes
     ] # legato 1.20
 
-drums = s "[sd hh:9]*8" # amp "[0.3 0.1]*4" # pan "<0.3 0.7>*4"
+drums = s "[sd hh:9]*8" # amp "[0.3 0.1]*8" # pan "<0.3 0.7>*8"
 
 introPercussion = swingBy (1/10) 8 $ stack
     [ melodyInstrument $ cat melody
     , drums
-    ] # tempoIntro 
+    ] # tempoIntro
 
 -- BLOCK: FM Parameters (Not Shown)
 
@@ -142,14 +144,13 @@ fmlfodepth = pF "lfodepth"
 
 -- BLOCK: Bass
 
--- loosely based on the DX7's "BASS 1" (algorithm 16)
--- with additional feedback applied
+-- loosely based on the DX7's "BASS 1" with additional feedback applied
 fmBass =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0.6 # fmamp 6 0
-      # fmratio 1 1 # fmratio 2 1 # fmratio 3 1 
-      # fmratio 4 10.07 # fmratio 5 0.5 # fmratio 6 0.5 
-      # fmmod 5 6 2 # fmmod 6 6 1 # fmmod 1 2 1.5 
+      # fmratio 1 1 # fmratio 2 1 # fmratio 3 1
+      # fmratio 4 10.07 # fmratio 5 0.5 # fmratio 6 0.5
+      # fmmod 5 6 2 # fmmod 6 6 1 # fmmod 1 2 1.5
       # fmmod 2 2 1 # fmmod 1 3 2 # fmmod 3 4 0.8
       # fmfeedback 1.8
       # fmEnvelope 1 [1, 0.95, 0.3, 0] [20, 1, 0.3, 0.5]
@@ -161,8 +162,7 @@ fmBass =
 
 -- BLOCK: Lead
 
--- loosely based on DX7's "SYN-LEAD 1" (algorithm 18)
--- with additional feedback applied
+-- loosely based on DX7's "SYN-LEAD 1" with additional feedback applied
 fmLead =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0.3 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
@@ -174,7 +174,7 @@ fmLead =
       # fmEnvelope 4 [1, 0.9, 0, 0] [20, 1, 0.3, 1]
       # fmEnvelope 5 [1, 0.65, 0.6, 0] [20, 2, 0.2, 1]
       # fmlfofreq 5.5 # fmlfodepth 0.004
-      # fmfeedback 1.6 # fmdetune 2 (-2) # fmdetune 1 0.3 
+      # fmfeedback 1.6 # fmdetune 2 (-2) # fmdetune 1 0.3
 
 -- BLOCK: FM Drum Instrument
 
