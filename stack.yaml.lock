@@ -3,7 +3,28 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/topics/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: opencascade-hs-0.8.0.0@sha256:77f3a86590e5c45f5197acb6806eec2d0950036cd5295936f6739f16e06a50d3,19268
+    pantry-tree:
+      sha256: 11e019087eeac9ac7701c50057c2019e6bdb9287c2c3450b1b833ee872961d52
+      size: 35287
+  original:
+    hackage: opencascade-hs-0.8.0.0
+- completed:
+    hackage: waterfall-cad-0.8.0.0@sha256:f77b7a78b48b8989a6bfb37c031ff8909e433c99d912ce73cb629ea894e52a96,3061
+    pantry-tree:
+      sha256: d0bf789c9a9f4f40928a8b1278149b798bf60e24ca65fc66ef376c89e7339a55
+      size: 3843
+  original:
+    hackage: waterfall-cad-0.8.0.0
+- completed:
+    hackage: waterfall-cad-svg-0.8.0.0@sha256:193c848ab7972eab1c679b78481692056eb3d501cd6c1d898b6da267a15ebf59,2607
+    pantry-tree:
+      sha256: b600b1a8b38d31bd9059cc15f5ed0389d0c34cd194c08bbb334d10a773c249af
+      size: 776
+  original:
+    hackage: waterfall-cad-svg-0.8.0.0
 snapshots:
 - completed:
     sha256: 468e1afa06cd069e57554f10e84fdf1ac5e8893e3eefc503ef837e2449f7e60c
