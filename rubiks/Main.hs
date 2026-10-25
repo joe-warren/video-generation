@@ -59,8 +59,9 @@ codeBlockOno' tf duration srcfile props blockname =
             =<< CodeScene.codeScene props (fac * tf)
             =<< CodeBlock.loadCodeBlock srcfile blockname
 
--- | tf = one Bar
-tfIntro = (4*60/Audio.bpmIntro)
+-- | tfVerse = one Bar
+-- tfIntro is sped up by 2 to try to fix the pacing
+tfIntro = (4*60/Audio.bpmIntro)/2
 
 tfVerse = (4*60/Audio.bpmVerse)
 
@@ -184,7 +185,7 @@ main = Run.run videoProps $ do
 
     -- 12
 
-    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 2 Audio.introPercussion
+    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 1 Audio.introPercussion
     codeBlockAudioOno tfIntro "Intro With Percussion"
     -- 14
 
@@ -216,7 +217,7 @@ main = Run.run videoProps $ do
             diagram . Object.scramble Object.segmentsWithStickers
     --32
 
-    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 4 Audio.verse
+    setTidalOpEarly 0.1 $ Tidal.jumpMod 1 2 Audio.verse
     codeBlockAudioOnoFast (tfVerse/2) "Verse Parts"
     codeBlockAudioOnoFast (tfVerse/2) "Keys"
     codeBlockAudioOnoFast (tfVerse/2) "Bass"

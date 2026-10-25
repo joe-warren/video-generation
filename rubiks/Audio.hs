@@ -143,7 +143,7 @@ fmlfodepth = pF "lfodepth"
 -- BLOCK: Bass
 
 -- loosely based on the DX7's "BASS 1" (algorithm 16)
--- with additional feedback
+-- with additional feedback applied
 fmBass =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0.6 # fmamp 6 0
@@ -162,7 +162,7 @@ fmBass =
 -- BLOCK: Lead
 
 -- loosely based on DX7's "SYN-LEAD 1" (algorithm 18)
--- with feedback applied
+-- with additional feedback applied
 fmLead =
       sound "superfm"
       # fmamp 1 1 # fmamp 2 0.3 # fmamp 3 0 # fmamp 4 0 # fmamp 5 0 # fmamp 6 0
